@@ -10,6 +10,11 @@ Pull request
 <li>프로젝트 소유자는 Pull Request를 Merge 하고 닫는다.</li>
 </ol>
 =======
+here
+안녕하세요
+기차나
+
+=======
 Meme
 정환이의 근육짱짱 이두박근
 =======
@@ -18,6 +23,3 @@ Meme
 정환이 핸섬가이
 jhl
 쩌렁
-=======
-master
-master
