@@ -9,6 +9,7 @@ Pull request
 <li>토론하면서 그에 따라 계속 커밋한다.</li>
 <li>프로젝트 소유자는 Pull Request를 Merge 하고 닫는다.</li>
 </ol>
+<pre>
 =======
 here
 안녕하세요
@@ -23,3 +24,4 @@ Meme
 정환이 핸섬가이
 jhl
 쩌렁
+</pre>
