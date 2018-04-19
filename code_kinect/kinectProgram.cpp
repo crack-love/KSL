@@ -937,7 +937,10 @@ void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 {
 #undef max
 	float closestDistance = std::numeric_limits<float>::max();
-	for (int count = 0; count < BODY_COUNT; count++) {
+	bool findClosest = false;
+	
+	for (int count = 0; count < BODY_COUNT; count++)
+	{
 		const ComPtr<IBody> body = bodies[count];
 		BOOLEAN tracked;
 		ERROR_CHECK(body->get_IsTracked(&tracked));
@@ -960,7 +963,7 @@ void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 		if (closestDistance <= distance) {
 			continue;
 		}
-		closestDistance = distance;
+		closestDistance = distance; findClosest = true;
 
 		// Retrieve Tracking ID
 		UINT64 trackingId;
@@ -980,7 +983,8 @@ void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 		this->produced = false;
 
 	}
-	this->distance = closestDistance;
+	
+	if (findClosest) this->distance = closestDistance;
 }
 
 void Kinect::findLRHandPos()

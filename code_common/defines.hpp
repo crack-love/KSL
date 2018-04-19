@@ -21,8 +21,8 @@
 //#define Show_Status_PointPos
 //#define Show_Status_Face
 #define Show_Status_MLVar
-#define Show_Status_DistanceFrame
-#define Show_Status_DistanceFrame_Size 4 // do not Change this
+//#define Show_Status_DistanceFrame
+#define Show_Status_DistanceFrame_Size 4 // do not Change/disable this
 
 #define LERP_PERCENT 0.6
 #define HAND_RECORD_TYPE_L JointType_HandLeft
@@ -48,6 +48,6 @@
 #define ERROR_CHECK( ret )                                        \
     if( FAILED( ret ) ){                                          \
         std::stringstream ss;                                     \
-        ss << "failed " #ret " " << std::hex << ret << std::endl; \
+        ss << "failed " << #ret << " " << std::hex << ret << std::endl; \
         throw std::runtime_error( ss.str().c_str() );             \
     }
