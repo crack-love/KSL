@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 	show_hello();
 	SHOW_ENUM(KINECT_MODE, KINECT_MODE_SIZE);
 
-	switch (INPUT(int, "MODE") + 1)
+	switch (INPUT(int, "MODE") - 1)
 	{
 	case KINECT_MODE_OUTPUT:
 		modeOutput();
