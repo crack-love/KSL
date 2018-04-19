@@ -4,8 +4,7 @@ LabelMapper LabelMapper::instance;
 
 LabelMapper::LabelMapper()
 {
-	addMap(0, "안녕하세요");
-	addMap(1, "바다");
+	load();
 }
 
 string LabelMapper::lswap(int i)
@@ -27,6 +26,27 @@ string LabelMapper::label(int i)
 int LabelMapper::label(string s)
 {
 	return instance.stoiLabel[s];
+}
+
+void LabelMapper::load()
+{
+	int id;
+	string name;
+	fstream is;
+
+	is.open(FILENAME, fstream::in);
+
+	cout << "Loading LABEL.txt ... open = " << is.is_open() << endl;
+	FAIL_STOP(is.is_open(), "LABEL.txt file open fail");
+	
+	while (is.good())
+	{
+		is >> id >> name;
+		cout << ">>> " << id << ", " << name << endl;
+
+		addMap(id, name);
+	}	
+	is.close();
 }
 
 void LabelMapper::addMap(int i, string s)
