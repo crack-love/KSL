@@ -104,7 +104,7 @@ using namespace cv;
 		CameraSpacePoint lHandPos;
 		CameraSpacePoint rHandPos;
 		TIMESPAN recordStartTime;
-		string label;
+		int label;
 		float* data;
 
 		// cnn
@@ -120,7 +120,6 @@ using namespace cv;
 		// Processing
 		void run_one_cycle();
 
-		void setLabel(string l);
 		void setLabel(int l);
 		void setMode(KINECT_MODE m);
 		void setPredict(int l);

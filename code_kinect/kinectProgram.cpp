@@ -34,13 +34,9 @@ void Kinect::run_one_cycle()
     show();
 }
 
-void Kinect::setLabel(string l)
-{
-	label = l;
-}
 void Kinect::setLabel(int l)
 {
-	label = LABEL(l);
+	label = l;
 }
 
 void Kinect::setMode(KINECT_MODE m)
@@ -462,12 +458,12 @@ void Kinect::updateFrame()
 
 void Kinect::save()
 {
-	frameCollection.setLabel(label);
+	frameCollection.setLabel(LABEL(label));
 
 	stringstream sstream;
 	sstream << frameCollection.toString() << endl;
 
-	string filePath = "data/" + currentDateTime() + "_" + frameCollection.getLabel() + ".txt";
+	string filePath = "../data/" + currentDateTime() + "_" + frameCollection.getLabel() + ".txt";
 
 	// write File
 	ofstream writeFile(filePath.data(), std::ios_base::app);
@@ -475,8 +471,10 @@ void Kinect::save()
 		writeFile << sstream.str();
 		writeFile.close();
 		static int i = 0;
+
 		cout << "Record saving done " << ++i << endl;
 	}
+	else cout << "Record saving fail" << endl;
 }
 
 // Draw Data

@@ -27,8 +27,7 @@
 #define LERP_PERCENT 0.6
 #define HAND_RECORD_TYPE_L JointType_HandLeft
 #define HAND_RECORD_TYPE_R JointType_HandRight
-#define FRAME_STANDARD_SIZE ((SPOINT_SIZE+1)*2) // 78
-//#define FRAME_STANDARD_SIZE ((SPOINT_SIZE+1)*4) // (37+1)*2*2 = 152
+#define FRAME_STANDARD_SIZE ((SPOINT_SIZE+1)*2) // 76
 
 
 // ---------------------------------------------------------------------
@@ -42,7 +41,7 @@
 #define INPUT(Type, name) input_something<Type>(std::cin, std::cout, name)
 
 // EnumType은 to_string 오버로딩 필요
-#define SHOW_ENUM(Type, size) show_enumeration<Type>(std::cout, size)
+#define SHOW_ENUM(Type, size, paading) show_enumeration<Type>(std::cout, size, paading)
 
 // Error Check Macro (HRESULT)
 #define ERROR_CHECK( ret )                                        \
