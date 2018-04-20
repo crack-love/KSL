@@ -33,7 +33,10 @@
     <ClCompile Include="..\code_common\LabelMapper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\code_kinect\kinectProgram.cpp">
+    <ClCompile Include="..\code_kinect\KinectProgram.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code_kinect\MainTransaction.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,11 +56,14 @@
     <ClInclude Include="..\code_common\defines.hpp">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\code_kinect\kinectProgram.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\code_common\kygUtil.hpp">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code_kinect\KinectProgram.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code_kinect\MainTransaction.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

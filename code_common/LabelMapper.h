@@ -8,9 +8,10 @@ using namespace std;
 
 #include "defines.hpp"
 
-#define LABEL LabelMapper::label
+#define LABEL LabelMapper::getInstance()->label
 
 // 싱글톤 패턴
+//
 // LABEL(arg) 로 string, integer간 상호 전환
 class LabelMapper
 {
@@ -23,8 +24,11 @@ private :
 	map<string, int> stoiLabel;
 
 public:
-	static string label(int i);
-	static int label(string s);
+	static LabelMapper* getInstance();
+	void initialize();
+
+	string label(int i);
+	int label(string s);
 
 private:
 	LabelMapper(); // load 호출

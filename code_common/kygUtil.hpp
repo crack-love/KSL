@@ -5,6 +5,7 @@
 #include <cstdlib> // system
 #include <chrono>
 #include <time.h> // localtime_s
+#include <string>
 using namespace std;
 
 	// 솔루션, 프로젝트 네임 출력
@@ -14,7 +15,7 @@ using namespace std;
 	}
 
 	// if fail, system("pause"), throw runtim-err
-	inline void fail_than_stop(int t, const char *m)
+	inline void fail_than_stop(int t, string m)
 	{
 		if (t <= 0)
 		{
@@ -22,13 +23,12 @@ using namespace std;
 			system("pause");
 
 			throw std::runtime_error(m);
-			return;
 		}
 	}
 
 	// InputType은 oerator >> 오버로딩 필요
 	template <class InputType>
-	static InputType input_something(istream &i, ostream &o, const char *m)
+	static InputType input_something(istream &i, ostream &o, string m)
 	{
 		InputType res;
 
@@ -40,11 +40,11 @@ using namespace std;
 
 	// EnumType은 to_string 오버로딩 필요
 	template <class EnumType>
-	static void show_enumeration(ostream &o, int size)
+	static void show_enumeration(ostream &o, int size, int padding)
 	{
 		for (int i = 0; i < size; ++i)
 		{
-			o << (i + 1) << " - " << to_string((EnumType)i) << endl;
+			o << (i + padding) << " - " << to_string((EnumType)i) << endl;
 		}
 	}
 
