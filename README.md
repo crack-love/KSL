@@ -5,6 +5,6 @@
 - [Download page](https://github.com/crack-love/KSL/releases)
 
 ## Other Links
-1. [Git tutorial]()
+1. [Git tutorial](https://github.com/crack-love/KSL/blob/master/document/GitTutorial.md)
 1. [Git Markup language tutorial](https://guides.github.com/features/mastering-markdown/) 
 1. [Version manage guidlines](https://semver.org/lang/ko/)
