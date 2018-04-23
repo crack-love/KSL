@@ -43,15 +43,15 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <OutDir>$(SolutionDir)</OutDir>
-    <IntDir>.\</IntDir>
+    <ExecutablePath>$(SolutionDir)dependency\path;$(ExecutablePath)</ExecutablePath>
+    <OutDir>$(SolutionDir)$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <OutDir>$(SolutionDir)</OutDir>
-    <IntDir>.\</IntDir>
+    <ExecutablePath>$(SolutionDir)dependency\path;$(ExecutablePath)</ExecutablePath>
+    <OutDir>$(SolutionDir)$(Platform)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -61,10 +61,10 @@
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <ShowIncludes>false</ShowIncludes>
-      <AdditionalIncludeDirectories>C:\dev\develop\KSL\code;C:\dev\develop\KSL\dependency\code\kinect-2.0_1409;C:\dev\develop\KSL\dependency\code\opencv-3.4.1</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)code;$(SolutionDir)dependency\code\kinect-2.0_1409;$(SolutionDir)dependency\code\opencv-3.4.1</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\dev\develop\KSL\dependency\path;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependency\path;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(SolutionDir)dependency\link\Kinect20.lib;$(SolutionDir)dependency\link\Kinect20.Face.lib;$(SolutionDir)dependency\link\opencv_world341d.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -76,13 +76,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\dev\develop\KSL\code;C:\dev\develop\KSL\dependency\code\kinect-2.0_1409;C:\dev\develop\KSL\dependency\code\opencv-3.4.1</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)code;$(SolutionDir)dependency\code\kinect-2.0_1409;$(SolutionDir)dependency\code\opencv-3.4.1</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>$(SolutionDir)dependency\link\Kinect20.lib;$(SolutionDir)dependency\link\Kinect20.Face.lib;$(SolutionDir)dependency\link\opencv_world341.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\dev\develop\KSL\dependency\path;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependency\path;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

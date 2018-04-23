@@ -100,7 +100,7 @@ void Kinect::initializeSensor()
     if( !isOpen ){
         throw std::runtime_error( "failed IKinectSensor::get_IsOpen( &isOpen )" );
     }
-
+	//
 	// Retrieve Coordinate Mapper
 	ERROR_CHECK(kinect->get_CoordinateMapper(&coordinateMapper));
 }

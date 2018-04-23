@@ -9,6 +9,7 @@
 using namespace std;
 
 	// 솔루션, 프로젝트 네임 출력
+	// deprecated
 	static void show_hello()
 	{
 		cout << "$(SolutionName) - $(ProjectName)" << endl;
