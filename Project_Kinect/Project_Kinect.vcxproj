@@ -44,13 +44,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExecutablePath>$(SolutionDir)dependency\path;$(ExecutablePath)</ExecutablePath>
-    <OutDir>$(SolutionDir)$(Platform)\</OutDir>
+    <OutDir>.\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExecutablePath>$(SolutionDir)dependency\path;$(ExecutablePath)</ExecutablePath>
-    <OutDir>$(SolutionDir)$(Platform)\</OutDir>
+    <OutDir>.\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
@@ -64,7 +64,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)code;$(SolutionDir)dependency\code\kinect-2.0_1409;$(SolutionDir)dependency\code\opencv-3.4.1</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependency\path;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(SolutionDir)dependency\link\Kinect20.lib;$(SolutionDir)dependency\link\Kinect20.Face.lib;$(SolutionDir)dependency\link\opencv_world341d.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -82,7 +82,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>$(SolutionDir)dependency\link\Kinect20.lib;$(SolutionDir)dependency\link\Kinect20.Face.lib;$(SolutionDir)dependency\link\opencv_world341.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependency\path;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
