@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)code_common;$(SolutionDir)code_dnn;$(SolutionDir)code_kinect;$(SolutionDir)dependency\kinect-2.0_1409;$(SolutionDir)dependency\opencv-3.4.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>PATH=$(SolutionDir)\code_dependency\;%PATH% %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependency\kinect-2.0_1409;$(SolutionDir)dependency\opencv-3.4.1;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(SolutionDir)dependency\opencv-3.4.1\opencv_world341d.lib;$(SolutionDir)dependency\kinect-2.0_1409\Kinect20.lib;$(SolutionDir)dependency\kinect-2.0_1409\Kinect20.Face.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
