@@ -86,7 +86,7 @@ void Kinect::initializeComponents()
 	}
 }
 
-// Initialize Sensor
+// Initialize Sensor, 센서 초기화
 void Kinect::initializeSensor()
 {
     // Open Sensor
@@ -136,6 +136,7 @@ void Kinect::initializeColor()
 	uint colorBytesPerPixel;
 
     // Open Color Reader
+	// source -> reader 연결
     ComPtr<IColorFrameSource> colorFrameSource;
     ERROR_CHECK( kinect->get_ColorFrameSource( &colorFrameSource ) );
     ERROR_CHECK( colorFrameSource->OpenReader( &colorFrameReader ) );
@@ -148,6 +149,7 @@ void Kinect::initializeColor()
     ERROR_CHECK( colorFrameDescription->get_BytesPerPixel( &colorBytesPerPixel ) ); // 4
 
     // Allocation Color Buffer
+	// colorBuffer를 이미지 사이즈만큼 resize
     colorBuffer.resize( colorWidth * colorHeight * colorBytesPerPixel );
 }
 
@@ -224,6 +226,7 @@ void Kinect::updatePredict()
 inline void Kinect::updateColor()
 {
     // Retrieve Color Frame
+	// reader로 부터 frame을 읽어옴
     ComPtr<IColorFrame> colorFrame;
     const HRESULT ret = colorFrameReader->AcquireLatestFrame( &colorFrame );
     if( FAILED( ret ) ){
@@ -234,6 +237,7 @@ inline void Kinect::updateColor()
 	colorFrame->get_RelativeTime(&lastFrameRelativeTime);
 
     // Convert Format ( YUY2 -> BGRA )
+	// frame에서 가져온 정보를 data화
     ERROR_CHECK( colorFrame->CopyConvertedFrameDataToArray( static_cast<UINT>( colorBuffer.size() ), &colorBuffer[0], ColorImageFormat::ColorImageFormat_Bgra ) );
 }
 
@@ -241,6 +245,7 @@ inline void Kinect::updateColor()
 inline void Kinect::updateBody()
 {
 	// Retrieve Body Frame
+	// reader로 부터 frame을 읽어옴
 	ComPtr<IBodyFrame> bodyFrame;
 	const HRESULT ret = bodyFrameReader->AcquireLatestFrame(&bodyFrame);
 	if (FAILED(ret)) {
@@ -248,7 +253,7 @@ inline void Kinect::updateBody()
 	}
 
 	// Release Previous Bodies
-	Concurrency::parallel_for_each(bodies.begin(), bodies.end(), [](IBody*& body) {
+	Concurrency::parallel_for_each(bodies.begin(), bodies.end(), [](IBody*& body) { // 익명 함수 생성 후 인자로 넘겨줌
 		SafeRelease(body);
 	});
 
@@ -259,7 +264,7 @@ inline void Kinect::updateBody()
 	// Find Closest Body
 	findClosestBody(bodies);
 
-	findLRHandPos();
+	findLRHandPos();  // 손이 traking 되고 있으면 손의 위치(rhandpos, lhandpos)를 지정
 
 	// 손 활성화 확인, SPOINT_BODY_SPINE_BASE보다 (spinePx / 2) 만큼 위로 올라가있을 경우 활성화!
 	{
@@ -283,6 +288,7 @@ inline void Kinect::updateBody()
 inline void Kinect::updateHDFace()
 {
 	// Retrieve HDFace Frame
+	// reader로 부터 frame을 읽어옴
 	ComPtr<IHighDefinitionFaceFrame> hdFaceFrame;
 	const HRESULT ret = hdFaceFrameReader->AcquireLatestFrame(&hdFaceFrame);
 	if (FAILED(ret)) {
@@ -292,13 +298,13 @@ inline void Kinect::updateHDFace()
 	// Check Traced
 	ERROR_CHECK(hdFaceFrame->get_IsFaceTracked(&tracked));
 	if (!tracked) {
-
 		return;
 	}
 	// Retrieve Face Alignment Result
 	ERROR_CHECK(hdFaceFrame->GetAndRefreshFaceAlignmentResult(faceAlignment.Get()));
 }
 
+// 관절 정보 update
 void Kinect::updateSPoint()
 {
 	const ComPtr<IBody> body = bodies[trackingCount];
@@ -497,7 +503,7 @@ void Kinect::save()
 }
 
 void Kinect::saveForPredict()
-{
+{   // 렉이 심함
 	frameCollection.setLabel(LABEL(label));
 
 	stringstream sstream;
@@ -614,6 +620,7 @@ inline void Kinect::drawHDFace()
 	ERROR_CHECK(faceModelBuilder->get_CaptureStatus(&faceCapture));
 
 	// Retrieve Vertexes
+	// facemodel에서 vertexes 정보를 가져옴
 	ERROR_CHECK(faceModel->CalculateVerticesForAlignment(faceAlignment.Get(), vertexCount, &vertexes[0]));
 	//drawVertexes(colorMat, vertexes, 1, colors[trackingCount]);
 	
@@ -697,7 +704,75 @@ inline void Kinect::drawColor()
 {
     // Create cv::Mat from Color Buffer
     colorMat = cv::Mat( colorHeight, colorWidth, CV_8UC4, &colorBuffer[0] );
+
+	extractHand(colorMat);
 }
+
+void Kinect::extractHand(cv::Mat& screen)
+{
+	if (!findLRHandPosResult()) return;
+		
+	int width = 256, height = 256;
+	int hWidth = width / 2, hHeight = height / 2;
+
+	{   // left hand
+		// CameraSpacePoint lpoint = lHandPos;
+		CameraSpacePoint lpoint = sPoints[SPOINT_BODY_WRIST_LEFT].getPoint();
+		
+		ColorSpacePoint lColorPoint;
+		// pMapper->MapCameraPointsToColorSpace(1, &lpoint, 1, &lColorPoint);
+		coordinateMapper->MapCameraPointToColorSpace(lpoint, &lColorPoint);
+
+		
+		// cout << lpoint.X << " " << lpoint.Y << " " << endl;
+		// cout << lColorPoint.X << " " << lColorPoint.Y << endl;
+
+		if ( ! (lColorPoint.X - hWidth < 0 || lColorPoint.X + hWidth >= colorWidth || lColorPoint.Y - hHeight < 0 || lColorPoint.Y + hHeight >= colorHeight) )
+		{
+			cout << lColorPoint.X - hWidth << " " << lColorPoint.X + hWidth << " " << colorWidth << endl;
+
+			cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
+			//cout << "donel-1" << endl;
+			cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
+			//cout << "donel-2" << endl;
+			cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			//cout << "donel-3" << endl;
+		}
+	}
+
+	{   // right hand
+		// CameraSpacePoint rpoint = rHandPos;
+		CameraSpacePoint rpoint = sPoints[SPOINT_BODY_WRIST_RIGHT].getPoint();
+
+		ColorSpacePoint rColorPoint;
+		// pMapper->MapCameraPointsToColorSpace(1, &rpoint, 1, &rColorPoint);
+		coordinateMapper->MapCameraPointToColorSpace(rpoint, &rColorPoint);
+
+		// cout << lpoint.X << " " << lpoint.Y << " " << endl;
+		// cout << rColorPoint.X << " " << rColorPoint.Y << endl;
+		// cout << rpoint.X << " " << rpoint.Y << " " << endl;
+
+		/* 계속 런타임 에러가 뜨넹...
+		if (! (rColorPoint.X - hWidth < 0 || rColorPoint.X + hWidth >= colorWidth || rColorPoint.Y - hHeight < 0 || rColorPoint.Y + hHeight >= colorHeight))
+		{
+			cout << rColorPoint.X - hWidth << " " << rColorPoint.X + hWidth << " " << colorWidth << endl;
+
+			// cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight)); // 잘라내기
+			cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight));
+			cout << "done1" << endl;
+			cv::Mat rhandROI = screen(cv::Rect(colorWidth - width, 0, width, height));
+			cout << "done2" << endl;
+			cv::addWeighted(rhandROI, 0.0, rhand, 1.0, 0, rhandROI);
+			cout << "done3" << endl;
+		}
+		*/
+	}
+}
+
+// inline bool Kinect::inRange(int x, int start, int end)
+// {
+//	return start <= x && x < end;
+//}
 
 // Draw Body
 inline void Kinect::drawBody()
@@ -745,6 +820,8 @@ inline void Kinect::drawBody()
 	});
 }
 
+
+// 관절 포인트 표시
 void Kinect::drawSPoint()
 {
 	Concurrency::parallel_for_each(sPoints.begin(), sPoints.end(), [&](SPoint& sPoint)
@@ -753,7 +830,7 @@ void Kinect::drawSPoint()
 
 		if (leftHandActivated && sPoint.getType() == SPOINT_BODY_WRIST_LEFT)
 		{
-			drawEllipse(colorMat, sPoint.getPoint(), 5, cv::Vec3b(0, 255, 0));
+			drawEllipse(colorMat, sPoint.getPoint(), 5, cv::Vec3b(0, 255, 0));  // 활성화시 초록색으로 표시
 		}
 		else if (rightHandActivated && sPoint.getType() == SPOINT_BODY_WRIST_RIGHT)
 		{
@@ -785,6 +862,8 @@ inline void Kinect::drawEllipse(cv::Mat& image, const CameraSpacePoint& pos, con
 	}
 }
 
+
+// 상태 출력
 void Kinect::drawStatusText()
 {
 	int yd = 50;
@@ -940,7 +1019,7 @@ inline void Kinect::showColor()
     cv::resize( colorMat, resizeMat, cv::Size(), scale, scale );
 
     // Show Image
-    cv::imshow( "Color", resizeMat );
+    cv::imshow( "Color", resizeMat );  // colorMat를 resize한 mat를 보여줌
 
 	/*
 	if (tracked && distance < 1)
@@ -1065,8 +1144,9 @@ void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 		const CameraSpacePoint point = joint.Position;
 		const float distance = std::sqrt(std::pow(point.X, 2) + std::pow(point.Y, 2) + std::pow(point.Z, 2));
 		if (closestDistance <= distance) {
-			continue;
+			continue;  // 거리가 더 가깝지 않을 경우 continue
 		}
+		// head 기준으로 가장 가까운 body를 찾는다.
 		closestDistance = distance; findClosest = true;
 
 		// Retrieve Tracking ID
@@ -1083,7 +1163,7 @@ void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 
 		// Update Current
 		this->trackingId = trackingId;
-		this->trackingCount = count;
+		this->trackingCount = count; // 가장 가까이 있는 몸을 trakingCount로 둠
 		this->produced = false;
 
 	}
@@ -1106,4 +1186,24 @@ void Kinect::findLRHandPos()
 		return;
 	}
 	rHandPos = joint.Position;
+}
+
+bool Kinect::findLRHandPosResult()
+{
+	std::array<Joint, JointType::JointType_Count> joints;
+	ERROR_CHECK(bodies[trackingCount]->GetJoints(static_cast<UINT>(joints.size()), &joints[0]));
+	Joint joint = joints[HAND_RECORD_TYPE_L];
+	// Joint joint = joints[SPOINT_BODY_WRIST_LEFT];
+	if (joint.TrackingState == TrackingState::TrackingState_NotTracked) {
+		return false;
+	}
+	lHandPos = joint.Position;
+
+	joint = joints[HAND_RECORD_TYPE_R];
+	if (joint.TrackingState == TrackingState::TrackingState_NotTracked) {
+		return false;
+	}
+	rHandPos = joint.Position;
+
+	return true;
 }
