@@ -47,5 +47,5 @@ float SPoint::Lerp(float p, float x, float y)
 		y = temp;
 	}
 
-	return  x + (y - x) * p;
+	return  x + (y - x) * p;  // (x - x * p) + y * p
 }

@@ -72,6 +72,8 @@ using namespace cv;
 		std::vector<BYTE> colorBuffer; // raw buffer
 		int colorWidth, colorHeight;
 		cv::Mat colorMat; // showing mat
+		cv::Mat lhandMat; // left hand mat
+		cv::Mat rhandMat; // right hand mat
 
 		// Body Buffer
 		array<IBody*, BODY_COUNT> bodies = { nullptr };
@@ -122,6 +124,9 @@ using namespace cv;
 		// cnn
 		string lastPredict = "";
 
+		// handTrack
+		// ICoordinateMapper* pMapper;
+
 	public:
 		// Constructor
 		Kinect(KINECT_MODE m);
@@ -149,13 +154,15 @@ using namespace cv;
 
 		void initializeSensor();
 
-		// Initialize HDFace
+		// Initialize HDFace, FaceReader 초기화
 		void initializeHDFace();
 
+		// Color(RGB) Frame Reader 초기화
 		void initializeColor();
 
 		void initializeComponents();
 
+		// Body Frame Reader 초기화
 		void initializeBody();
 
 		void initializeCNN();
@@ -206,6 +213,7 @@ using namespace cv;
 		void findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies);
 
 		void findLRHandPos();
+		bool findLRHandPosResult();
 
 		string status2string(const FaceModelBuilderCaptureStatus capture);
 
@@ -214,4 +222,10 @@ using namespace cv;
 		void save();
 		void saveForPredict();
 		void queryToServer();
+
+		// for extract hand
+		void extractHand(cv::Mat& screnn);
+		// void extractLHand(cv::Mat& screnn);
+		// void extractRHand(cv::Mat& screnn);
+		// inline bool inRange(int x, int start, int end);
 	};
