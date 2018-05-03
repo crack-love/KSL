@@ -13,7 +13,7 @@
 #include <wrl/client.h>
 #include <thread> // this_thread
 #include <Process.h> // for loading python
-
+#include <vector> // for save lhand rhand image
 
 
 // #include <windows.h>
@@ -26,6 +26,7 @@ using namespace cv;
 #include "SPoint.h"
 #include "FrameCollection.h"
 #include "LabelMapper.h"
+// #include "ImageCollection.h"
 
 	enum KINECT_MODE
 	{
@@ -121,12 +122,17 @@ using namespace cv;
 		int label;
 		float* data;
 
+		//ImageCollection imageCollectionR;
+		//ImageCollection imageCollectionL;
+
 		// cnn
 		string lastPredict = "";
 
 		// handTrack
 		// ICoordinateMapper* pMapper;
 
+		// vector<cv::Mat> lhandList;
+		// vector<cv::Mat> rhandList;
 	public:
 		// Constructor
 		Kinect(KINECT_MODE m);

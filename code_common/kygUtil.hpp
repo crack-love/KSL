@@ -75,7 +75,7 @@ using namespace std;
 			y = temp;
 		}
 
-		return  x + (y - x) * p;
+		return  x + (y - x) * p;  // x - x * p + y * p = x * (1 - p) + y * p
 	}
 
 	inline bool LerpBool(float p, bool x, bool y)

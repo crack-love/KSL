@@ -1,50 +1,33 @@
-#include "FrameCollection.h"
+#include "ImageCollection.h"
 
 
-FrameCollection::FrameCollection()
+ImageCollection::ImageCollection()
 {
 	label = "none";
 	//data 
 }
 
-void FrameCollection::setLabel(string src)
+void ImageCollection::setLabel(string src)
 {
 	label = src;
 }
 
-void FrameCollection::stackFrame(const Frame &f)
+void ImageCollection::stackFrame(const ImageFrame &f)
 {
-	if (collection.size() + 1 >= collection.max_size()) return;
+	// if (collection.size() + 1 >= collection.max_size()) return;
 
 	collection.push_back(f);
 }
 
-array<string, Show_Status_DistanceFrame_Size> FrameCollection::lastFrameToString()
-{
-	if (collection.size() < 1) return array<string, Show_Status_DistanceFrame_Size>();
-	
-	return collection[collection.size() - 1].toString();
-}
-
-void FrameCollection::getData(float* dst)
-{
-	for (int i = 0; i < FRAME_STANDARD_SIZE; ++i)
-	{
-		// Frame[i]
-		collection[i].getData(&dst[i * (SPOINT_SIZE + 1) * 2]);
-	}
-
-}
-
-void FrameCollection::setStandard(TIMESPAN startTime)
+void ImageCollection::setStandard(TIMESPAN startTime)
 {
 	if (collection.size() < 2) return;
 
-	vector<Frame> result = vector<Frame>();
-	Frame temp;
+	vector<ImageFrame> result = vector<ImageFrame>();
+	ImageFrame temp;
 	TIMESPAN timeLine;
 	TIMESPAN endTime = collection[collection.size() - 1].getTime();
-	int dt = (int)(endTime - startTime) / (FRAME_STANDARD_SIZE);
+	int dt = (int)(endTime - startTime) / (IMAGE_FRAME_STANDARD_SIZE);
 	timeLine = startTime + dt;
 	double percent = 0;
 
@@ -78,34 +61,36 @@ void FrameCollection::setStandard(TIMESPAN startTime)
 	collection = result;
 }
 
-string FrameCollection::toString()
+string ImageCollection::toString()
 {
 	stringstream out;
 
 	out << currentDateTime() << " ";
 	out << LABEL(label) << " ";
-	out << FRAME_STANDARD_SIZE << " ";
-	out << FRAME_STANDARD_SIZE << " ";
+	out << IMAGE_FRAME_STANDARD_SIZE << " ";
+	out << HAND_WIDTH << " ";
+	out << HAND_HEIGHT << " ";
+	out << IMAGE_CHANNEL << " ";
 	out << 1 << " "; // channel
 
-	for (int j = 0; j < FRAME_STANDARD_SIZE; ++j)
+	for (int j = 0; j < IMAGE_FRAME_STANDARD_SIZE; ++j)
 	{
 		out << collection[j].toString(0) << " ";
-	}		
+	}
 	return out.str();
 }
 
-int FrameCollection::getCollectionSize()
+int ImageCollection::getCollectionSize()
 {
 	return (int)collection.size();
 }
 
-void FrameCollection::clear()
+void ImageCollection::clear()
 {
 	collection.clear();
 }
 
-string FrameCollection::getLabel()
+string ImageCollection::getLabel()
 {
 	return label;
 }

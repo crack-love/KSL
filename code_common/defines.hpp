@@ -29,6 +29,10 @@
 #define HAND_RECORD_TYPE_R JointType_HandRight
 #define FRAME_STANDARD_SIZE ((SPOINT_SIZE+1)*2) // 76
 
+#define IMAGE_FRAME_STANDARD_SIZE 32
+#define HAND_WIDTH 224
+#define HAND_HEIGHT 224
+#define IMAGE_CHANNEL 3
 
 // ---------------------------------------------------------------------
 //	Macro

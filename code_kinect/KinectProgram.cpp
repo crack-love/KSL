@@ -403,7 +403,7 @@ void Kinect::updateStatus()
 	// 초당프레임 계산
 	{
 		TIMESPAN dur = lastFrameRelativeTime - pastFrameRelativeTime;
-		fps = (double)10000000 / dur; // sec / dur
+		fps = (double)10000000 / dur; // sec / dur => 1초에 진동하는 횟수, 1 / fps => dur.
 
 		pastFrameRelativeTime = lastFrameRelativeTime;
 	}
@@ -461,6 +461,9 @@ void Kinect::updateFrame()
 
 					// record
 					frameCollection.setStandard(recordStartTime);  // 표준화
+					// imageCollectionL.setStandard(recordStartTime);
+					// imageCollectionR.setStandard(recordStartTime);
+
 					save();
 					++recorded;
 					break;
@@ -484,6 +487,9 @@ void Kinect::updateFrame()
 void Kinect::save()
 {
 	frameCollection.setLabel(LABEL(label));
+	
+	// imageCollectionL.setLabel(LABEL(label));
+	// imageCollectionR.setLabel(LABEL(label));
 
 	stringstream sstream;
 	sstream << frameCollection.toString() << endl;
@@ -500,6 +506,40 @@ void Kinect::save()
 		cout << "Record saving done " << ++i << endl;
 	}
 	else cout << "Record saving fail" << endl;
+
+	/*
+	sstream.str("");
+
+	sstream << imageCollectionL.toString() << endl;
+	filePath = "../data/" + currentDateTime() + "_" + imageCollectionL.getLabel() + "_lhand.txt";
+
+	// write File
+	ofstream writeFileL(filePath.data(), std::ios_base::app);
+	if (writeFileL.is_open()) {
+		writeFileL << sstream.str();
+		writeFileL.close();
+		static int i = 0;
+
+		cout << "Record Left Hand saving done " << ++i << endl;
+	}
+	else cout << "Record saving fail" << endl;
+
+	sstream.str("");
+
+	sstream << imageCollectionR.toString() << endl;
+	filePath = "../data/" + currentDateTime() + "_" + imageCollectionR.getLabel() + "_rhand.txt";
+
+	// write File
+	ofstream writeFileR(filePath.data(), std::ios_base::app);
+	if (writeFileR.is_open()) {
+		writeFileR << sstream.str();
+		writeFileR.close();
+		static int i = 0;
+
+		cout << "Record Left Hand saving done " << ++i << endl;
+	}
+	else cout << "Record saving fail" << endl;
+	*/
 }
 
 void Kinect::saveForPredict()
@@ -712,7 +752,7 @@ void Kinect::extractHand(cv::Mat& screen)
 {
 	if (!findLRHandPosResult()) return;
 		
-	int width = 256, height = 256;
+	int width = 224, height = 224;
 	int hWidth = width / 2, hHeight = height / 2;
 
 	{   // left hand
@@ -729,14 +769,27 @@ void Kinect::extractHand(cv::Mat& screen)
 
 		if ( ! (lColorPoint.X - hWidth < 0 || lColorPoint.X + hWidth >= colorWidth || lColorPoint.Y - hHeight < 0 || lColorPoint.Y + hHeight >= colorHeight) )
 		{
-			cout << lColorPoint.X - hWidth << " " << lColorPoint.X + hWidth << " " << colorWidth << endl;
+			// cout << lColorPoint.X - hWidth << " " << lColorPoint.X + hWidth << " " << colorWidth << endl;
 
-			cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
+
+			// 관심영역 설정 (set ROI (X, Y, W, H)).
+
+			Rect rect(lColorPoint.X - hWidth, lColorPoint.Y - hHeight, width, height);
+			// cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
+			cv::Mat lhand = screen(rect);
 			//cout << "donel-1" << endl;
 			cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
 			//cout << "donel-2" << endl;
 			cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
 			//cout << "donel-3" << endl;
+			// lhandList.push_back(lhand);
+			if (frameStacking)
+			{
+				//ImageFrame f;
+				//f.memorize(lhand, lastFrameRelativeTime);
+				
+				//imageCollectionL.stackFrame(f);
+			}
 		}
 	}
 
@@ -752,20 +805,31 @@ void Kinect::extractHand(cv::Mat& screen)
 		// cout << rColorPoint.X << " " << rColorPoint.Y << endl;
 		// cout << rpoint.X << " " << rpoint.Y << " " << endl;
 
-		/* 계속 런타임 에러가 뜨넹...
+		// 계속 런타임 에러가 뜨넹...
 		if (! (rColorPoint.X - hWidth < 0 || rColorPoint.X + hWidth >= colorWidth || rColorPoint.Y - hHeight < 0 || rColorPoint.Y + hHeight >= colorHeight))
 		{
-			cout << rColorPoint.X - hWidth << " " << rColorPoint.X + hWidth << " " << colorWidth << endl;
+			// cout << rColorPoint.X - hWidth << " " << rColorPoint.X + hWidth << " " << colorWidth << endl;
 
 			// cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight)); // 잘라내기
-			cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight));
-			cout << "done1" << endl;
+			Rect rect(rColorPoint.X - hWidth, rColorPoint.Y - hHeight, width, height);
+			// cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight));
+			cv::Mat rhand = screen(rect);
+			// cout << "done1" << endl;
 			cv::Mat rhandROI = screen(cv::Rect(colorWidth - width, 0, width, height));
-			cout << "done2" << endl;
+			// cout << "done2" << endl;
 			cv::addWeighted(rhandROI, 0.0, rhand, 1.0, 0, rhandROI);
-			cout << "done3" << endl;
+			// cout << "done3" << endl;
+			// rhandList.push_back(rhand);
+
+			if (frameStacking)
+			{
+				//ImageFrame f;
+				//f.memorize(rhand, lastFrameRelativeTime);
+
+				//imageCollectionL.stackFrame(f);
+			}
 		}
-		*/
+		//
 	}
 }
 
