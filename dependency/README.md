@@ -30,8 +30,6 @@ Keras는 설치 과정이 CLI 환경에서 이뤄지며 이를 따라가다보�
 
 1. 키넥트 런타임 패키지가 설치가 필요하다. -> [link](https://drive.google.com/open?id=1_m3lO9dSzmrTBmx_6e3x4FYEU7mtPwXO)
 
--------------------------
-
 ### Install Keras
 
 1. 파이썬 3.5.x 설치가 필요하다. -> [3.5.4 link](https://drive.google.com/open?id=1RfJEmtT12EwDFq2U43h76c5uP0uOiKzq)
