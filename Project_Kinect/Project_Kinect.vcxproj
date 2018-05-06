@@ -10,6 +10,25 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="code\common\LabelMapper.cpp" />
+    <ClCompile Include="code\Frame.cpp" />
+    <ClCompile Include="code\FrameCollection.cpp" />
+    <ClCompile Include="code\kinectProgram.cpp" />
+    <ClCompile Include="code\main.cpp" />
+    <ClCompile Include="code\MainTransaction.cpp" />
+    <ClCompile Include="code\SPoint.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="code\common\defines.hpp" />
+    <ClInclude Include="code\common\kygUtil.hpp" />
+    <ClInclude Include="code\common\LabelMapper.h" />
+    <ClInclude Include="code\Frame.h" />
+    <ClInclude Include="code\FrameCollection.h" />
+    <ClInclude Include="code\kinectProgram.h" />
+    <ClInclude Include="code\MainTransaction.h" />
+    <ClInclude Include="code\SPoint.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{33A77B11-44F5-4295-AAEE-CDC3AF204DDD}</ProjectGuid>
@@ -44,15 +63,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <OutDir>.\</OutDir>
-    <IntDir>.\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <OutDir>$(projectDir)program\</OutDir>
+    <IntDir>$(ProjectDir)program\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <OutDir>.\</OutDir>
-    <IntDir>.\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <OutDir>$(projectDir)program\</OutDir>
+    <IntDir>$(ProjectDir)program\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -61,11 +80,11 @@
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <ShowIncludes>false</ShowIncludes>
-      <AdditionalIncludeDirectories>$(SolutionDir)code;$(SolutionDir)dependency\code\kinect-2.0_1409;$(SolutionDir)dependency\code\opencv-3.4.1</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)code;$(SolutionDir)dependency\libHeader\kinect-2.0_1409;$(SolutionDir)dependency\libHeader\opencv-3.4.1</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)dependency\link\Kinect20.lib;$(SolutionDir)dependency\link\Kinect20.Face.lib;$(SolutionDir)dependency\link\opencv_world341d.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)dependency\libSource\Kinect20.lib;$(SolutionDir)dependency\libSource\Kinect20.Face.lib;$(SolutionDir)dependency\libSource\opencv_world341d.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -76,34 +95,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)code;$(SolutionDir)dependency\code\kinect-2.0_1409;$(SolutionDir)dependency\code\opencv-3.4.1</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)code;$(SolutionDir)dependency\libHeader\kinect-2.0_1409;$(SolutionDir)dependency\libHeader\opencv-3.4.1</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(SolutionDir)dependency\link\Kinect20.lib;$(SolutionDir)dependency\link\Kinect20.Face.lib;$(SolutionDir)dependency\link\opencv_world341.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)dependency\libSource\Kinect20.lib;$(SolutionDir)dependency\libSource\Kinect20.Face.lib;$(SolutionDir)dependency\libSource\opencv_world341.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\code\common\LabelMapper.cpp" />
-    <ClCompile Include="..\code\kinect\Frame.cpp" />
-    <ClCompile Include="..\code\kinect\FrameCollection.cpp" />
-    <ClCompile Include="..\code\kinect\kinectProgram.cpp" />
-    <ClCompile Include="..\code\kinect\main.cpp" />
-    <ClCompile Include="..\code\kinect\MainTransaction.cpp" />
-    <ClCompile Include="..\code\kinect\SPoint.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\code\common\defines.hpp" />
-    <ClInclude Include="..\code\common\kygUtil.hpp" />
-    <ClInclude Include="..\code\common\LabelMapper.h" />
-    <ClInclude Include="..\code\kinect\Frame.h" />
-    <ClInclude Include="..\code\kinect\FrameCollection.h" />
-    <ClInclude Include="..\code\kinect\kinectProgram.h" />
-    <ClInclude Include="..\code\kinect\MainTransaction.h" />
-    <ClInclude Include="..\code\kinect\SPoint.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Project_Interface.Properties
+namespace Project_Interface2.Properties
 {
 
 
