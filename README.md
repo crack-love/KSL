@@ -17,3 +17,5 @@
 - [Git Markdown tutorial](https://guides.github.com/features/mastering-markdown/) 
 
 - [Version manage guidlines](https://semver.org/lang/ko/)
+
+- [Git Bash Problem with Korean](http://hanmomhanda.blogspot.kr/2014/01/git-bash.html)
