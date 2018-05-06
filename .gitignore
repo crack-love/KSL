@@ -6,7 +6,7 @@
 *.iobj
 *.ipdb
 *.exe
-Project_PyDNN/models/
+*.keras
 
 # User-specific files
 *.suo

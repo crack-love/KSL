@@ -2,270 +2,255 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Project_Interface
+namespace Project_Interface2
 {
-    public partial class FormMain : Form
+    public partial class Form : System.Windows.Forms.Form
     {
-        const int port = 14358;
-        const int port1 = 14359;
-        const int port2 = 14360;
+        enum ProcessStatus
+        {
+            None, Ready, Dead 
+        }
 
-        //const string programCameraPath = "Project_Kinect_Debug.exe";
-        //const string programServerPath = "do_PredictServer.py";
+        UserData data;
+        Logic logic;
+        Timer runningCheck;
+        bool isLeftStarted;
+        bool isRightStarted;
 
-        Process programCamera;
-        Process programServer;
-
-        Socket socket1;
-        Socket socket2;
-
-        public FormMain()
+        public Form()
         {
             InitializeComponent();
+            initComponetData();
+            initUserData();
+            initLogic();
+            initTimer();
         }
 
-        private void FormMain_Load(object sender, EventArgs e)
+        private void initComponetData()
         {
-            initiate();
-            //startThisServer();
-            //timer1.Start();
-            string path = getFilePath();
-
-            programCamera = execute(path);
-        }
-
-        void initiate()
-        {
-            this.Text += (" - " + port.ToString());
+            isLeftStarted = false;
+            isRightStarted = false;
             labelMain.Text = "";
-            labelName1.Text = "Camera Program";
-            labelName2.Text = "Server Program";
-            labelStatus1.Text = "";
-            labelStatus2.Text = "";
-            labelPath1.Text = "";// programCameraPath;
-            labelPath2.Text = "";// programServerPath;
-            labelPort1.Text = port1.ToString();
-            labelPort2.Text = port2.ToString();
-            buttonExecute2.Enabled = false;
+            textBoxInputLeft.Text = "";
+            textBoxInputRight.Text = "";
+            textBoxOutputLeft.Text = "";
+            textBoxOutputRight.Text = "";
+            textBoxInputLeft.Enabled = false;
+            textBoxInputRight.Enabled = false;
+            setLabelStatus(0, ProcessStatus.None);
+            setLabelStatus(1, ProcessStatus.None);
         }
 
-        void cameraProgramCallback(object sender, DataReceivedEventArgs e)
+        private void initUserData()
         {
-            labelMain.Text = e.Data;
+            data = new UserData();
+            data.load();
         }
 
-        private void Read(StreamReader reader)
+        private void initLogic()
         {
-            new Thread(() =>
+            logic = new Logic();
+            logic.processEnableChanged += executeButtonEnableChanged;
+            logic.outputReceived += outputRecieved;
+        }
+
+        private void initTimer()
+        {
+            runningCheck = new Timer();
+            runningCheck.Tick += runningCheck_Tick;
+            runningCheck.Interval = 400;
+        }
+
+        private void runningCheck_Tick(object sender, EventArgs e)
+        {
+
+            if (isLeftStarted)
             {
-                while (true)
+                executeButtonEnableChanged(0, logic.isProcessRunning(0));
+            }
+
+            if (isRightStarted)
+            {
+                executeButtonEnableChanged(1, logic.isProcessRunning(1));
+            }
+        }
+
+
+        private void textBoxInputLeft_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                logic.input(0, textBoxInputLeft.Text);
+                textBoxInputLeft.Text = "";
+            }
+        }
+
+        private void textBoxInputRight_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                logic.input(1, textBoxInputRight.Text);
+                textBoxInputRight.Text = "";
+            }
+        }
+
+        private void buttonLeft_Click(object sender, EventArgs e)
+        {
+            if (data.KinectProgramPath == null || !File.Exists(data.KinectProgramPath))
+            {
+                MessageBox.Show(this, "키넥트 프로그램이 설정돼있지 않거나 파일이 존재하지 않습니다. 프로그램을 선택해주세요");
+                OpenFileDialog dialog = new OpenFileDialog();
+                dialog.Filter = "exe|*.exe";
+                if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    int current;
-                    while ((current = reader.Read()) >= 0)
-                    {
-                        labelMain.Text += (char)current;
-                    }
+                    data.KinectProgramPath = dialog.FileName;
                 }
-            }).Start();
+                else return;
+            }
+
+            logic.execute(0, data.KinectProgramPath, "");
+            textBoxOutputLeft.Text = "";
+            isLeftStarted = true;
+            runningCheck.Start();
         }
 
-        private void buttonExecute1_Click(object sender, EventArgs e)
+        private void buttonRight_Click(object sender, EventArgs e)
         {
-            string path = getFilePath();
+            bool pythonChoose = false;
 
-            programCamera = execute(path);
-            //programCamera.OutputDataReceived += cameraProgramCallback;
-            //programCamera.StandardInput.WriteLine("Hello");
-            //programCamera.StandardInput.write
-            //Read(programCamera.StandardOutput);
-
-            /*try
+            if (data.pythonPath == null || !File.Exists(data.pythonPath))
             {
-                //programCamera = Process.Start(labelPath1.Text);
-                Process.Start(labelPath1.Text);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                setFilePath(labelPath1);
-                try
+                MessageBox.Show(this, "파이썬 경로가 설정돼있지 않거나 파일이 존재하지 않습니다. 파이썬 프로그램을 선택해주세요 (Python Version 3.5.x)");
+                OpenFileDialog dialog2 = new OpenFileDialog();
+                dialog2.Filter = "python exe|*.exe";
+                if (dialog2.ShowDialog() == DialogResult.OK)
                 {
-                    programCamera = Process.Start(labelPath1.Text);
+                    data.pythonPath = dialog2.FileName;
+                    data.save();
+                    pythonChoose = true;
                 }
-                catch (Exception) { }
+                else return;
             }
 
-            if (programCamera != null)
+            if (pythonChoose)
+                MessageBox.Show("스크립트 선택");
+
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "py|*.py";
+            dialog.Title = "Open Python Script";
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
-                //socket1 = AsynchronousClient.Connect("locanhost", port1);
-            }*/
+                logic.execute(1, data.pythonPath, "-u " + dialog.FileName);
+                textBoxOutputRight.Text = "";
+                isRightStarted = true;
+                runningCheck.Start();
+            }
         }
 
-        private void buttonExecute2_Click(object sender, EventArgs e)
-        {/*
-            try
-            {
-                programServer = cmdExecute();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                setFilePath(labelPath2);
-                try
-                {
-                    programServer = cmdExecute();
-                }
-                catch (Exception) { }
-            }
-
-            if (programCamera != null)
-            {
-                //socket2 = AsynchronousClient.Connect("locanhost", port2);
-            }/*/
-        }
-
-        Process execute(string path)
+        private void Form_FormClosing(object sender, FormClosingEventArgs e)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            Process process = new Process();
-
-            startInfo.FileName = path;
-            //startInfo.CreateNoWindow = false;
-            startInfo.UseShellExecute = false;
-
-            // Process에게서 데이터 받기
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardInput = true;
-            startInfo.RedirectStandardError = true;
-
-            process.StartInfo = startInfo;
-            process.Start();
-
-            //process.StandardInput.Write(@"python " + programServerPath + Environment.NewLine);
-            process.StandardInput.WriteLine("HIHIHI\r\n");
-            process.WaitForExit(10000);
-            return process;
+            data.save();
+            logic.finalize();
         }
 
-        void clearProcessRedirect(Process p)
+        private void executeButtonEnableChanged(int idx, bool processOK)
         {
-            if (p.StandardInput != null) p.StandardInput.Close();
-            if (p.StandardOutput != null) p.StandardOutput.Close();
-            if (p.StandardError != null) p.StandardError.Close();
-        }
-
-        string getFilePath()
-        {
-
-            OpenFileDialog fd = new OpenFileDialog();
-            //fd.Filter = "Executable File|.exe";
-
-            if (fd.ShowDialog() == DialogResult.OK)
+            switch(idx)
             {
-                return fd.FileName;
-                //label.Text = fd.FileName;
+                case 0:
+                    buttonLeft.Text = processOK ? "(Running)" : "Execute";
+                    textBoxInputLeft.Enabled = processOK;
+                    buttonLeft.Enabled = !processOK; break;
+                case 1:
+                    buttonRight.Text = processOK? "(Running)" : "Execute";
+                    textBoxInputRight.Enabled = processOK;
+                    buttonRight.Enabled = !processOK; break;
             }
 
-            return "";
+            setLabelStatus(idx, processOK ? ProcessStatus.Ready : ProcessStatus.Dead);
         }
 
-        private void startThisServer()
+        // called from other thread
+        private void outputRecieved(int idx, string data)
         {
-            AsynchronousClient.Received += recv;
-            AsynchronousClient.RecievingLoop(port);
-        }
-
-        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            AsynchronousClient.receiving = false;
-            AsynchronousClient.listenDone.Set();
-
-            if (socket1 != null) AsynchronousClient.closeSocket(socket1);
-            if (socket2 != null) AsynchronousClient.closeSocket(socket2);
-
-
-            if (programCamera != null) clearProcessRedirect(programCamera);
-            if (programServer != null) clearProcessRedirect(programServer);
-
-            if (programCamera != null) programCamera.Kill();
-            if (programServer != null) programServer.Kill();
-        }
-
-        private void recv(string arg)
-        {
-            if (arg.StartsWith("[REQUEST]"))
+            data += Environment.NewLine;
+            
+            switch (idx)
             {
-                removePrefixPostfix(arg, "[REQUEST]", "<EOF>");
-
-                labelMain.Text = "데이터 도착, 결과 확인 중...";
-
-                if (!AsynchronousClient.socketConnected(socket2))
-                {
-                    AsynchronousClient.Send(socket2, arg);
-                }
-            }
-            else if (arg.StartsWith("[RESULT]"))
-            {
-                removePrefixPostfix(arg, "[RESULT]", "<EOF>");
-                
-                labelMain.Text = arg;
+                case -1:
+                    setControl(labelMain, setMainText, data);
+                    break;
+                case 0:
+                    setControl(textBoxOutputLeft, textBoxOutputLeft.AppendText, data);
+                    break;
+                case 1:
+                    setControl(textBoxOutputRight, textBoxOutputRight.AppendText, data);
+                    break;
             }
         }
 
-        private string removePrefixPostfix(string str, string prefix, string postfix)
+        private void setMainText(string s)
         {
-            string sub = str.Substring(prefix.Length);
-            sub = sub.Substring(0, sub.LastIndexOf(postfix));
-
-            return sub;
+            labelMain.Text = s;
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        // 컨트롤 세이프 콜
+        public delegate void Function(string x);
+        private void setControl(Control control, Function call, string arg)
         {
-            if (programCamera == null)
+            if (control.InvokeRequired)
             {
-                labelStatus1.Text = "Closed";
-                labelStatus1.ForeColor = Color.Black;
+                control.Invoke(call, arg);
             }
-            if (programServer == null)
+            else
+                call(arg);
+        }
+
+        private void buttonCloseAll_Click(object sender, EventArgs e)
+        {
+            logic.finalize();
+            initLogic();
+        }
+
+        private void setLabelStatus(int idx, ProcessStatus status)
+        {
+            Label[] dstList = { labelStatusLeft, labelStatusRight };
+            Color foreColor = Color.Black;
+            Color backColor = Color.FromKnownColor(KnownColor.Control);
+            string text = "";
+
+            switch(status)
             {
-                labelStatus2.Text = "Closed";
-                labelStatus1.ForeColor = Color.Black;
+                case ProcessStatus.None:
+                    text = "None";
+                    break;
+                case ProcessStatus.Ready:
+                    text = "Ready";
+                    foreColor = Color.White;
+                    backColor = Color.Green;
+                    break;
+                case ProcessStatus.Dead:
+                    text = "Dead";
+                    foreColor = Color.White;
+                    backColor = Color.Red;
+                    break;
             }
 
-            if (programCamera != null && AsynchronousClient.socketConnectedPoll(socket1))
-            {
-                labelStatus1.Text = "Connecting ...";
-                labelStatus1.ForeColor = Color.Red;
-                socket1 = AsynchronousClient.Connect("localhost", port1);
-            }
-            else if (programCamera != null)
-            {
-                labelStatus1.Text = "Connected";
-                labelStatus1.ForeColor = Color.Green;
-            }
+            dstList[idx].Text = text;
+            dstList[idx].ForeColor = foreColor;
+            dstList[idx].BackColor = backColor;
+        }
 
-            if (programServer != null && AsynchronousClient.socketConnectedPoll(socket2))
-            {
-                labelStatus2.Text = "Connecting ...";
-                labelStatus2.ForeColor = Color.Red;
-                socket2 = AsynchronousClient.Connect("localhost", port2);
-            }
-            else if (programServer != null)
-            {
-                labelStatus2.Text = "Connected";
-                labelStatus2.ForeColor = Color.Green;
-            }
+        private void buttonSet_Click(object sender, EventArgs e)
+        {
+            data.setFromPrompt();
         }
     }
 }

@@ -4,15 +4,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project_Kinect", "Project_Kinect\Project_Kinect.vcxproj", "{33A77B11-44F5-4295-AAEE-CDC3AF204DDD}"
-	ProjectSection(ProjectDependencies) = postProject
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227} = {11481B6E-4CA3-4DF6-A33F-2B5790207227}
-	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_PROJECT_ROOT_", "Project_Root\Project_Root.vcxproj", "{11481B6E-4CA3-4DF6-A33F-2B5790207227}"
-EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Project_PyDNN", "Project_PyDNN\Project_PyDNN.pyproj", "{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project_Interface2", "Project_Interface2\Project_Interface2.csproj", "{570F4F72-7B50-44EC-963D-E70EFB08E5B3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project_Interface", "Project_Interface\Project_Interface.csproj", "{570F4F72-7B50-44EC-963D-E70EFB08E5B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,32 +27,6 @@ Global
 		{33A77B11-44F5-4295-AAEE-CDC3AF204DDD}.Release|x64.ActiveCfg = Release|x64
 		{33A77B11-44F5-4295-AAEE-CDC3AF204DDD}.Release|x64.Build.0 = Release|x64
 		{33A77B11-44F5-4295-AAEE-CDC3AF204DDD}.Release|x86.ActiveCfg = Release|x64
-		{0DE83E12-3D90-418F-B9A0-B37B49C8C507}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{0DE83E12-3D90-418F-B9A0-B37B49C8C507}.Debug|Any CPU.Build.0 = Debug|x64
-		{0DE83E12-3D90-418F-B9A0-B37B49C8C507}.Debug|x64.ActiveCfg = Debug|x64
-		{0DE83E12-3D90-418F-B9A0-B37B49C8C507}.Debug|x64.Build.0 = Debug|x64
-		{0DE83E12-3D90-418F-B9A0-B37B49C8C507}.Release|Any CPU.ActiveCfg = Release|x64
-		{0DE83E12-3D90-418F-B9A0-B37B49C8C507}.Release|Any CPU.Build.0 = Release|x64
-		{0DE83E12-3D90-418F-B9A0-B37B49C8C507}.Release|x64.ActiveCfg = Release|x64
-		{0DE83E12-3D90-418F-B9A0-B37B49C8C507}.Release|x64.Build.0 = Release|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Debug|Any CPU.Build.0 = Debug|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Debug|x64.ActiveCfg = Debug|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Debug|x64.Build.0 = Debug|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Debug|x86.ActiveCfg = Debug|Win32
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Debug|x86.Build.0 = Debug|Win32
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Release|Any CPU.ActiveCfg = Release|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Release|Any CPU.Build.0 = Release|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Release|x64.ActiveCfg = Release|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Release|x64.Build.0 = Release|x64
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Release|x86.ActiveCfg = Release|Win32
-		{11481B6E-4CA3-4DF6-A33F-2B5790207227}.Release|x86.Build.0 = Release|Win32
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Release|x64.ActiveCfg = Release|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Release|x86.ActiveCfg = Release|Any CPU
 		{570F4F72-7B50-44EC-963D-E70EFB08E5B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{570F4F72-7B50-44EC-963D-E70EFB08E5B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{570F4F72-7B50-44EC-963D-E70EFB08E5B3}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -72,10 +39,6 @@ Global
 		{570F4F72-7B50-44EC-963D-E70EFB08E5B3}.Release|x64.Build.0 = Release|Any CPU
 		{570F4F72-7B50-44EC-963D-E70EFB08E5B3}.Release|x86.ActiveCfg = Release|Any CPU
 		{570F4F72-7B50-44EC-963D-E70EFB08E5B3}.Release|x86.Build.0 = Release|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB20CB34-28F4-46C5-8742-3E2B8FDEFB9D}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
