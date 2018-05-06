@@ -66,19 +66,19 @@
     $ python -c "import keras; print(keras.__version__)"
     ```
 
-1. 만약 CPU가 AVX 연산을 지원하면 tensorflow import 시 이를 이용하기를 권고하는데 H5PY를 업데이트하면 해결된다.
+1. 만약 CPU가 AVX, SSE, FMA 등 연산을 지원하면 tensorflow import 시 이를 이용하기를 권고한다.
 
-    1. AVX는 CPU의 SIMD 부동 소수점 연산 명령어 조합의 최신 버전이다.
+    1. AVX, SSE 등은 CPU의 SIMD 부동 소수점 연산 명령어 조합의 최신 버전이다.
 
     1. CPU 연산 속도가 매우 빨라짐.
 
-    1. H5PY는 대용량 데이터(HDF5 format) 처리를 지원하는 모듈.
+    1. tensorflow는 AVX 미지원 PC의 호환성을 위해 기본 빌드에는 포함시키지 않는다.
 
-    1. tensorflow는 AVX 미지원 PC의 호환성을 위해 낮은 버전의 H5PY를 사용중이라고 한다.
+    1. 부동 소수점 명령어를 사용하려면 tensorflow를 clnoe해서 수동으로 빌드해야 한다.
 
-    ```powershell
-    pip install "h5py==2.8.0rc1" --user
-    ```
+    1. 만약 GPU를 사용하면 CPU의 연산은 영향이 거의 없기 때문에 필요 없다. [ref](https://stackoverflow.com/questions/43134753/tensorflow-wasnt-compiled-to-use-sse-etc-instructions-but-these-are-availab/44984610#44984610)
+
+    1. [How to compile tensorflow using SSE4.1, SSE4.2, and AVX.](https://github.com/tensorflow/tensorflow/issues/8037)
 
 ### GPU using
 
