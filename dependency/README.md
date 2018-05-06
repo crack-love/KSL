@@ -114,7 +114,7 @@ NVIDIA의 CUDA를 이용한 cuDNN을 사용하기 위해서는 GPU가 compute ca
 
     처음 tensorflow를 import하면 gpu 디바이스를 확인하고 등록한다. 이 때 시간이 약간 소요된다.
 
-    ```python
+    ```powershell
     $ python
     >>> import tensorflow as tf
     ```
