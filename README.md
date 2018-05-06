@@ -4,11 +4,16 @@
 
 ## Release
 
-- [Source code](https://github.com/crack-love/KSL/releases) (MS Visual studio 2017 required)
-- [install guide](https://github.com/crack-love/KSL/blob/master/dependency/README.md)
+- [Release note](https://github.com/crack-love/KSL/releases)
 
-## Other Links
+- [Install & Build guide](https://github.com/crack-love/KSL/blob/master/dependency/README.md)
 
-1. [Git tutorial](https://github.com/crack-love/KSL/blob/master/document/GitTutorial.md)
-1. [Git Markup language tutorial](https://guides.github.com/features/mastering-markdown/) 
-1. [Version manage guidlines](https://semver.org/lang/ko/)
+- [Warning](https://github.com/crack-love/KSL/tree/master/data)
+
+## Git Studies
+
+- [Git tutorial](https://github.com/crack-love/KSL/blob/master/document/GitTutorial.md)
+
+- [Git Markdown tutorial](https://guides.github.com/features/mastering-markdown/) 
+
+- [Version manage guidlines](https://semver.org/lang/ko/)
