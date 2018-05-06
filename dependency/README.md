@@ -2,7 +2,7 @@
 
 모든 과정은 Windows 10 64bit 환경 기준입니다. 만약 link가 깨져있거나 설치 과정에 문제가 있으면 issue 부탁드립니다.
 
-설치 순서는 C++ 개발 환경, Kinect, Python 개발 환경, Tensorflow, Keras, GPU 지원 순이며 Python 이후 부터는 설치 과정이 CLI 환경에서 이뤄집니다.
+설치 순서는 C++/C# 개발 환경, Kinect, Python 개발 환경, Tensorflow, Keras, GPU 지원 순이며 Python 이후 부터는 설치 과정이 CLI 환경에서 이뤄집니다.
 
 -------------------------------------------------------------------
 
@@ -24,7 +24,7 @@
 
 ### Install Kinect
 
-1. 빌드를 위해서 VC15(Visual studio 2017)가 필요하다. -> [site](https://docs.microsoft.com/ko-kr/visualstudio/install/install-visual-studio)
+1. 빌드를 위해서 VC15(Visual studio 2017)가 필요하다. (C++/C# 개발 환경 설치) -> [site](https://docs.microsoft.com/ko-kr/visualstudio/install/install-visual-studio)
 
 1. 빌드 파일 실행을 위해서는 vc 재배포 패키지 2012 설치가 필요하다. -> [link](https://github.com/crack-love/KSL/blob/master/dependency/vcredist_x64.exe)
 
@@ -63,7 +63,7 @@
     ```powershell
     python -m pip install keras
 
-    $ python -c "import keras; print(keras.__version__)"
+    python -c "import keras; print(keras.__version__)"
     ```
 
 1. 만약 CPU가 AVX, SSE, FMA 등 연산을 지원하면 tensorflow import 시 이를 이용하기를 권고한다.
@@ -115,15 +115,16 @@ NVIDIA의 CUDA를 이용한 cuDNN을 사용하기 위해서는 GPU가 compute ca
     처음 tensorflow를 import하면 gpu 디바이스를 확인하고 등록한다. 이 때 시간이 약간 소요된다.
 
     ```python
-    import tensorflow as tf
+    $ python
+    >>> import tensorflow as tf
     ```
-    tensorflow에서 세션을 불러우면 gpu를 사용중인지 확인할 수 있는 로그가 출력된다.
+    tensorflow에서 세션을 불러오면 gpu를 사용중인지 확인할 수 있는 로그(I)가 출력된다.
 
     ```python
     tf.Session()
     ```
 
-    아무것도 출력되지 않으면 로그 출력 범위를 확인해보거나 기계학습을 돌려보고 체감속도가 빨라졌는지 확인해본다..
+    아무것도 출력되지 않으면 로그 출력 범위(I, W, E)를 확인해보거나 기계학습을 돌려보고 체감속도가 빨라졌는지 또는 GPU를 사용중인지(작업관리자) 확인해본다..
 
 [top](#index)
 

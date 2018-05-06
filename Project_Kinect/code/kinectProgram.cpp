@@ -500,12 +500,12 @@ void Kinect::queryToServer()
 	hSocket = socket(PF_INET, SOCK_STREAM, 0);
 	if (hSocket == INVALID_SOCKET)
 		printf("hSocketet() error!\n");
-
+	/*
 	memset(&servAddr, 0, sizeof(servAddr));
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	servAddr.sin_port = htons(14358);
-
+	*/
 	//-------------------------------- CONECT
 
 	if (connect(hSocket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
@@ -554,9 +554,9 @@ void Kinect::save()
 		writeFile << sstream.str();
 		writeFile.close();
 
-		cout << LABEL(label) << "Record saving ... done " << ++i << endl;
+		cout << LABEL(label) << " Record saving ... done " << ++i << endl;
 	}
-	else cout << LABEL(label) << "Record saving ... fail " << ++i << endl;
+	else cout << LABEL(label) << " Record saving ... fail " << ++i << endl;
 }
 
 // Draw Data

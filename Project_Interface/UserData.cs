@@ -49,7 +49,7 @@ namespace Project_Interface2
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message);
+                MessageBox.Show(e.Message + " 파일을 새로 만듭니다.");
             }
         }
 
