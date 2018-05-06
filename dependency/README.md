@@ -66,7 +66,7 @@
     python -c "import keras; print(keras.__version__)"
     ```
 
-1. 만약 CPU가 AVX, SSE, FMA 등 연산을 지원하면 tensorflow import 시 이를 이용하기를 권고한다.
+1. 만약 CPU가 AVX, SSE, FMA 등 연산을 지원하면 tensorflow import 시 텐서플로우가 해당 연산 이용을 권고한다.
 
     1. AVX, SSE 등은 CPU의 SIMD 부동 소수점 연산 명령어 조합의 최신 버전이다.
 
