@@ -5,7 +5,7 @@
 ## Release
 
 - [Source code](https://github.com/crack-love/KSL/releases) (MS Visual studio 2017 required)
-- [install guide](https://github.com/crack-love/KSL/blob/master/dependency/README.md)
+- [Install guide](https://github.com/crack-love/KSL/blob/master/dependency/README.md)
 
 ## Other Links
 
