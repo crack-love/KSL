@@ -69,8 +69,6 @@ void Kinect::initialize()
 
 	initializeComponents();
 
-	
-
     // Wait a Few Seconds until begins to Retrieve Data from Sensor ( about 2000-[ms] )
     std::this_thread::sleep_for( std::chrono::seconds( 2 ) );
 }
