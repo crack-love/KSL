@@ -60,12 +60,28 @@ private:
 	ComPtr<IColorFrameReader> colorFrameReader;
 	ComPtr<IBodyFrameReader> bodyFrameReader;
 	ComPtr<IHighDefinitionFaceFrameReader> hdFaceFrameReader;
+	ComPtr<IDepthFrameReader> depthFrameReader;
+	ComPtr<IBodyIndexFrameReader> bodyIndexFrameReader;
 
 	// Color Buffer
 	std::vector<BYTE> colorBuffer; // raw buffer
 	int colorWidth, colorHeight;
 	cv::Mat colorMat; // showing mat
 
+	// Depth Buffer
+	// cv::Mat depthMap; // depth image
+	int depthWidth = 512, depthHeight = 424; // kinect v2의 depth 데이터 크기
+	USHORT depthMin, depthMax;
+	cv::Mat depthMat;
+	// std::vector<BYTE> depthBuffer;
+	BYTE depthBuffer[512 * 424 * 4];
+
+	// Body Index Buffer
+	cv::Mat bodyIndexMat;
+	int bodyWidth = 512, bodyHeight = 424;
+	// cv::Mat bodyIndexMat;
+	BYTE bodyIndexBuffer[512 * 424 * 4];
+	
 	// Body Buffer
 	array<IBody*, BODY_COUNT> bodies = { nullptr };
 	std::array<cv::Vec3b, BODY_COUNT> colors;
@@ -154,6 +170,10 @@ private:
 
 	void initializeCNN();
 
+	void initializeDepth();
+
+	void initializeBodyIndex();
+
 	// Finalize
 	void finalize();
 
@@ -173,6 +193,10 @@ private:
 	void updateHDFace();
 
 	void updatePredict();
+
+	void updateDepth();
+
+	void updateBodyIndex();
 
 	// Draw Data
 	void draw();
@@ -211,5 +235,8 @@ private:
 
 	// for extract hand
 	void extractHand(cv::Mat& screen);
+	void extractDepthHand(cv::Mat& screen);
+	void extractBodyIndexHand(cv::Mat& screen);
+
 	bool isHandTracking();
 };

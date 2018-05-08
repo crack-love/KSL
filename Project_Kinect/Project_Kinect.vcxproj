@@ -85,6 +85,7 @@
     <Link>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(SolutionDir)dependency\libSource\Kinect20.lib;$(SolutionDir)dependency\libSource\Kinect20.Face.lib;$(SolutionDir)dependency\libSource\opencv_world341d.lib</AdditionalDependencies>
+      <StackReserveSize>104857600</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
