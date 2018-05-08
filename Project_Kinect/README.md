@@ -1,1 +1,0 @@
-런타임 시 NuiDatabase 폴더와 Kinect20.Face.dll는 쌍으로 필요하다.
