@@ -63,7 +63,13 @@ void Kinect::initialize()
 
 	initializeCNN();
 
+	initializeDepth();
+
+	// initializeBodyIndex();
+
 	initializeComponents();
+
+	
 
     // Wait a Few Seconds until begins to Retrieve Data from Sensor ( about 2000-[ms] )
     std::this_thread::sleep_for( std::chrono::seconds( 2 ) );
@@ -166,11 +172,26 @@ inline void Kinect::initializeBody()
 	colors[5] = cv::Vec3b(0, 255, 255); // Yellow
 }
 
+inline void Kinect::initializeDepth()
+{
+	ComPtr<IDepthFrameSource> depthFrameSource; // 자동으로 Release를 해준다.
+	ERROR_CHECK(kinect->get_DepthFrameSource(&depthFrameSource));
+	ERROR_CHECK(depthFrameSource->OpenReader(&depthFrameReader));
+
+}
+
 void Kinect::initializeCNN()
 {
 	// reading cnn model
 	//bool ok = cnn.read("../models/test.model");
 	//cout << "Reading cnn model ..." << ok << endl;
+}
+
+void Kinect::initializeBodyIndex()
+{
+	ComPtr<IBodyIndexFrameSource> bodyIndexFrameSource;
+	ERROR_CHECK(kinect->get_BodyIndexFrameSource(&bodyIndexFrameSource));
+	ERROR_CHECK(bodyIndexFrameSource->OpenReader(&bodyIndexFrameReader));
 }
 
 // Finalize
@@ -206,8 +227,14 @@ void Kinect::update()
 
 	// send / save data if need
 	updateFrame();
+	
+	// update depth
+	updateDepth();
+
+	// updateBodyIndex();
 
 	updateStatus();
+
 }
 
 void Kinect::updatePredict()
@@ -229,6 +256,151 @@ inline void Kinect::updateColor()
 
     // Convert Format ( YUY2 -> BGRA )
     ERROR_CHECK( colorFrame->CopyConvertedFrameDataToArray( static_cast<UINT>( colorBuffer.size() ), &colorBuffer[0], ColorImageFormat::ColorImageFormat_Bgra ) );
+}
+
+// updete depth
+inline void Kinect::updateDepth()
+{
+	/*
+	unsigned int bufferSize = depthWidth * depthHeight * sizeof(USHORT);
+	cv::Mat bufferMat(depthHeight, depthWidth, CV_16UC1);  // depth frame의 하나의 픽셀은 16bit
+	depthMat = cv::Mat(depthHeight, depthWidth, CV_8UC1);
+
+	ComPtr<IDepthFrame> depthFrame;
+	const HRESULT ret = depthFrameReader->AcquireLatestFrame(&depthFrame);
+	if (FAILED(ret)) {
+		return;
+	}
+
+	// 여기에서는 Depth 데이터를 시각화하기위한 변환 처리에 편리한 cv :: Mat 형으로 받고있다.
+	const HRESULT result = depthFrame->AccessUnderlyingBuffer(&bufferSize, reinterpret_cast<UINT16**>(&bufferMat.data)); 
+
+	if (FAILED(result)) {
+		return;
+	}
+	
+
+	// Depth 데이터를 이미지로 표시하기 위해 16bit에서 8bit로 변환한다.
+	// 센서에서 거리가 가까울수록 백색 (255), 멀수록 검게 (0) 표시하도록 변환 있다.
+	bufferMat.convertTo(depthMap, CV_8U, -255.0f / 8000.0f, 255.0f); // ex. depth = 8000, (8000 * -255 / 8000) = -255, -255 + beta = 0
+	*/
+
+	USHORT nMinDepth = 0;
+	USHORT nMaxDepth = 0;
+	ComPtr<IFrameDescription> description;
+	ComPtr<IDepthFrame> depthFrame;
+
+	const HRESULT ret = depthFrameReader->AcquireLatestFrame(&depthFrame);
+	if (FAILED(ret)) {
+		return;
+	}
+
+	depthFrame->get_DepthMinReliableDistance(&nMinDepth);
+
+	nMaxDepth = USHRT_MAX;
+	depthFrame->get_DepthMaxReliableDistance(&nMaxDepth);
+
+	unsigned int sz;
+	unsigned short* buf;
+	depthFrame->AccessUnderlyingBuffer(&sz, &buf);
+	// depthBuffer.resize(depthWidth * depthHeight * 4);
+
+	// vector<BYTE>::iterator iter = depthBuffer.begin();
+
+	const unsigned short* curr = (const unsigned short*)buf;
+	const unsigned short* dataEnd = curr + (depthWidth * depthHeight);
+	BYTE* dest = depthBuffer;
+	/*
+	int idx = 0;
+	while (curr < dataEnd) {
+		// Get depth in millimeters
+		unsigned short depth = (*curr++);
+
+		// Draw a grayscale image of the depth:
+		// B,G,R are all set to depth%256, alpha set to 1.
+		for (int i = 0; i < 3; ++i)
+			depthBuffer[idx++] = (BYTE)depth % 256;
+		depthBuffer[idx++] = 0xff;
+	}
+	*/
+
+	int idx = 0;
+	while (curr < dataEnd) {
+		// Get depth in millimeters
+		unsigned short depth = (*curr++);
+		// cout << depth << endl;
+		// Draw a grayscale image of the depth:
+		// B,G,R are all set to depth%256, alpha set to 1.
+		BYTE intensity = static_cast<BYTE>((depth >= nMinDepth) && (depth <= nMaxDepth) ? (depth % 256) : 0);
+		for (int i = 0; i < 3; ++i)
+			// *dest++ = (BYTE)depth % 256;
+			*dest++ = intensity;
+		*dest++ = 0xff;
+	}
+
+	// bufferMat.convertTo(depthMap, CV_8U, 255.0f / 8000.0f, 0.0f);
+	// bufferMat.convertTo(depthMap, CV_8U, 1.0f / 8000.0f, 0.0f);
+	// cv::imshow("Depth", depthMap);
+
+	//ComPtr<IFrameDescription> depthDescription;
+	//const HRESULT result = depthFrame->get_FrameDescription(&depthDescription);
+	//if (FAILED(result)) {
+	//	return;
+	//}
+
+
+	//depthDescription->get_Width(&depthWidth);
+	//depthDescription->get_Height(&depthHeight);
+	//depthFrame->get_DepthMinReliableDistance(&depthMin);
+	//depthFrame->get_DepthMaxReliableDistance(&depthMax);
+}
+
+inline void Kinect::updateBodyIndex()
+{
+	ComPtr<IBodyIndexFrame> bodyIndexFrame;
+
+	const HRESULT ret = bodyIndexFrameReader->AcquireLatestFrame(&bodyIndexFrame);
+	if (FAILED(ret)) {
+		return;
+	}
+
+	
+	BYTE bodyColor[] = { 255, 0, 0, 255 };
+	unsigned int bufferSize = 0;
+	unsigned char* buffer = nullptr;
+
+	bodyIndexFrame->AccessUnderlyingBuffer(&bufferSize, &buffer);
+
+	const unsigned char* curr = (const unsigned char*)buffer;
+	const unsigned char* dataEnd = curr + (bodyWidth * bodyHeight);
+
+	// trackingCount;
+
+	BYTE* dest = bodyIndexBuffer;
+	while (curr < dataEnd) {
+		// Get depth in millimeters
+		unsigned char index = (*curr++);
+		// cout << depth << endl;
+		// Draw a grayscale image of the depth:
+		// B,G,R are all set to depth%256, alpha set to 1.
+		// for (int i = 0; i < 3; ++i)
+		//	// *dest++ = (BYTE)depth % 256;
+		//	*dest++ = intensity;
+		// cout << int(index) << endl;
+		if (index == trackingCount) {
+			for (int i = 0; i < 4; ++i)
+			{
+				*dest++ = bodyColor[i];
+			}
+		}
+		else {
+			for (int i = 0; i < 4; ++i)
+			{
+				*dest++ = 0;
+			}
+		}
+		// *dest++ = 0;
+	}
 }
 
 // Update Body
@@ -674,7 +846,11 @@ inline void Kinect::drawColor()
     // Create cv::Mat from Color Buffer
     colorMat = cv::Mat( colorHeight, colorWidth, CV_8UC4, &colorBuffer[0] );
 
-	extractHand(colorMat);
+	depthMat = cv::Mat(depthHeight, depthWidth, CV_8UC4, &depthBuffer[0] );
+	// bodyIndexMat = cv::Mat(bodyHeight, bodyWidth, CV_8UC4, &bodyIndexBuffer[0]);
+	// extractHand(colorMat);
+	extractDepthHand(colorMat);
+	// extractBodyIndexHand(colorMat);
 }
 
 // Draw Body
@@ -1100,7 +1276,7 @@ void Kinect::extractHand(cv::Mat& screen)
 	{   // left hand
 		// CameraSpacePoint lpoint = lHandPos;
 		CameraSpacePoint lpoint = sPoints[SPOINT_BODY_WRIST_LEFT].getPoint();
-
+		
 		ColorSpacePoint lColorPoint;
 		// pMapper->MapCameraPointsToColorSpace(1, &lpoint, 1, &lColorPoint);
 		coordinateMapper->MapCameraPointToColorSpace(lpoint, &lColorPoint);
@@ -1152,6 +1328,7 @@ void Kinect::extractHand(cv::Mat& screen)
 			Rect rect(rColorPoint.X - hWidth, rColorPoint.Y - hHeight, width, height);
 			// cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight));
 			cv::Mat rhand = screen(rect);
+			
 			// cout << "done1" << endl;
 			cv::Mat rhandROI = screen(cv::Rect(colorWidth - width, 0, width, height));
 			// cout << "done2" << endl;
@@ -1165,6 +1342,176 @@ void Kinect::extractHand(cv::Mat& screen)
 			}
 		}
 		//
+	}
+}
+
+
+// extract hand
+void Kinect::extractDepthHand(cv::Mat& screen)
+{
+	if (!isHandTracking()) return;
+
+	int width = DEPTH_HAND_WIDTH, height = DEPTH_HAND_HEIGHT;
+	int hWidth = width / 2, hHeight = height / 2;
+
+	// cv::imshow("Depth", depthMat);
+	{   // left hand
+		// CameraSpacePoint lpoint = lHandPos;
+		CameraSpacePoint lpoint = sPoints[SPOINT_BODY_WRIST_LEFT].getPoint();
+
+		DepthSpacePoint depthPoint;
+		coordinateMapper->MapCameraPointsToDepthSpace(1, &lpoint, 1, &depthPoint);
+
+		if (!(depthPoint.X - hWidth < 0 || depthPoint.X + hWidth >= depthWidth || depthPoint.Y - hHeight < 0 || depthPoint.Y + hHeight >= depthHeight))
+		{
+			Rect rect((int)(depthPoint.X - hWidth), (int)(depthPoint.Y - hHeight), width, height);
+			
+			// cout << depthPoint.X << " " << depthPoint.Y << endl;
+
+			cv::Mat lhand = depthMat(rect);
+
+			// cout << int(lhand.at<BYTE>(hWidth, hHeight)) << endl;  // convertTo를 하면서 값이 일정하게 출력.
+
+			// cv::Mat colorHand = cv::Mat(height, width, CV_8UC4);
+
+			// lhand.convertTo(colorHand, CV_8UC4, 1.0f, 0.0f); // ex. depth = 8000, (8000 * -255 / 8000) = -255, -255 + beta = 0
+			// cv::cvtColor(lhand, colorHand, CV_GRAY2RGBA);
+
+			//cout << "donel-1" << endl;
+			cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
+
+			//cout << "donel-2" << endl;
+			//cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			//cv::addWeighted(lhandROI, 0.0, colorHand, 1.0, 0, lhandROI);
+			cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			//cout << "donel-3" << endl;
+			// lhandList.push_back(lhand);
+			if (frameStacking)
+			{
+
+			}
+		}
+	}
+
+	{   // right hand
+		// CameraSpacePoint rpoint = rHandPos;
+		CameraSpacePoint rpoint = sPoints[SPOINT_BODY_WRIST_RIGHT].getPoint();
+
+		DepthSpacePoint depthPoint;
+		coordinateMapper->MapCameraPointsToDepthSpace(1, &rpoint, 1, &depthPoint);
+
+		if (!(depthPoint.X - hWidth < 0 || depthPoint.X + hWidth >= depthWidth || depthPoint.Y - hHeight < 0 || depthPoint.Y + hHeight >= depthHeight))
+		{
+			// cout << lColorPoint.X - hWidth << " " << lColorPoint.X + hWidth << " " << colorWidth << endl;
+
+			// 관심영역 설정 (set ROI (X, Y, W, H)).
+
+			Rect rect(depthPoint.X - hWidth, depthPoint.Y - hHeight, width, height);
+			// cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
+			cv::Mat rhand = depthMat(rect);
+
+			//cv::Mat colorHand = cv::Mat(height, width, CV_8UC4);
+
+			//rhand.convertTo(colorHand, CV_8UC4, 1.0f, 0.0f); // ex. depth = 8000, (8000 * -255 / 8000) = -255, -255 + beta = 0
+			// cv::cvtColor(rhand, colorHand, CV_GRAY2RGBA);
+															 //cout << "donel-1" << endl;
+			cv::Mat rhandROI = screen(cv::Rect(colorWidth - width, 0, width, height));
+			//cout << "donel-2" << endl;
+			//cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			// cv::addWeighted(rhandROI, 0.0, colorHand, 1.0, 0, rhandROI);
+			cv::addWeighted(rhandROI, 0.0, rhand, 1.0, 0, rhandROI);
+			//cout << "donel-3" << endl;
+			// lhandList.push_back(lhand);
+			if (frameStacking)
+			{
+
+			}
+		}
+	}
+}
+
+
+// extract hand
+void Kinect::extractBodyIndexHand(cv::Mat& screen)
+{
+	if (!isHandTracking()) return;
+
+	int width = DEPTH_HAND_WIDTH, height = DEPTH_HAND_HEIGHT;
+	int hWidth = width / 2, hHeight = height / 2;
+
+	// cv::imshow("Depth", depthMat);
+	{   // left hand
+		// CameraSpacePoint lpoint = lHandPos;
+		CameraSpacePoint lpoint = sPoints[SPOINT_BODY_WRIST_LEFT].getPoint();
+
+		DepthSpacePoint depthPoint;
+		coordinateMapper->MapCameraPointsToDepthSpace(1, &lpoint, 1, &depthPoint);
+
+		if (!(depthPoint.X - hWidth < 0 || depthPoint.X + hWidth >= depthWidth || depthPoint.Y - hHeight < 0 || depthPoint.Y + hHeight >= depthHeight))
+		{
+			Rect rect((int)(depthPoint.X - hWidth), (int)(depthPoint.Y - hHeight), width, height);
+
+			// cout << depthPoint.X << " " << depthPoint.Y << endl;
+
+			cv::Mat lhand = bodyIndexMat(rect);
+
+			// cout << int(lhand.at<BYTE>(hWidth, hHeight)) << endl;  // convertTo를 하면서 값이 일정하게 출력.
+
+			// cv::Mat colorHand = cv::Mat(height, width, CV_8UC4);
+
+			// lhand.convertTo(colorHand, CV_8UC4, 1.0f, 0.0f); // ex. depth = 8000, (8000 * -255 / 8000) = -255, -255 + beta = 0
+			// cv::cvtColor(lhand, colorHand, CV_GRAY2RGBA);
+
+			//cout << "donel-1" << endl;
+			cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
+
+			//cout << "donel-2" << endl;
+			//cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			//cv::addWeighted(lhandROI, 0.0, colorHand, 1.0, 0, lhandROI);
+			cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			//cout << "donel-3" << endl;
+			// lhandList.push_back(lhand);
+			if (frameStacking)
+			{
+
+			}
+		}
+	}
+
+	{   // right hand
+		// CameraSpacePoint rpoint = rHandPos;
+		CameraSpacePoint rpoint = sPoints[SPOINT_BODY_WRIST_RIGHT].getPoint();
+
+		DepthSpacePoint depthPoint;
+		coordinateMapper->MapCameraPointsToDepthSpace(1, &rpoint, 1, &depthPoint);
+
+		if (!(depthPoint.X - hWidth < 0 || depthPoint.X + hWidth >= depthWidth || depthPoint.Y - hHeight < 0 || depthPoint.Y + hHeight >= depthHeight))
+		{
+			// cout << lColorPoint.X - hWidth << " " << lColorPoint.X + hWidth << " " << colorWidth << endl;
+
+			// 관심영역 설정 (set ROI (X, Y, W, H)).
+
+			Rect rect(depthPoint.X - hWidth, depthPoint.Y - hHeight, width, height);
+			// cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
+			cv::Mat rhand = bodyIndexMat(rect);
+
+			//cv::Mat colorHand = cv::Mat(height, width, CV_8UC4);
+
+			//rhand.convertTo(colorHand, CV_8UC4, 1.0f, 0.0f); // ex. depth = 8000, (8000 * -255 / 8000) = -255, -255 + beta = 0
+			// cv::cvtColor(rhand, colorHand, CV_GRAY2RGBA);
+			//cout << "donel-1" << endl;
+			cv::Mat rhandROI = screen(cv::Rect(colorWidth - width, 0, width, height));
+			//cout << "donel-2" << endl;
+			//cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			// cv::addWeighted(rhandROI, 0.0, colorHand, 1.0, 0, rhandROI);
+			cv::addWeighted(rhandROI, 0.0, rhand, 1.0, 0, rhandROI);
+			//cout << "donel-3" << endl;
+			// lhandList.push_back(lhand);
+			if (frameStacking)
+			{
+
+			}
+		}
 	}
 }
 
