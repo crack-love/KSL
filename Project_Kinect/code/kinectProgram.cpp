@@ -63,9 +63,9 @@ void Kinect::initialize()
 
 	initializeCNN();
 
-	initializeDepth();
+	initializeDepth();  // depthFrameReader 초기화
 
-	// initializeBodyIndex();
+	// initializeBodyIndex();  // bodyIndexFrameReader 초기화
 
 	initializeComponents();
 
@@ -172,7 +172,7 @@ inline void Kinect::initializeBody()
 
 inline void Kinect::initializeDepth()
 {
-	ComPtr<IDepthFrameSource> depthFrameSource; // 자동으로 Release를 해준다.
+	ComPtr<IDepthFrameSource> depthFrameSource;
 	ERROR_CHECK(kinect->get_DepthFrameSource(&depthFrameSource));
 	ERROR_CHECK(depthFrameSource->OpenReader(&depthFrameReader));
 
@@ -329,7 +329,7 @@ inline void Kinect::updateDepth()
 		// cout << depth << endl;
 		// Draw a grayscale image of the depth:
 		// B,G,R are all set to depth%256, alpha set to 1.
-		BYTE intensity = static_cast<BYTE>((depth >= nMinDepth) && (depth <= nMaxDepth) ? (depth % 256) : 0);
+		BYTE intensity = static_cast<BYTE>((depth >= nMinDepth) && (depth <= nMaxDepth) ? (depth % 256) : 0);  // nMinDepth와 nMaxDepth일 경우 depth % 256
 		for (int i = 0; i < 3; ++i)
 			// *dest++ = (BYTE)depth % 256;
 			*dest++ = intensity;
@@ -385,7 +385,7 @@ inline void Kinect::updateBodyIndex()
 		//	// *dest++ = (BYTE)depth % 256;
 		//	*dest++ = intensity;
 		// cout << int(index) << endl;
-		if (index == trackingCount) {
+		if (index == trackingCount) {   // 현재 추적되고 있는 index일 경우
 			for (int i = 0; i < 4; ++i)
 			{
 				*dest++ = bodyColor[i];
@@ -844,8 +844,6 @@ inline void Kinect::drawColor()
     // Create cv::Mat from Color Buffer
     colorMat = cv::Mat( colorHeight, colorWidth, CV_8UC4, &colorBuffer[0] );
 
-	depthMat = cv::Mat(depthHeight, depthWidth, CV_8UC4, &depthBuffer[0] );
-	// bodyIndexMat = cv::Mat(bodyHeight, bodyWidth, CV_8UC4, &bodyIndexBuffer[0]);
 	// extractHand(colorMat);
 	extractDepthHand(colorMat);
 	// extractBodyIndexHand(colorMat);
@@ -1349,6 +1347,8 @@ void Kinect::extractDepthHand(cv::Mat& screen)
 {
 	if (!isHandTracking()) return;
 
+	depthMat = cv::Mat(depthHeight, depthWidth, CV_8UC4, &depthBuffer[0]);
+
 	int width = DEPTH_HAND_WIDTH, height = DEPTH_HAND_HEIGHT;
 	int hWidth = width / 2, hHeight = height / 2;
 
@@ -1433,6 +1433,8 @@ void Kinect::extractDepthHand(cv::Mat& screen)
 void Kinect::extractBodyIndexHand(cv::Mat& screen)
 {
 	if (!isHandTracking()) return;
+
+	bodyIndexMat = cv::Mat(bodyHeight, bodyWidth, CV_8UC4, &bodyIndexBuffer[0]);
 
 	int width = DEPTH_HAND_WIDTH, height = DEPTH_HAND_HEIGHT;
 	int hWidth = width / 2, hHeight = height / 2;

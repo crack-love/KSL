@@ -234,9 +234,9 @@ private:
 	void queryToServer(); // request predict result to python server
 
 	// for extract hand
-	void extractHand(cv::Mat& screen);
-	void extractDepthHand(cv::Mat& screen);
-	void extractBodyIndexHand(cv::Mat& screen);
+	void extractHand(cv::Mat& screen);			// colorFrame에서 손을 tracking하여 screen에 복사
+	void extractDepthHand(cv::Mat& screen);     // depthFrame에서 손을 tracking하여 screen에 복사
+	void extractBodyIndexHand(cv::Mat& screen); // bodyIndexFrame에서 손을 tracking하여 screen에 복사
 
 	bool isHandTracking();
 };
