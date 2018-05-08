@@ -18,52 +18,52 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\code_kinect\Frame.cpp">
+    <ClCompile Include="code\Frame.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\code_kinect\FrameCollection.cpp">
+    <ClCompile Include="code\FrameCollection.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\code_kinect\main.cpp">
+    <ClCompile Include="code\kinectProgram.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\code_kinect\SPoint.cpp">
+    <ClCompile Include="code\main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\code_common\LabelMapper.cpp">
+    <ClCompile Include="code\MainTransaction.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="code\SPoint.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="code\common\LabelMapper.cpp">
       <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\code_kinect\KinectProgram.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\code_kinect\MainTransaction.cpp">
-      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\code_kinect\Frame.h">
+    <ClInclude Include="code\Frame.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\code_kinect\FrameCollection.h">
+    <ClInclude Include="code\FrameCollection.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\code_kinect\SPoint.h">
+    <ClInclude Include="code\kinectProgram.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\code_common\LabelMapper.h">
+    <ClInclude Include="code\MainTransaction.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="code\SPoint.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="code\common\defines.hpp">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\code_common\defines.hpp">
+    <ClInclude Include="code\common\kygUtil.hpp">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\code_common\kygUtil.hpp">
+    <ClInclude Include="code\common\LabelMapper.h">
       <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\code_kinect\KinectProgram.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\code_kinect\MainTransaction.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
