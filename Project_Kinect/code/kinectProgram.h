@@ -3,6 +3,7 @@
 //#pragma comment(lib, "ws2_32.lib") // 충돌 방지
 //#include <winsock2.h> // windows등 구버전 헤더와 충돌
 
+
 #include <Kinect.h>
 #include <Kinect.face.h>
 #include <ppl.h> // parallel_for_each
@@ -61,7 +62,6 @@ private:
 	ComPtr<IBodyFrameReader> bodyFrameReader;
 	ComPtr<IHighDefinitionFaceFrameReader> hdFaceFrameReader;
 	ComPtr<IDepthFrameReader> depthFrameReader;
-	ComPtr<IBodyIndexFrameReader> bodyIndexFrameReader;
 
 	// Color Buffer
 	std::vector<BYTE> colorBuffer; // raw buffer
@@ -70,18 +70,12 @@ private:
 
 	// Depth Buffer
 	// cv::Mat depthMap; // depth image
-	int depthWidth = 512, depthHeight = 424; // kinect v2의 depth 데이터 크기
+	int depthWidth = 512, depthHeight = 424; // kinect v2??depth ?곗씠???ш린
 	USHORT depthMin, depthMax;
 	cv::Mat depthMat;
 	// std::vector<BYTE> depthBuffer;
 	BYTE depthBuffer[512 * 424 * 4];
-
-	// Body Index Buffer
-	cv::Mat bodyIndexMat;
-	int bodyWidth = 512, bodyHeight = 424;
-	// cv::Mat bodyIndexMat;
-	BYTE bodyIndexBuffer[512 * 424 * 4];
-	
+  
 	// Body Buffer
 	array<IBody*, BODY_COUNT> bodies = { nullptr };
 	std::array<cv::Vec3b, BODY_COUNT> colors;
@@ -173,8 +167,6 @@ private:
 
 	void initializeDepth();
 
-	void initializeBodyIndex();
-
 	// Finalize
 	void finalize();
 
@@ -196,8 +188,6 @@ private:
 	void updatePredict();
 
 	void updateDepth();
-
-	void updateBodyIndex();
 
 	// Draw Data
 	void draw();
@@ -232,12 +222,10 @@ private:
 
 	void save();
 
-	void queryToServer(); // request predict result to python server
-
 	// for extract hand
-	void extractHand(cv::Mat& screen);			// colorFrame에서 손을 tracking하여 screen에 복사
-	void extractDepthHand(cv::Mat& screen);     // depthFrame에서 손을 tracking하여 screen에 복사
-	void extractBodyIndexHand(cv::Mat& screen); // bodyIndexFrame에서 손을 tracking하여 screen에 복사
+	void extractHand(cv::Mat& screen);			// colorFrame?먯꽌 ?먯쓣 tracking?섏뿬 screen??蹂듭궗
+	void extractDepthHand(cv::Mat& screen);     // depthFrame?먯꽌 ?먯쓣 tracking?섏뿬 screen??蹂듭궗
+	void extractBodyIndexHand(cv::Mat& screen); // bodyIndexFrame?먯꽌 ?먯쓣 tracking?섏뿬 screen??蹂듭궗
 
 	bool isHandTracking();
 };
