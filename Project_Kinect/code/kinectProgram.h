@@ -1,7 +1,7 @@
 #pragma once
 
-#pragma comment(lib, "ws2_32.lib") // �浹 ����
-#include <winsock2.h> // windows�� ������ ����� �浹
+#pragma comment(lib, "ws2_32.lib") // 충돌 방지
+#include <winsock2.h> // windows등 구버전 헤더와 충돌
 
 #include <Kinect.h>
 #include <Kinect.face.h>
@@ -60,12 +60,21 @@ private:
 	ComPtr<IColorFrameReader> colorFrameReader;
 	ComPtr<IBodyFrameReader> bodyFrameReader;
 	ComPtr<IHighDefinitionFaceFrameReader> hdFaceFrameReader;
+	ComPtr<IDepthFrameReader> depthFrameReader;
 
 	// Color Buffer
 	std::vector<BYTE> colorBuffer; // raw buffer
 	int colorWidth, colorHeight;
 	cv::Mat colorMat; // showing mat
 
+	// Depth Buffer
+	// cv::Mat depthMap; // depth image
+	int depthWidth = 512, depthHeight = 424; // kinect v2의 depth 데이터 크기
+	USHORT depthMin, depthMax;
+	cv::Mat depthMat;
+	// std::vector<BYTE> depthBuffer;
+	BYTE depthBuffer[512 * 424 * 4];
+  
 	// Body Buffer
 	array<IBody*, BODY_COUNT> bodies = { nullptr };
 	std::array<cv::Vec3b, BODY_COUNT> colors;
@@ -154,6 +163,8 @@ private:
 
 	void initializeCNN();
 
+	void initializeDepth();
+
 	// Finalize
 	void finalize();
 
@@ -173,6 +184,8 @@ private:
 	void updateHDFace();
 
 	void updatePredict();
+
+	void updateDepth();
 
 	// Draw Data
 	void draw();
@@ -207,5 +220,10 @@ private:
 
 	void save();
 
-	void queryToServer(); // request predict result to python server
+	// for extract hand
+	void extractHand(cv::Mat& screen);			// colorFrame에서 손을 tracking하여 screen에 복사
+	void extractDepthHand(cv::Mat& screen);     // depthFrame에서 손을 tracking하여 screen에 복사
+	void extractBodyIndexHand(cv::Mat& screen); // bodyIndexFrame에서 손을 tracking하여 screen에 복사
+
+	bool isHandTracking();
 };
