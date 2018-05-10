@@ -1,7 +1,7 @@
 #pragma once
 
-#pragma comment(lib, "ws2_32.lib") // Ãæµ¹ ¹æÁö
-#include <winsock2.h> // windowsµî ±¸¹öÀü Çì´õ¿Í Ãæµ¹
+#pragma comment(lib, "ws2_32.lib") // ì¶©ëŒ ë°©ì§€
+#include <winsock2.h> // windowsë“± êµ¬ë²„ì „ í—¤ë”ì™€ ì¶©ëŒ
 
 #include <Kinect.h>
 #include <Kinect.face.h>
@@ -61,7 +61,6 @@ private:
 	ComPtr<IBodyFrameReader> bodyFrameReader;
 	ComPtr<IHighDefinitionFaceFrameReader> hdFaceFrameReader;
 	ComPtr<IDepthFrameReader> depthFrameReader;
-	ComPtr<IBodyIndexFrameReader> bodyIndexFrameReader;
 
 	// Color Buffer
 	std::vector<BYTE> colorBuffer; // raw buffer
@@ -70,18 +69,12 @@ private:
 
 	// Depth Buffer
 	// cv::Mat depthMap; // depth image
-	int depthWidth = 512, depthHeight = 424; // kinect v2ÀÇ depth µ¥ÀÌÅÍ Å©±â
+	int depthWidth = 512, depthHeight = 424; // kinect v2ì˜ depth ë°ì´í„° í¬ê¸°
 	USHORT depthMin, depthMax;
 	cv::Mat depthMat;
 	// std::vector<BYTE> depthBuffer;
 	BYTE depthBuffer[512 * 424 * 4];
-
-	// Body Index Buffer
-	cv::Mat bodyIndexMat;
-	int bodyWidth = 512, bodyHeight = 424;
-	// cv::Mat bodyIndexMat;
-	BYTE bodyIndexBuffer[512 * 424 * 4];
-	
+  
 	// Body Buffer
 	array<IBody*, BODY_COUNT> bodies = { nullptr };
 	std::array<cv::Vec3b, BODY_COUNT> colors;
@@ -172,8 +165,6 @@ private:
 
 	void initializeDepth();
 
-	void initializeBodyIndex();
-
 	// Finalize
 	void finalize();
 
@@ -195,8 +186,6 @@ private:
 	void updatePredict();
 
 	void updateDepth();
-
-	void updateBodyIndex();
 
 	// Draw Data
 	void draw();
@@ -231,12 +220,10 @@ private:
 
 	void save();
 
-	void queryToServer(); // request predict result to python server
-
 	// for extract hand
-	void extractHand(cv::Mat& screen);			// colorFrame¿¡¼­ ¼ÕÀ» trackingÇÏ¿© screen¿¡ º¹»ç
-	void extractDepthHand(cv::Mat& screen);     // depthFrame¿¡¼­ ¼ÕÀ» trackingÇÏ¿© screen¿¡ º¹»ç
-	void extractBodyIndexHand(cv::Mat& screen); // bodyIndexFrame¿¡¼­ ¼ÕÀ» trackingÇÏ¿© screen¿¡ º¹»ç
+	void extractHand(cv::Mat& screen);			// colorFrameì—ì„œ ì†ì„ trackingí•˜ì—¬ screenì— ë³µì‚¬
+	void extractDepthHand(cv::Mat& screen);     // depthFrameì—ì„œ ì†ì„ trackingí•˜ì—¬ screenì— ë³µì‚¬
+	void extractBodyIndexHand(cv::Mat& screen); // bodyIndexFrameì—ì„œ ì†ì„ trackingí•˜ì—¬ screenì— ë³µì‚¬
 
 	bool isHandTracking();
 };
