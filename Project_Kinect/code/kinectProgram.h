@@ -1,7 +1,7 @@
 #pragma once
 
-#pragma comment(lib, "ws2_32.lib") // 충돌 방지
-#include <winsock2.h> // windows등 구버전 헤더와 충돌
+//#pragma comment(lib, "ws2_32.lib") // 충돌 방지
+//#include <winsock2.h> // windows등 구버전 헤더와 충돌
 
 #include <Kinect.h>
 #include <Kinect.face.h>
@@ -100,6 +100,7 @@ private:
 
 	/// sPoint
 	float spinePx;
+	float spinePxColorSpaceVersion;
 	std::array<SPoint, SPOINT_SIZE> sPoints;
 	CameraSpacePoint addtionalPoints[11];
 

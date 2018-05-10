@@ -35,8 +35,8 @@
 #define HAND_WIDTH 224  // color frame에서 손을 추출할 때 손 ROI 사이즈
 #define HAND_HEIGHT 224
 
-#define DEPTH_HAND_WIDTH 128  // depth frame, body index frame에서 손을 추출할 때 손 ROI 사이즈
-#define DEPTH_HAND_HEIGHT 128
+#define DEPTH_HAND_WIDTH 256  // depth frame, body index frame에서 손을 추출할 때 손 ROI 사이즈
+#define DEPTH_HAND_HEIGHT 256
 
 // ---------------------------------------------------------------------
 //	Macro
