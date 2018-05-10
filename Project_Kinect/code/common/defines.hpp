@@ -32,6 +32,12 @@
 #define PATH_DATA_FOLDER "../../data/"
 #define FILE_LABEL "LABEL.txt"
 
+#define HAND_WIDTH 224  // color frame에서 손을 추출할 때 손 ROI 사이즈
+#define HAND_HEIGHT 224
+
+#define DEPTH_HAND_WIDTH 128  // depth frame, body index frame에서 손을 추출할 때 손 ROI 사이즈
+#define DEPTH_HAND_HEIGHT 128
+
 // ---------------------------------------------------------------------
 //	Macro
 // ---------------------------------------------------------------------
@@ -39,10 +45,10 @@
 // if fail, system("pause"), throw runtim-err
 #define FAIL_STOP(check, msg) fail_than_stop(check, msg)
 
-// InputType�� oerator >> �����ε� �ʿ�
+// InputType은 oerator >> 오버로딩 필요
 #define INPUT(Type, name) input_something<Type>(std::cin, std::cout, name)
 
-// EnumType�� to_string �����ε� �ʿ�
+// EnumType은 to_string 오버로딩 필요
 #define SHOW_ENUM(Type, size, paading) show_enumeration<Type>(std::cout, size, paading)
 
 // Error Check Macro (HRESULT)
