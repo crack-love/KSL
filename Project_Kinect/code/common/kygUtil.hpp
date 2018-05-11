@@ -6,6 +6,7 @@
 #include <chrono>
 #include <time.h> // localtime_s
 #include <string>
+#include <Kinect.h>
 using namespace std;
 
 	// 솔루션, 프로젝트 네임 출력
@@ -67,6 +68,12 @@ using namespace std;
 	{
 		return sqrt(pow(a.X - b.X, 2.0) + pow(a.Y - b.Y, 2.0) + pow(a.Z - b.Z, 2.0));
 	}
+
+	inline double distance2d(ColorSpacePoint a, ColorSpacePoint b)
+	{
+		return sqrt(pow(a.X - b.X, 2.0) + pow(a.Y - b.Y, 2.0));
+	}
+
 
 	inline float Lerp(float p, float x, float y)
 	{

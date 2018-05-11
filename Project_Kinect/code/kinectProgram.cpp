@@ -219,6 +219,9 @@ void Kinect::update()
   
 	updateDepth();
 
+	// update depth
+	// updateDepth();
+
 	updateStatus();
 }
 
@@ -316,7 +319,10 @@ inline void Kinect::updateDepth()
 		// cout << depth << endl;
 		// Draw a grayscale image of the depth:
 		// B,G,R are all set to depth%256, alpha set to 1.
-		BYTE intensity = static_cast<BYTE>((depth >= nMinDepth) && (depth <= nMaxDepth) ? (depth % 256) : 0);  // nMinDepth와 nMaxDepth일 경우 depth % 256
+    
+		// BYTE intensity = static_cast<BYTE>((depth >= nMinDepth) && (depth <= nMaxDepth) ? (depth % 256) : 0);  // nMinDepth와 nMaxDepth일 경우 depth % 256
+		BYTE intensity = static_cast<BYTE>((depth * (-255.0f / 8000.0f) + 255.0f));
+
 		for (int i = 0; i < 3; ++i)
 			// *dest++ = (BYTE)depth % 256;
 			*dest++ = intensity;
@@ -412,6 +418,10 @@ void Kinect::updateSPoint()
 	const Joint jointA = joints[JointType::JointType_SpineShoulder];
 	const Joint jointB = joints[JointType::JointType_SpineMid];
 	spinePx = (float)distance3d(jointA.Position, jointB.Position);
+	ColorSpacePoint x, y;
+	coordinateMapper->MapCameraPointToColorSpace(jointA.Position, &x);
+	coordinateMapper->MapCameraPointToColorSpace(jointB.Position, &y);
+	spinePxColorSpaceVersion = (float)distance2d(x, y);
 
 	sPoints[SPOINT_HEAD_HAIR].setPoint(vertexes[28]);
 	sPoints[SPOINT_HEAD_FACE_EYE_LEFT].setPoint(vertexes[333]);
@@ -705,6 +715,9 @@ inline void Kinect::drawColor()
     // Create cv::Mat from Color Buffer
     colorMat = cv::Mat( colorHeight, colorWidth, CV_8UC4, &colorBuffer[0] );
 
+	extractHand(colorMat);
+	// extractDepthHand(colorMat);
+	// extractBodyIndexHand(colorMat);
 	// extractHand(colorMat);
 	extractDepthHand(colorMat);
 }
@@ -1121,13 +1134,34 @@ void Kinect::findLRHandPos()
 	rHandPos = joint.Position;
 }
 
+bool operator < (Vec4b& l, Vec4b& r)
+{
+	for (int i = 0; i < 4; ++i)
+		if (l.val[i] > r.val[i]) return false;
+
+	return true;
+}
+
+bool operator > (Vec4b& l, Vec4b& r)
+{
+	for (int i = 0; i < 4; ++i)
+		if (l.val[i] < r.val[i]) return false;
+
+	return true;
+}
+
 // extract hand
 void Kinect::extractHand(cv::Mat& screen)
 {
 	if (!isHandTracking()) return;
 
-	int width = HAND_WIDTH, height = HAND_HEIGHT;
-	int hWidth = width / 2, hHeight = height / 2;
+	//int width = HAND_WIDTH, height = HAND_HEIGHT;
+	float width = spinePxColorSpaceVersion *1.2f, height = spinePxColorSpaceVersion * 1.2f;
+	float hWidth = width / 2;
+	float hHeight = height / 2;
+	cv::Vec4b color;
+
+	//int hWidth = width / 2, hHeight = height / 2;
 
 	{   // left hand
 		// CameraSpacePoint lpoint = lHandPos;
@@ -1137,6 +1171,8 @@ void Kinect::extractHand(cv::Mat& screen)
 		// pMapper->MapCameraPointsToColorSpace(1, &lpoint, 1, &lColorPoint);
 		coordinateMapper->MapCameraPointToColorSpace(lpoint, &lColorPoint);
 
+		cv::Point p = cv::Point(lColorPoint.X, lColorPoint.Y);
+		color = screen.at<Vec4b>(p);
 
 		// cout << lpoint.X << " " << lpoint.Y << " " << endl;
 		// cout << lColorPoint.X << " " << lColorPoint.Y << endl;
@@ -1148,9 +1184,31 @@ void Kinect::extractHand(cv::Mat& screen)
 
 			// 관심영역 설정 (set ROI (X, Y, W, H)).
 
-			Rect rect(lColorPoint.X - hWidth, lColorPoint.Y - hHeight, width, height);
+			// 출력
+			Rect rect(lColorPoint.X - hWidth, lColorPoint.Y - hHeight * 0.8f, width, height);
 			// cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
 			cv::Mat lhand = screen(rect);
+
+			float percent = 0.6;
+			Vec4b minC, maxC;
+			for (int i = 0; i < 4; ++i)
+			{
+				minC.val[i] = color.val[i] * percent; // 아래로 1-percent
+				maxC.val[i] = color.val[i] * (1 + (1 - percent)); // 위로 1-percent
+			}
+
+			
+
+			// 색깔필터링
+			/*for (int i =0; i < lhand.size().height; ++i)
+				for (int j = 0; j < lhand.size().width; ++j)
+				{
+					if (minC > lhand.at<Vec4b>(i, j) || maxC < lhand.at<Vec4b>(i, j))
+					{
+						lhand.at<Vec4b>(i, j) = 0;
+					}
+				}*/
+
 			//cout << "donel-1" << endl;
 			cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
 			//cout << "donel-2" << endl;
