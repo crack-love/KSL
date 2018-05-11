@@ -63,7 +63,7 @@ void Kinect::initialize()
 
 	initializeCNN();
 
-	// initializeDepth();  // depthFrameReader 초기화
+	initializeDepth();  // depthFrameReader 초기화
 
 	initializeComponents();
 
@@ -216,6 +216,8 @@ void Kinect::update()
 
 	// send / save data if need
 	updateFrame();
+  
+	updateDepth();
 
 	// update depth
 	// updateDepth();
@@ -317,8 +319,10 @@ inline void Kinect::updateDepth()
 		// cout << depth << endl;
 		// Draw a grayscale image of the depth:
 		// B,G,R are all set to depth%256, alpha set to 1.
+    
 		// BYTE intensity = static_cast<BYTE>((depth >= nMinDepth) && (depth <= nMaxDepth) ? (depth % 256) : 0);  // nMinDepth와 nMaxDepth일 경우 depth % 256
 		BYTE intensity = static_cast<BYTE>((depth * (-255.0f / 8000.0f) + 255.0f));
+
 		for (int i = 0; i < 3; ++i)
 			// *dest++ = (BYTE)depth % 256;
 			*dest++ = intensity;
@@ -568,84 +572,6 @@ void Kinect::updateFrame()
 	}
 }
 
-// *************************[deprecated]
-// request predict result to python server
-/*void Kinect::queryToServer()
-{
-	// 라벨설정 필요없음
-	// frameCollection.setLabel(LABEL(label));
-
-	stringstream sstream;
-	sstream << frameCollection.toString() << endl;
-
-	//string filePath = "temp.txt";
-
-	// write File
-	/*
-	ofstream writeFile(filePath.data(), std::ios_base::out);
-	if (writeFile.is_open()) {
-		writeFile << sstream.str();
-		writeFile.close();
-		static int i = 0;
-
-		cout << "Record throwing done (" << ++i << "), receiving ";// << endl;
-	}
-	else cout << "Record throwing fail, ";// << endl;
-	*/
-	// stringstream sstream;
-	// sstream << frameCollection.toString() << endl;
-
-	/*WSADATA wsaData;
-	SOCKET hSocket;
-	SOCKADDR_IN servAddr;
-
-	// char*를 받은 후에 원하는 형태로 type cast를 한다. 
-	// char message[500];
-	// const char* message;
-	// string frameData = frameCollection.toString();
-	// cout << frameData.size() << endl;
-
-
-	//int strLen = strlen(message);
-	// cout << strLen << endl;
-
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		printf("WSAStartup() errer!\n");
-
-	hSocket = socket(PF_INET, SOCK_STREAM, 0);
-	if (hSocket == INVALID_SOCKET)
-		printf("hSocketet() error!\n");
-	/*
-	memset(&servAddr, 0, sizeof(servAddr));
-	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	servAddr.sin_port = htons(14358);
-	*/
-	//-------------------------------- CONECT
-
-	/*if (connect(hSocket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
-		printf("connect() error!\n");
-
-	//-------------------------------- SEND
-
-	// string s = sstream.str();
-	// message = s.c_str();
-	// send(hSocket, message, strLen, 0);
-	// send(hSocket, message.c_str(), message.size(), 0);
-
-	//string sending = ("[REQUEST]" + sstream.str() + "<EOF>");
-	//send(hSocket, sending.data(), sending.length(), 0);
-	//	recv(hSocket, message, 2, 0);
-
-	// cout << LABEL(message[0]) << endl;
-//	cout << message[0] - '0';
-//	cout << LABEL(message[0] - '0');
-//	lastPredict = LABEL(message[0] - '0');
-
-	/*closesocket(hSocket);
-	WSACleanup();
-}*/
-
 void Kinect::setWorkerName(string name)
 {
 	workerName = name;
@@ -792,7 +718,8 @@ inline void Kinect::drawColor()
 	extractHand(colorMat);
 	// extractDepthHand(colorMat);
 	// extractBodyIndexHand(colorMat);
-
+	// extractHand(colorMat);
+	extractDepthHand(colorMat);
 }
 
 // Draw Body
@@ -1243,6 +1170,7 @@ void Kinect::extractHand(cv::Mat& screen)
 		ColorSpacePoint lColorPoint;
 		// pMapper->MapCameraPointsToColorSpace(1, &lpoint, 1, &lColorPoint);
 		coordinateMapper->MapCameraPointToColorSpace(lpoint, &lColorPoint);
+
 		cv::Point p = cv::Point(lColorPoint.X, lColorPoint.Y);
 		color = screen.at<Vec4b>(p);
 

@@ -32,10 +32,10 @@
 #define PATH_DATA_FOLDER "../../data/"
 #define FILE_LABEL "LABEL.txt"
 
-#define HAND_WIDTH 224  // color frame?ì„œ ?ì„ ì¶”ì¶œ??????ROI ?¬ì´ì¦?
+#define HAND_WIDTH 224  // color frame?ï¿½ì„œ ?ï¿½ì„ ì¶”ì¶œ??????ROI ?ï¿½ì´ï¿½?
 #define HAND_HEIGHT 224
 
-#define DEPTH_HAND_WIDTH 256  // depth frame, body index frame¿¡¼­ ¼ÕÀ» ÃßÃâÇÒ ¶§ ¼Õ ROI »çÀÌÁî
+#define DEPTH_HAND_WIDTH 256  // depth frame, body index frameï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ROI ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 #define DEPTH_HAND_HEIGHT 256
 
 // ---------------------------------------------------------------------
@@ -45,10 +45,10 @@
 // if fail, system("pause"), throw runtim-err
 #define FAIL_STOP(check, msg) fail_than_stop(check, msg)
 
-// InputType?€ oerator >> ?¤ë²„ë¡œë”© ?„ìš”
+// InputTypeì€ oerator >> ì˜¤ë²„ë¡œë”© í•„ìš”
 #define INPUT(Type, name) input_something<Type>(std::cin, std::cout, name)
 
-// EnumType?€ to_string ?¤ë²„ë¡œë”© ?„ìš”
+// EnumTypeì€ to_string ì˜¤ë²„ë¡œë”© í•„ìš”
 #define SHOW_ENUM(Type, size, paading) show_enumeration<Type>(std::cout, size, paading)
 
 // Error Check Macro (HRESULT)
