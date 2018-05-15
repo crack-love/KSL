@@ -14,6 +14,8 @@
     <ClCompile Include="code\common\LabelMapper.cpp" />
     <ClCompile Include="code\Frame.cpp" />
     <ClCompile Include="code\FrameCollection.cpp" />
+    <ClCompile Include="code\ImageFrame.cpp" />
+    <ClCompile Include="code\ImageFrameCollection.cpp" />
     <ClCompile Include="code\kinectProgram.cpp" />
     <ClCompile Include="code\main.cpp" />
     <ClCompile Include="code\MainTransaction.cpp" />
@@ -25,6 +27,8 @@
     <ClInclude Include="code\common\LabelMapper.h" />
     <ClInclude Include="code\Frame.h" />
     <ClInclude Include="code\FrameCollection.h" />
+    <ClInclude Include="code\ImageFrame.h" />
+    <ClInclude Include="code\ImageFrameCollection.h" />
     <ClInclude Include="code\kinectProgram.h" />
     <ClInclude Include="code\MainTransaction.h" />
     <ClInclude Include="code\SPoint.h" />

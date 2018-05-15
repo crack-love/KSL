@@ -32,11 +32,15 @@
 #define PATH_DATA_FOLDER "../../data/"
 #define FILE_LABEL "LABEL.txt"
 
-#define HAND_WIDTH 224  // color frame?�서 ?�을 추출??????ROI ?�이�?
+#define HAND_WIDTH 224  
 #define HAND_HEIGHT 224
 
 #define DEPTH_HAND_WIDTH 256  // depth frame, body index frame���� ��� ������ �� �� ROI ������
 #define DEPTH_HAND_HEIGHT 256
+
+#define IMAEG_STANDARD_FRAME_SIZE 32
+#define IMAGE_WIDTH 128
+#define IMAGE_HEIGHT 128
 
 // ---------------------------------------------------------------------
 //	Macro
