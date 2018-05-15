@@ -32,10 +32,10 @@
 #define PATH_DATA_FOLDER "../../data/"
 #define FILE_LABEL "LABEL.txt"
 
-#define HAND_WIDTH 224  
+#define HAND_WIDTH 224  // color frame에서 손을 추출할 때 손 ROI 사이즈
 #define HAND_HEIGHT 224
 
-#define DEPTH_HAND_WIDTH 256  // depth frame, body index frame���� ��� ������ �� �� ROI ������
+#define DEPTH_HAND_WIDTH 256  // depth frame, body index frame에서 손을 추출할 때 손 ROI 사이즈
 #define DEPTH_HAND_HEIGHT 256
 
 #define IMAEG_STANDARD_FRAME_SIZE 32
