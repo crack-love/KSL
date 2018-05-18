@@ -9,6 +9,7 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <string>
+#include <direct.h>
 #include <wrl/client.h>
 #include <thread> // this_thread
 using namespace std;
@@ -19,6 +20,7 @@ using namespace cv;
 #include "common/LabelMapper.h"
 #include "SPoint.h"
 #include "FrameCollection.h"
+#include "ImageFrameCollection.h"
 
 enum KINECT_MODE
 {
@@ -114,6 +116,9 @@ private:
 	//bool isDataready = false;
 	int recorded = 0;
 	FrameCollection frameCollection;
+	ImageFrameCollection lhandCollection;
+	ImageFrameCollection rhandCollection;
+
 	CameraSpacePoint lHandPos;
 	CameraSpacePoint rHandPos;
 	TIMESPAN recordStartTime;

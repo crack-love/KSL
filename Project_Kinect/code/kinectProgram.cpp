@@ -552,14 +552,21 @@ void Kinect::updateFrame()
 
 					// record
 					frameCollection.setStandard(recordStartTime);
+					rhandCollection.setStandard(recordStartTime);
+					lhandCollection.setStandard(recordStartTime);
+
 					save();
 					++recorded;
+
+					
 					break;
 				}
 			}
 
 			frameStacking = false;
 			frameCollection.clear();
+			rhandCollection.clear();
+			lhandCollection.clear();
 		}
 	}
 
@@ -585,7 +592,8 @@ void Kinect::save()
 	sstream << frameCollection.toString() << endl;
 
 	string filePath = string(PATH_DATA_FOLDER);
-	string fileName = currentDateTime() + "_" + workerName + "_" + LABEL(label) + ".txt";
+	string curTime = currentDateTime();
+	string fileName = curTime + "_" + workerName + "_" + LABEL(label) + ".txt";
 
 	// write File
 	static int i = 0;
@@ -598,6 +606,33 @@ void Kinect::save()
 		cout << LABEL(label) << " Record saving ... done " << ++i << endl;
 	}
 	else cout << LABEL(label) << " Record saving ... fail " << ++i << endl;
+
+	// data/label
+	string parentDir = string(PATH_DATA_FOLDER) + LABEL(label);
+
+	// // data/label/left
+	string dirPath = parentDir + "/left";
+
+	// data/label/left/dataTime_workerName
+	string fileDirPath = dirPath + "/" + curTime + "_" + workerName;
+
+	mkdir(parentDir.c_str());
+	mkdir(dirPath.c_str());
+	mkdir(fileDirPath.c_str());
+
+	// cout << result << endl;
+	lhandCollection.save(fileDirPath);
+	
+	// data/label/right/dataTime+workerName
+	// dirPath = string(PATH_DATA_FOLDER) + LABEL(label) + "/right/" + currentDateTime() + "_" + workerName;
+	dirPath = parentDir + "/right";
+	fileDirPath = dirPath + "/" + curTime + "_" + workerName;
+
+	mkdir(dirPath.c_str());
+	mkdir(fileDirPath.c_str());
+
+	// mkdir(dirPath.c_str());
+	rhandCollection.save(fileDirPath);
 }
 
 // Draw Data
@@ -719,7 +754,7 @@ inline void Kinect::drawColor()
 	// extractDepthHand(colorMat);
 	// extractBodyIndexHand(colorMat);
 	// extractHand(colorMat);
-	extractDepthHand(colorMat);
+	// extractDepthHand(colorMat);
 }
 
 // Draw Body
@@ -1159,23 +1194,33 @@ void Kinect::extractHand(cv::Mat& screen)
 	float width = spinePxColorSpaceVersion *1.2f, height = spinePxColorSpaceVersion * 1.2f;
 	float hWidth = width / 2;
 	float hHeight = height / 2;
-	cv::Vec4b color;
+
+  // cv::Vec4b color;
 
 	//int hWidth = width / 2, hHeight = height / 2;
 
 	{   // left hand
 		// CameraSpacePoint lpoint = lHandPos;
-		CameraSpacePoint lpoint = sPoints[SPOINT_BODY_WRIST_LEFT].getPoint();
-		
+		// CameraSpacePoint lpoint = sPoints[SPOINT_BODY_WRIST_LEFT].getPoint();
+		CameraSpacePoint lpoint = lHandPos;
 		ColorSpacePoint lColorPoint;
 		// pMapper->MapCameraPointsToColorSpace(1, &lpoint, 1, &lColorPoint);
 		coordinateMapper->MapCameraPointToColorSpace(lpoint, &lColorPoint);
 
 		cv::Point p = cv::Point(lColorPoint.X, lColorPoint.Y);
-		color = screen.at<Vec4b>(p);
+		// color = screen.at<Vec4b>(p);
 
 		// cout << lpoint.X << " " << lpoint.Y << " " << endl;
 		// cout << lColorPoint.X << " " << lColorPoint.Y << endl;
+
+		/*
+		cout << "--left--" << endl;
+		cout << lColorPoint.X << " " << lColorPoint.Y << endl;
+		cout << hWidth << " " << hHeight << endl;
+		cout << width << " " << height << endl;
+		cout << colorWidth << " " << colorHeight << endl;
+		cout << endl;
+		*/
 
 		if (!(lColorPoint.X - hWidth < 0 || lColorPoint.X + hWidth >= colorWidth || lColorPoint.Y - hHeight < 0 || lColorPoint.Y + hHeight >= colorHeight))
 		{
@@ -1185,10 +1230,16 @@ void Kinect::extractHand(cv::Mat& screen)
 			// 관심영역 설정 (set ROI (X, Y, W, H)).
 
 			// 출력
-			Rect rect(lColorPoint.X - hWidth, lColorPoint.Y - hHeight * 0.8f, width, height);
+			// Rect rect(lColorPoint.X - hWidth, lColorPoint.Y - hHeight * 0.8f, width, height);]
+			Rect rect(lColorPoint.X - hWidth, lColorPoint.Y - hHeight, width, height);
 			// cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
 			cv::Mat lhand = screen(rect);
+			cv::Mat resizedLHand;
 
+			cv::resize(lhand, resizedLHand, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+
+			
+			/*
 			float percent = 0.6;
 			Vec4b minC, maxC;
 			for (int i = 0; i < 4; ++i)
@@ -1196,8 +1247,7 @@ void Kinect::extractHand(cv::Mat& screen)
 				minC.val[i] = color.val[i] * percent; // 아래로 1-percent
 				maxC.val[i] = color.val[i] * (1 + (1 - percent)); // 위로 1-percent
 			}
-
-			
+			*/
 
 			// 색깔필터링
 			/*for (int i =0; i < lhand.size().height; ++i)
@@ -1210,22 +1260,28 @@ void Kinect::extractHand(cv::Mat& screen)
 				}*/
 
 			//cout << "donel-1" << endl;
-			cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
+			// cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
+			cv::Mat lhandROI = screen(cv::Rect(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT));
+
 			//cout << "donel-2" << endl;
-			cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			//cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
+			cv::addWeighted(lhandROI, 0.0, resizedLHand, 1.0, 0, lhandROI);
 			//cout << "donel-3" << endl;
 			// lhandList.push_back(lhand);
 			if (frameStacking)
 			{
-
+				ImageFrame lhandFrame;
+				// lhandFrame.memorize(lhand, lastFrameRelativeTime);
+				lhandFrame.memorize(resizedLHand, lastFrameRelativeTime);
+				lhandCollection.stackFrame(lhandFrame);
 			}
 		}
 	}
 
 	{   // right hand
 		// CameraSpacePoint rpoint = rHandPos;
-		CameraSpacePoint rpoint = sPoints[SPOINT_BODY_WRIST_RIGHT].getPoint();
-
+		// CameraSpacePoint rpoint = sPoints[SPOINT_BODY_WRIST_RIGHT].getPoint();
+		CameraSpacePoint rpoint = rHandPos;
 		ColorSpacePoint rColorPoint;
 		// pMapper->MapCameraPointsToColorSpace(1, &rpoint, 1, &rColorPoint);
 		coordinateMapper->MapCameraPointToColorSpace(rpoint, &rColorPoint);
@@ -1233,6 +1289,15 @@ void Kinect::extractHand(cv::Mat& screen)
 		// cout << lpoint.X << " " << lpoint.Y << " " << endl;
 		// cout << rColorPoint.X << " " << rColorPoint.Y << endl;
 		// cout << rpoint.X << " " << rpoint.Y << " " << endl;
+
+		/*
+		cout << "--right--" << endl;
+		cout << rColorPoint.X << " " << rColorPoint.Y << endl;
+		cout << hWidth << " " << hHeight << endl;
+		cout << width << " " << height << endl;
+		cout << colorWidth << " " << colorHeight << endl;
+		cout << endl;
+		*/
 
 		if (!(rColorPoint.X - hWidth < 0 || rColorPoint.X + hWidth >= colorWidth || rColorPoint.Y - hHeight < 0 || rColorPoint.Y + hHeight >= colorHeight))
 		{
@@ -1242,17 +1307,24 @@ void Kinect::extractHand(cv::Mat& screen)
 			Rect rect(rColorPoint.X - hWidth, rColorPoint.Y - hHeight, width, height);
 			// cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight));
 			cv::Mat rhand = screen(rect);
-			
-			// cout << "done1" << endl;
-			cv::Mat rhandROI = screen(cv::Rect(colorWidth - width, 0, width, height));
+			cv::Mat resizedRHand;
+
+			cv::resize(rhand, resizedRHand, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+
+			// cout << "뀨" << endl;
+			// cv::Mat rhandROI = screen(cv::Rect(0, height, width, height));
+			cv::Mat rhandROI = screen(cv::Rect(colorWidth - IMAGE_WIDTH, 0, IMAGE_WIDTH, IMAGE_HEIGHT));
 			// cout << "done2" << endl;
-			cv::addWeighted(rhandROI, 0.0, rhand, 1.0, 0, rhandROI);
+			// cv::addWeighted(rhandROI, 0.0, rhand, 1.0, 0, rhandROI);
+			cv::addWeighted(rhandROI, 0.0, resizedRHand, 1.0, 0, rhandROI);
 			// cout << "done3" << endl;
 			// rhandList.push_back(rhand);
 
 			if (frameStacking)
 			{
-
+				ImageFrame rhandFrame;
+				rhandFrame.memorize(resizedRHand, lastFrameRelativeTime);
+				rhandCollection.stackFrame(rhandFrame);
 			}
 		}
 		//
