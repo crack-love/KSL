@@ -24,5 +24,5 @@ TIMESPAN ImageFrame::getTime()
 
 void ImageFrame::LerpMe(float p, const ImageFrame & right)
 {
-	cv::addWeighted(image, 1.0 - p, right.image, p, 0.0, image);
+	//cv::addWeighted(image, 1.0 - p, right.image, p, 0.0, image);
 }

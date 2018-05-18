@@ -74,6 +74,11 @@ using namespace std;
 		return sqrt(pow(a.X - b.X, 2.0) + pow(a.Y - b.Y, 2.0));
 	}
 
+	inline double distance2d(DepthSpacePoint a, DepthSpacePoint b)
+	{
+		return sqrt(pow(a.X - b.X, 2.0) + pow(a.Y - b.Y, 2.0));
+	}
+
 
 	inline float Lerp(float p, float x, float y)
 	{
