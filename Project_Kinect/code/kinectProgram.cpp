@@ -1,7 +1,10 @@
 ﻿
 #include "kinectProgram.h"
 
-// Constructor
+//----------------------------------------------------------------------------------
+/// Constructors
+//----------------------------------------------------------------------------------
+
 Kinect::Kinect()
 {
 	initialize();
@@ -14,14 +17,21 @@ Kinect::Kinect(KINECT_MODE m)
     // Initialize
     initialize();
 }
-// Destructor
+
+//----------------------------------------------------------------------------------
+/// Destructors
+//----------------------------------------------------------------------------------
+
 Kinect::~Kinect()
 {
     // Finalize
     finalize();
 }
 
-// Processing
+//----------------------------------------------------------------------------------
+/// Processing
+//----------------------------------------------------------------------------------
+
 void Kinect::run_one_cycle()
 {
     // Update Data
@@ -45,7 +55,15 @@ void Kinect::setMode(KINECT_MODE m)
 	mode = m;
 }
 
-// Initialize
+void Kinect::setWorkerName(string name)
+{
+	workerName = name;
+}
+
+//----------------------------------------------------------------------------------
+/// Initialize & Finalize
+//----------------------------------------------------------------------------------
+
 void Kinect::initialize()
 {
     cv::setUseOptimized( true );
@@ -60,8 +78,6 @@ void Kinect::initialize()
     initializeColor();
 
 	initializeBody();
-
-	initializeCNN();
 
 	initializeDepth();  // depthFrameReader 초기화
 
@@ -99,7 +115,6 @@ void Kinect::initializeSensor()
 	// Retrieve Coordinate Mapper
 	ERROR_CHECK(kinect->get_CoordinateMapper(&coordinateMapper));
 }
-
 
 // Initialize HDFace
 inline void Kinect::initializeHDFace()
@@ -176,13 +191,6 @@ inline void Kinect::initializeDepth()
 
 }
 
-void Kinect::initializeCNN()
-{
-	// reading cnn model
-	//bool ok = cnn.read("../models/test.model");
-	//cout << "Reading cnn model ..." << ok << endl;
-}
-
 // Finalize
 void Kinect::finalize()
 {
@@ -200,11 +208,17 @@ void Kinect::finalize()
     }
 }
 
+//----------------------------------------------------------------------------------
+/// Update
+//----------------------------------------------------------------------------------
+
 // Update Data
 void Kinect::update()
 {
     // Update Color
     updateColor();
+
+	updateDepth();
 
 	// Update Body
 	updateBody();
@@ -214,19 +228,13 @@ void Kinect::update()
 
 	updateSPoint();
 
-	// send / save data if need
-	updateFrame();
-  
-	updateDepth();
+	// extract hand roi
+	updateROI();
 
-	// update depth
-	// updateDepth();
+	// send/save data if need
+	updateFrame();
 
 	updateStatus();
-}
-
-void Kinect::updatePredict()
-{
 }
 
 // Update Color
@@ -246,104 +254,94 @@ inline void Kinect::updateColor()
     ERROR_CHECK( colorFrame->CopyConvertedFrameDataToArray( static_cast<UINT>( colorBuffer.size() ), &colorBuffer[0], ColorImageFormat::ColorImageFormat_Bgra ) );
 }
 
+// call extract hand
+void Kinect::updateROI()
+{
+	extractHand();
+}
+
+// extract hand
+void Kinect::extractHand()
+{
+	if (!atLeastOneTracked) return;
+	if (colorMat.rows == 0) return;
+	if (depthMat.rows == 0) return;
+
+	// 이곳 수정하여 color <-> depth 전환
+
+	Mat srcMat = colorMat;
+	float spinePx = spinePxColorSpaceVersion;
+	ColorSpacePoint handPos;
+	
+	//Mat srcMat = depthMat;
+	//float spinePx = spinePxDepthSpaceVersion;
+	//DepthSpacePoint handPos;
+
+	float width = spinePx * 1.2f;
+	float height = spinePx * 1.2f;
+	float hWidth = width / 2;
+	float hHeight = height / 2;
+
+	for (int i = 0; i < 2; ++i)
+	{
+		CameraSpacePoint camHandPos = (i == 0 ? lHandPos : rHandPos);
+
+		// 이곳 수정하여 color <-> depth 전환
+
+		coordinateMapper->MapCameraPointToColorSpace(camHandPos, &handPos);
+		//coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+
+		/* 범위 초과할 경우 ::: 문제 없을 것 같으므로 일단 해제
+		if (!(handPos.X - hWidth < 0 || handPos.X + hWidth >= colorWidth || handPos.Y - hHeight < 0 || handPos.Y + hHeight >= colorHeight))
+		{
+		continue;
+		}*/
+
+		// 관심영역 설정
+		Rect rect(handPos.X - hWidth, handPos.Y - hHeight, width, height);
+
+		cv::Mat extractedMat = srcMat(rect);
+		cv::Mat resizedMat;
+		cv::Mat convertedMat;
+		
+		cv::resize(extractedMat, resizedMat, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+
+		(i == 0 ? lHandImage : rHandImage) = resizedMat;
+	}
+}
+
 // updete depth
 inline void Kinect::updateDepth()
 {
-	/*
-	unsigned int bufferSize = depthWidth * depthHeight * sizeof(USHORT);
-	cv::Mat bufferMat(depthHeight, depthWidth, CV_16UC1);  // depth frame의 하나의 픽셀은 16bit
-	depthMat = cv::Mat(depthHeight, depthWidth, CV_8UC1);
-
-	ComPtr<IDepthFrame> depthFrame;
-	const HRESULT ret = depthFrameReader->AcquireLatestFrame(&depthFrame);
-	if (FAILED(ret)) {
-		return;
-	}
-
-	// 여기에서는 Depth 데이터를 시각화하기위한 변환 처리에 편리한 cv :: Mat 형으로 받고있다.
-	const HRESULT result = depthFrame->AccessUnderlyingBuffer(&bufferSize, reinterpret_cast<UINT16**>(&bufferMat.data)); 
-
-	if (FAILED(result)) {
-		return;
-	}
-	
-
-	// Depth 데이터를 이미지로 표시하기 위해 16bit에서 8bit로 변환한다.
-	// 센서에서 거리가 가까울수록 백색 (255), 멀수록 검게 (0) 표시하도록 변환 있다.
-	bufferMat.convertTo(depthMap, CV_8U, -255.0f / 8000.0f, 255.0f); // ex. depth = 8000, (8000 * -255 / 8000) = -255, -255 + beta = 0
-	*/
-
-	USHORT nMinDepth = 0;
-	USHORT nMaxDepth = 0;
-	ComPtr<IFrameDescription> description;
 	ComPtr<IDepthFrame> depthFrame;
 
 	const HRESULT ret = depthFrameReader->AcquireLatestFrame(&depthFrame);
 	if (FAILED(ret)) {
 		return;
 	}
-
-	depthFrame->get_DepthMinReliableDistance(&nMinDepth);
-
-	nMaxDepth = USHRT_MAX;
-	depthFrame->get_DepthMaxReliableDistance(&nMaxDepth);
 
 	unsigned int sz;
 	unsigned short* buf;
 	depthFrame->AccessUnderlyingBuffer(&sz, &buf);
-	// depthBuffer.resize(depthWidth * depthHeight * 4);
-
-	// vector<BYTE>::iterator iter = depthBuffer.begin();
 
 	const unsigned short* curr = (const unsigned short*)buf;
 	const unsigned short* dataEnd = curr + (depthWidth * depthHeight);
 	BYTE* dest = depthBuffer;
-	/*
-	int idx = 0;
-	while (curr < dataEnd) {
-		// Get depth in millimeters
-		unsigned short depth = (*curr++);
-
-		// Draw a grayscale image of the depth:
-		// B,G,R are all set to depth%256, alpha set to 1.
-		for (int i = 0; i < 3; ++i)
-			depthBuffer[idx++] = (BYTE)depth % 256;
-		depthBuffer[idx++] = 0xff;
-	}
-	*/
 
 	int idx = 0;
 	while (curr < dataEnd) {
 		// Get depth in millimeters
 		unsigned short depth = (*curr++);
-		// cout << depth << endl;
-		// Draw a grayscale image of the depth:
-		// B,G,R are all set to depth%256, alpha set to 1.
     
-		// BYTE intensity = static_cast<BYTE>((depth >= nMinDepth) && (depth <= nMaxDepth) ? (depth % 256) : 0);  // nMinDepth와 nMaxDepth일 경우 depth % 256
 		BYTE intensity = static_cast<BYTE>((depth * (-255.0f / 8000.0f) + 255.0f));
 
 		for (int i = 0; i < 3; ++i)
-			// *dest++ = (BYTE)depth % 256;
 			*dest++ = intensity;
 		*dest++ = 0xff;
 	}
 
-	// bufferMat.convertTo(depthMap, CV_8U, 255.0f / 8000.0f, 0.0f);
-	// bufferMat.convertTo(depthMap, CV_8U, 1.0f / 8000.0f, 0.0f);
-	// cv::imshow("Depth", depthMap);
-
-	//ComPtr<IFrameDescription> depthDescription;
-	//const HRESULT result = depthFrame->get_FrameDescription(&depthDescription);
-	//if (FAILED(result)) {
-	//	return;
-	//}
-
-
-	//depthDescription->get_Width(&depthWidth);
-	//depthDescription->get_Height(&depthHeight);
-	//depthFrame->get_DepthMinReliableDistance(&depthMin);
-	//depthFrame->get_DepthMaxReliableDistance(&depthMax);
+	// draw image...
+	depthMat = cv::Mat(depthHeight, depthWidth, CV_8UC4, &depthBuffer[0]);
 }
 
 // Update Body
@@ -386,8 +384,6 @@ inline void Kinect::updateBody()
 	}
 }
 
-
-
 // Update HDFace
 inline void Kinect::updateHDFace()
 {
@@ -418,10 +414,16 @@ void Kinect::updateSPoint()
 	const Joint jointA = joints[JointType::JointType_SpineShoulder];
 	const Joint jointB = joints[JointType::JointType_SpineMid];
 	spinePx = (float)distance3d(jointA.Position, jointB.Position);
+	
 	ColorSpacePoint x, y;
 	coordinateMapper->MapCameraPointToColorSpace(jointA.Position, &x);
 	coordinateMapper->MapCameraPointToColorSpace(jointB.Position, &y);
 	spinePxColorSpaceVersion = (float)distance2d(x, y);
+
+	DepthSpacePoint xd, yd;
+	coordinateMapper->MapCameraPointToDepthSpace(jointA.Position, &xd);
+	coordinateMapper->MapCameraPointToDepthSpace(jointB.Position, &yd);
+	spinePxDepthSpaceVersion = (float)distance2d(xd, yd);
 
 	sPoints[SPOINT_HEAD_HAIR].setPoint(vertexes[28]);
 	sPoints[SPOINT_HEAD_FACE_EYE_LEFT].setPoint(vertexes[333]);
@@ -516,6 +518,7 @@ void Kinect::updateStatus()
 	}
 }
 
+// update frame and save if need
 void Kinect::updateFrame()
 {
 	if (!frameStacking)
@@ -572,16 +575,17 @@ void Kinect::updateFrame()
 
 	if (frameStacking)
 	{
+		ImageFrame l, r;
 		Frame f;
+
 		f.memorize(lHandPos, rHandPos, sPoints, leftHandActivated, rightHandActivated, lastFrameRelativeTime);
+		l.memorize(lHandImage, lastFrameRelativeTime);
+		r.memorize(rHandImage, lastFrameRelativeTime);
 
 		frameCollection.stackFrame(f);
+		lhandCollection.stackFrame(l);
+		rhandCollection.stackFrame(r);
 	}
-}
-
-void Kinect::setWorkerName(string name)
-{
-	workerName = name;
 }
 
 void Kinect::save()
@@ -635,22 +639,63 @@ void Kinect::save()
 	rhandCollection.save(fileDirPath);
 }
 
+//----------------------------------------------------------------------------------
+/// Draw
+//----------------------------------------------------------------------------------
+
 // Draw Data
 void Kinect::draw()
 {
     // Draw Color
     drawColor();
 
+	drawExtractedROI();
+	
 	// Draw Body
 	//drawBody();
 
-	drawHDFace(); // update vertexs... not draw verxexs
+	drawHDFace(); // just update vertexs... not draw verxexs
 
 	drawSPoint();
 
 	drawStatusText();
 }
 
+void Kinect::drawExtractedROI()
+{
+	if (!atLeastOneTracked) return;
+
+	for (int i = 0; i < 2; ++i)
+	{
+		Mat srcImage = (i == 0 ? lHandImage : rHandImage);
+		if (srcImage.rows == 0) return;
+
+		//Mat dstImage = colorMat;
+
+		//for (int i = 0; i < IMAGE_HEIGHT; ++i)
+			//for (int j = 0; j < IMAGE_WIDTH; ++j)
+				//dstImage.at<>(i, j)
+
+		cv::Mat dstRect = colorMat(cv::Rect(colorWidth - IMAGE_WIDTH, IMAGE_HEIGHT * i, IMAGE_WIDTH, IMAGE_HEIGHT));
+		
+		// Mat Array 접근 수정
+		/*
+		for (int r = 0; r < IMAGE_HEIGHT; r++)
+		{
+			uchar* value = srcImage.ptr<uchar>(r);
+			uchar* result = dstRect.ptr<uchar>(r);
+			for (int c = 0; c < IMAGE_WIDTH; c++)
+			{
+				*result++ = *value;
+				*result++ = *value;
+				*result++ = *value++;
+				*result++ = 0;
+			}
+		}*/
+
+		cv::addWeighted(dstRect, 0.0, srcImage, 1.0, 0, dstRect);
+	}
+}
 
 // Draw HDFace
 inline void Kinect::drawHDFace()
@@ -668,60 +713,6 @@ inline void Kinect::drawHDFace()
 	// Retrieve Vertexes
 	ERROR_CHECK(faceModel->CalculateVerticesForAlignment(faceAlignment.Get(), vertexCount, &vertexes[0]));
 	//drawVertexes(colorMat, vertexes, 1, colors[trackingCount]);
-	
-
-	/*
-	// Retrieve Head Pivot Point
-	CameraSpacePoint point;
-	ERROR_CHECK( faceAlignment->get_HeadPivotPoint( &point ) );
-	std::cout << point.X << ", " << point.Y << ", " << point.Z << std::endl;
-	*/
-
-	/*
-	// Retrieve Animation Units ... Motion of Face Parts that Represent Expression (17 AUs)
-	std::array<float, FaceShapeAnimations::FaceShapeAnimations_Count> animationUnits;
-	ERROR_CHECK( faceAlignment->GetAnimationUnits( FaceShapeAnimations::FaceShapeAnimations_Count, &animationUnits[0] ) );
-	for( const float animationUnit : animationUnits ){
-	std::cout << std::to_string( animationUnit ) << std::endl;
-	}
-	*/
-
-	/*
-	// Retrieve Shape Units ... Deformations from Default Face Model (94 SUs)
-	ERROR_CHECK( faceModel->GetFaceShapeDeformations( FaceShapeDeformations::FaceShapeDeformations_Count, &shapeUnits[0] ) );
-	for( const float shapeUnit : shapeUnits ){
-	std::cout << std::to_string( shapeUnit ) << std::endl;
-	}
-	*/
-
-	/*
-	// Retrieve Face Model Scale
-	float scale;
-	ERROR_CHECK( faceModel->get_Scale( &scale ) );
-	std::cout << std::to_string( scale ) << std::endl;
-	*/
-
-	/*
-	// Retrieve Hair Color (XBGR)
-	// Set FaceModelBuilderAttributes::FaceModelBuilderAttributes_HairColor to IHighDefinitionFaceFrameSource::OpenModelBuilder()
-	UINT32 hairColor;
-	ERROR_CHECK( faceModel->get_HairColor( &hairColor ) );
-	std::cout << ( ( hairColor & 0xff000000 ) >> 24 ) << std::endl; // X
-	std::cout << ( ( hairColor & 0x00ff0000 ) >> 16 ) << std::endl; // B
-	std::cout << ( ( hairColor & 0x0000ff00 ) >>  8 ) << std::endl; // G
-	std::cout << ( ( hairColor & 0x000000ff ) >>  0 ) << std::endl; // R
-	*/
-
-	/*
-	// Retrieve Skin Color (XBGR)
-	// Set FaceModelBuilderAttributes::FaceModelBuilderAttributes_SkinColor to IHighDefinitionFaceFrameSource::OpenModelBuilder()
-	UINT32 skinColor;
-	ERROR_CHECK( faceModel->get_SkinColor( &skinColor ) );
-	std::cout << ( ( skinColor & 0xff000000 ) >> 24 ) << std::endl; // X
-	std::cout << ( ( skinColor & 0x00ff0000 ) >> 16 ) << std::endl; // B
-	std::cout << ( ( skinColor & 0x0000ff00 ) >>  8 ) << std::endl; // G
-	std::cout << ( ( skinColor & 0x000000ff ) >>  0 ) << std::endl; // R
-	*/
 }
 
 // Draw Vertexes (HDFACE)
@@ -743,18 +734,11 @@ inline void Kinect::drawVertexes(cv::Mat& image, const std::vector<CameraSpacePo
 	});
 }
 
-
 // Draw Color
 inline void Kinect::drawColor()
 {
     // Create cv::Mat from Color Buffer
     colorMat = cv::Mat( colorHeight, colorWidth, CV_8UC4, &colorBuffer[0] );
-
-	extractHand(colorMat);
-	// extractDepthHand(colorMat);
-	// extractBodyIndexHand(colorMat);
-	// extractHand(colorMat);
-	// extractDepthHand(colorMat);
 }
 
 // Draw Body
@@ -824,7 +808,6 @@ void Kinect::drawSPoint()
 
 
 }
-
 
 // Draw Ellipse
 inline void Kinect::drawEllipse(cv::Mat& image, const CameraSpacePoint& pos, const int radius, const cv::Vec3b& color, const int thickness)
@@ -1052,10 +1035,7 @@ inline void Kinect::showColor()
 	}*/
 }
 
-
-// Draw Face Model Builder Status
-
-// Convert Collection Status to String
+// Convert Collection Status to String (HDFace)
 inline std::string Kinect::status2string(const FaceModelBuilderCollectionStatus collection)
 {
 	std::string status;
@@ -1075,7 +1055,7 @@ inline std::string Kinect::status2string(const FaceModelBuilderCollectionStatus 
 	return status;
 }
 
-// Convert Capture Status to String
+// Convert Capture Status to String (HDFace)
 inline std::string Kinect::status2string(const FaceModelBuilderCaptureStatus capture)
 {
 	std::string status;
@@ -1097,12 +1077,19 @@ inline std::string Kinect::status2string(const FaceModelBuilderCaptureStatus cap
 	return status;
 }
 
+//----------------------------------------------------------------------------------
+/// ETC
+//----------------------------------------------------------------------------------
+
 // Find Closest Body
 void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 {
-#undef max
 	float closestDistance = std::numeric_limits<float>::max();
-	bool findClosest = false;
+
+#undef max // 윈도우 디파인된 max 이 성가신놈 재 디파인..
+#define max(a,b)	(((a) > (b)) ? (a) : (b)) 
+
+	atLeastOneTracked = false;
 	
 	for (int count = 0; count < BODY_COUNT; count++)
 	{
@@ -1112,7 +1099,6 @@ void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 		if (!tracked) {
 			continue;
 		}
-#define max(a,b)	(((a) > (b)) ? (a) : (b)) // 윈도우 디파인된 max 이 성가신놈 재 디파인..
 
 		// Retrieve Joint (Head)
 		std::array<Joint, JointType::JointType_Count> joints;
@@ -1128,7 +1114,8 @@ void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 		if (closestDistance <= distance) {
 			continue;
 		}
-		closestDistance = distance; findClosest = true;
+		closestDistance = distance;
+		atLeastOneTracked = true;
 
 		// Retrieve Tracking ID
 		UINT64 trackingId;
@@ -1149,7 +1136,7 @@ void Kinect::findClosestBody(const std::array<IBody*, BODY_COUNT>& bodies)
 
 	}
 	
-	if (findClosest) this->distance = closestDistance;
+	if (atLeastOneTracked) this->distance = closestDistance;
 }
 
 void Kinect::findLRHandPos()
@@ -1185,245 +1172,13 @@ bool operator > (Vec4b& l, Vec4b& r)
 	return true;
 }
 
-// extract hand
-void Kinect::extractHand(cv::Mat& screen)
-{
-	if (!isHandTracking()) return;
-
-	//int width = HAND_WIDTH, height = HAND_HEIGHT;
-	float width = spinePxColorSpaceVersion *1.2f, height = spinePxColorSpaceVersion * 1.2f;
-	float hWidth = width / 2;
-	float hHeight = height / 2;
-
-  // cv::Vec4b color;
-
-	//int hWidth = width / 2, hHeight = height / 2;
-
-	{   // left hand
-		// CameraSpacePoint lpoint = lHandPos;
-		// CameraSpacePoint lpoint = sPoints[SPOINT_BODY_WRIST_LEFT].getPoint();
-		CameraSpacePoint lpoint = lHandPos;
-		ColorSpacePoint lColorPoint;
-		// pMapper->MapCameraPointsToColorSpace(1, &lpoint, 1, &lColorPoint);
-		coordinateMapper->MapCameraPointToColorSpace(lpoint, &lColorPoint);
-
-		cv::Point p = cv::Point(lColorPoint.X, lColorPoint.Y);
-		// color = screen.at<Vec4b>(p);
-
-		// cout << lpoint.X << " " << lpoint.Y << " " << endl;
-		// cout << lColorPoint.X << " " << lColorPoint.Y << endl;
-
-		/*
-		cout << "--left--" << endl;
-		cout << lColorPoint.X << " " << lColorPoint.Y << endl;
-		cout << hWidth << " " << hHeight << endl;
-		cout << width << " " << height << endl;
-		cout << colorWidth << " " << colorHeight << endl;
-		cout << endl;
-		*/
-
-		if (!(lColorPoint.X - hWidth < 0 || lColorPoint.X + hWidth >= colorWidth || lColorPoint.Y - hHeight < 0 || lColorPoint.Y + hHeight >= colorHeight))
-		{
-			// cout << lColorPoint.X - hWidth << " " << lColorPoint.X + hWidth << " " << colorWidth << endl;
-
-
-			// 관심영역 설정 (set ROI (X, Y, W, H)).
-
-			// 출력
-			// Rect rect(lColorPoint.X - hWidth, lColorPoint.Y - hHeight * 0.8f, width, height);]
-			Rect rect(lColorPoint.X - hWidth, lColorPoint.Y - hHeight, width, height);
-			// cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
-			cv::Mat lhand = screen(rect);
-			cv::Mat resizedLHand;
-
-			cv::resize(lhand, resizedLHand, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
-
-			
-			/*
-			float percent = 0.6;
-			Vec4b minC, maxC;
-			for (int i = 0; i < 4; ++i)
-			{
-				minC.val[i] = color.val[i] * percent; // 아래로 1-percent
-				maxC.val[i] = color.val[i] * (1 + (1 - percent)); // 위로 1-percent
-			}
-			*/
-
-			// 색깔필터링
-			/*for (int i =0; i < lhand.size().height; ++i)
-				for (int j = 0; j < lhand.size().width; ++j)
-				{
-					if (minC > lhand.at<Vec4b>(i, j) || maxC < lhand.at<Vec4b>(i, j))
-					{
-						lhand.at<Vec4b>(i, j) = 0;
-					}
-				}*/
-
-			//cout << "donel-1" << endl;
-			// cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
-			cv::Mat lhandROI = screen(cv::Rect(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT));
-
-			//cout << "donel-2" << endl;
-			//cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
-			cv::addWeighted(lhandROI, 0.0, resizedLHand, 1.0, 0, lhandROI);
-			//cout << "donel-3" << endl;
-			// lhandList.push_back(lhand);
-			if (frameStacking)
-			{
-				ImageFrame lhandFrame;
-				// lhandFrame.memorize(lhand, lastFrameRelativeTime);
-				lhandFrame.memorize(resizedLHand, lastFrameRelativeTime);
-				lhandCollection.stackFrame(lhandFrame);
-			}
-		}
-	}
-
-	{   // right hand
-		// CameraSpacePoint rpoint = rHandPos;
-		// CameraSpacePoint rpoint = sPoints[SPOINT_BODY_WRIST_RIGHT].getPoint();
-		CameraSpacePoint rpoint = rHandPos;
-		ColorSpacePoint rColorPoint;
-		// pMapper->MapCameraPointsToColorSpace(1, &rpoint, 1, &rColorPoint);
-		coordinateMapper->MapCameraPointToColorSpace(rpoint, &rColorPoint);
-
-		// cout << lpoint.X << " " << lpoint.Y << " " << endl;
-		// cout << rColorPoint.X << " " << rColorPoint.Y << endl;
-		// cout << rpoint.X << " " << rpoint.Y << " " << endl;
-
-		/*
-		cout << "--right--" << endl;
-		cout << rColorPoint.X << " " << rColorPoint.Y << endl;
-		cout << hWidth << " " << hHeight << endl;
-		cout << width << " " << height << endl;
-		cout << colorWidth << " " << colorHeight << endl;
-		cout << endl;
-		*/
-
-		if (!(rColorPoint.X - hWidth < 0 || rColorPoint.X + hWidth >= colorWidth || rColorPoint.Y - hHeight < 0 || rColorPoint.Y + hHeight >= colorHeight))
-		{
-			// cout << rColorPoint.X - hWidth << " " << rColorPoint.X + hWidth << " " << colorWidth << endl;
-
-			// cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight)); // 잘라내기
-			Rect rect(rColorPoint.X - hWidth, rColorPoint.Y - hHeight, width, height);
-			// cv::Mat rhand = screen(cv::Range(rColorPoint.X - hWidth, rColorPoint.X + hWidth), cv::Range(rColorPoint.Y - hHeight, rColorPoint.Y + hHeight));
-			cv::Mat rhand = screen(rect);
-			cv::Mat resizedRHand;
-
-			cv::resize(rhand, resizedRHand, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
-
-			// cout << "뀨" << endl;
-			// cv::Mat rhandROI = screen(cv::Rect(0, height, width, height));
-			cv::Mat rhandROI = screen(cv::Rect(colorWidth - IMAGE_WIDTH, 0, IMAGE_WIDTH, IMAGE_HEIGHT));
-			// cout << "done2" << endl;
-			// cv::addWeighted(rhandROI, 0.0, rhand, 1.0, 0, rhandROI);
-			cv::addWeighted(rhandROI, 0.0, resizedRHand, 1.0, 0, rhandROI);
-			// cout << "done3" << endl;
-			// rhandList.push_back(rhand);
-
-			if (frameStacking)
-			{
-				ImageFrame rhandFrame;
-				rhandFrame.memorize(resizedRHand, lastFrameRelativeTime);
-				rhandCollection.stackFrame(rhandFrame);
-			}
-		}
-		//
-	}
-}
-
-
-// extract hand
-void Kinect::extractDepthHand(cv::Mat& screen)
-{
-	if (!isHandTracking()) return;
-
-	depthMat = cv::Mat(depthHeight, depthWidth, CV_8UC4, &depthBuffer[0]);
-
-	int width = DEPTH_HAND_WIDTH, height = DEPTH_HAND_HEIGHT;
-	int hWidth = width / 2, hHeight = height / 2;
-
-	// cv::imshow("Depth", depthMat);
-	{   // left hand
-		// CameraSpacePoint lpoint = lHandPos;
-		CameraSpacePoint lpoint = sPoints[SPOINT_BODY_WRIST_LEFT].getPoint();
-
-		DepthSpacePoint depthPoint;
-		coordinateMapper->MapCameraPointsToDepthSpace(1, &lpoint, 1, &depthPoint);
-
-		if (!(depthPoint.X - hWidth < 0 || depthPoint.X + hWidth >= depthWidth || depthPoint.Y - hHeight < 0 || depthPoint.Y + hHeight >= depthHeight))
-		{
-			Rect rect((int)(depthPoint.X - hWidth), (int)(depthPoint.Y - hHeight), width, height);
-			
-			// cout << depthPoint.X << " " << depthPoint.Y << endl;
-
-			cv::Mat lhand = depthMat(rect);
-
-			// cout << int(lhand.at<BYTE>(hWidth, hHeight)) << endl;  // convertTo를 하면서 값이 일정하게 출력.
-
-			// cv::Mat colorHand = cv::Mat(height, width, CV_8UC4);
-
-			// lhand.convertTo(colorHand, CV_8UC4, 1.0f, 0.0f); // ex. depth = 8000, (8000 * -255 / 8000) = -255, -255 + beta = 0
-			// cv::cvtColor(lhand, colorHand, CV_GRAY2RGBA);
-
-			//cout << "donel-1" << endl;
-			cv::Mat lhandROI = screen(cv::Rect(0, 0, width, height));
-
-			//cout << "donel-2" << endl;
-			//cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
-			//cv::addWeighted(lhandROI, 0.0, colorHand, 1.0, 0, lhandROI);
-			cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
-			//cout << "donel-3" << endl;
-			// lhandList.push_back(lhand);
-			if (frameStacking)
-			{
-
-			}
-		}
-	}
-
-	{   // right hand
-		// CameraSpacePoint rpoint = rHandPos;
-		CameraSpacePoint rpoint = sPoints[SPOINT_BODY_WRIST_RIGHT].getPoint();
-
-		DepthSpacePoint depthPoint;
-		coordinateMapper->MapCameraPointsToDepthSpace(1, &rpoint, 1, &depthPoint);
-
-		if (!(depthPoint.X - hWidth < 0 || depthPoint.X + hWidth >= depthWidth || depthPoint.Y - hHeight < 0 || depthPoint.Y + hHeight >= depthHeight))
-		{
-			// cout << lColorPoint.X - hWidth << " " << lColorPoint.X + hWidth << " " << colorWidth << endl;
-
-			// 관심영역 설정 (set ROI (X, Y, W, H)).
-
-			Rect rect(depthPoint.X - hWidth, depthPoint.Y - hHeight, width, height);
-			// cv::Mat lhand = screen(cv::Range(lColorPoint.X - hWidth, lColorPoint.X + hWidth), cv::Range(lColorPoint.Y - hHeight, lColorPoint.Y + hHeight));
-			cv::Mat rhand = depthMat(rect);
-
-			//cv::Mat colorHand = cv::Mat(height, width, CV_8UC4);
-
-			//rhand.convertTo(colorHand, CV_8UC4, 1.0f, 0.0f); // ex. depth = 8000, (8000 * -255 / 8000) = -255, -255 + beta = 0
-			// cv::cvtColor(rhand, colorHand, CV_GRAY2RGBA);
-															 //cout << "donel-1" << endl;
-			cv::Mat rhandROI = screen(cv::Rect(colorWidth - width, 0, width, height));
-			//cout << "donel-2" << endl;
-			//cv::addWeighted(lhandROI, 0.0, lhand, 1.0, 0, lhandROI);
-			// cv::addWeighted(rhandROI, 0.0, colorHand, 1.0, 0, rhandROI);
-			cv::addWeighted(rhandROI, 0.0, rhand, 1.0, 0, rhandROI);
-			//cout << "donel-3" << endl;
-			// lhandList.push_back(lhand);
-			if (frameStacking)
-			{
-
-			}
-		}
-	}
-}
-
+// for extract hand
 bool Kinect::isHandTracking()
 {
 	std::array<Joint, JointType::JointType_Count> joints;
 	ERROR_CHECK(bodies[trackingCount]->GetJoints(static_cast<UINT>(joints.size()), &joints[0]));
 	Joint joint = joints[HAND_RECORD_TYPE_L];
-	// Joint joint = joints[SPOINT_BODY_WRIST_LEFT];
+
 	if (joint.TrackingState == TrackingState::TrackingState_NotTracked) {
 		return false;
 	}
