@@ -1194,7 +1194,8 @@ void Kinect::extractHand(cv::Mat& screen)
 	float width = spinePxColorSpaceVersion *1.2f, height = spinePxColorSpaceVersion * 1.2f;
 	float hWidth = width / 2;
 	float hHeight = height / 2;
-	// cv::Vec4b color;
+
+  // cv::Vec4b color;
 
 	//int hWidth = width / 2, hHeight = height / 2;
 

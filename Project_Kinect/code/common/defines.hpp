@@ -32,7 +32,7 @@
 #define PATH_DATA_FOLDER "../../data/"
 #define FILE_LABEL "LABEL.txt"
 
-#define HAND_WIDTH 224  // color frame에서 손을 추출할 때 손 ROI 사이즈
+#define HAND_WIDTH 224  // color frame?�서 ?�을 추출??????ROI ?�이�?
 #define HAND_HEIGHT 224
 
 #define DEPTH_HAND_WIDTH 256  // depth frame, body index frame에서 손을 추출할 때 손 ROI 사이즈
