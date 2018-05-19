@@ -215,6 +215,8 @@ private:
 
 	void save();
 
+	void isFolderNotExistCreate(string path);
+
 	// for extract hand
 	void extractHand();
 

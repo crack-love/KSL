@@ -11,9 +11,9 @@ void ImageFrame::memorize(cv::Mat image, TIMESPAN endtime)
 	this->lastFrameRelativeTime = endtime;
 }
 
-void ImageFrame::save(string filename)
+void ImageFrame::save(string filepath)
 {
-	cv::imwrite(filename, image);
+	cv::imwrite(filepath, image);
 }
 
 
