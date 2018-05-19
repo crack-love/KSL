@@ -33,7 +33,7 @@
 #define FILE_LABEL "LABEL.txt"
 
 // ROI defines
-#define IMAEG_STANDARD_FRAME_SIZE 32
+#define IMAEG_STANDARD_FRAME_SIZE 76
 #define IMAGE_WIDTH 128
 #define IMAGE_HEIGHT 128
 

@@ -588,21 +588,43 @@ void Kinect::updateFrame()
 	}
 }
 
+void Kinect::isFolderNotExistCreate(string path)
+{
+	DWORD attribs = ::GetFileAttributesA(path.c_str());
+	if (attribs == INVALID_FILE_ATTRIBUTES)
+	{
+		// wrong
+
+		_mkdir(path.c_str());
+	}
+	else if (attribs & FILE_ATTRIBUTE_DIRECTORY)
+	{
+		// directory exist
+	}
+	else
+	{
+		// not directory
+	}
+}
+
 void Kinect::save()
 {
 	frameCollection.setLabel(LABEL(label));
-
-	stringstream sstream;
-	sstream << frameCollection.toString() << endl;
-
-	string filePath = string(PATH_DATA_FOLDER);
-	string curTime = currentDateTime();
-	string fileName = curTime + "_" + workerName + "_" + LABEL(label) + ".txt";
-
-	// write File
 	static int i = 0;
 
-	ofstream writeFile((filePath + "/" + fileName).data(), std::ios_base::app);
+	// folder :: data/0_안녕하세요/20180519_kyg/
+	string folderPath = string(PATH_DATA_FOLDER);
+	folderPath += "/" + to_string(label) + "_" + LABEL(label);
+	isFolderNotExistCreate(folderPath);
+	folderPath += "/" + currentDateTime() + "_" + workerName;
+	isFolderNotExistCreate(folderPath);
+	folderPath += "/";
+
+	// Spoints.txt
+	string fileName = "Spoints.txt";
+	stringstream sstream;
+	sstream << frameCollection.toString() << endl;
+	ofstream writeFile((folderPath + fileName).data(), std::ios::out|ios::trunc);
 	if (writeFile.is_open()) {
 		writeFile << sstream.str();
 		writeFile.close();
@@ -611,32 +633,9 @@ void Kinect::save()
 	}
 	else cout << LABEL(label) << " Record saving ... fail " << ++i << endl;
 
-	// data/label
-	string parentDir = string(PATH_DATA_FOLDER) + LABEL(label);
-
-	// // data/label/left
-	string dirPath = parentDir + "/left";
-
-	// data/label/left/dataTime_workerName
-	string fileDirPath = dirPath + "/" + curTime + "_" + workerName;
-
-	mkdir(parentDir.c_str());
-	mkdir(dirPath.c_str());
-	mkdir(fileDirPath.c_str());
-
-	// cout << result << endl;
-	lhandCollection.save(fileDirPath);
-	
-	// data/label/right/dataTime+workerName
-	// dirPath = string(PATH_DATA_FOLDER) + LABEL(label) + "/right/" + currentDateTime() + "_" + workerName;
-	dirPath = parentDir + "/right";
-	fileDirPath = dirPath + "/" + curTime + "_" + workerName;
-
-	mkdir(dirPath.c_str());
-	mkdir(fileDirPath.c_str());
-
-	// mkdir(dirPath.c_str());
-	rhandCollection.save(fileDirPath);
+	// 76_L.bmp || 76_R.bmp
+	lhandCollection.save(folderPath, "L");
+	rhandCollection.save(folderPath, "R");
 }
 
 //----------------------------------------------------------------------------------
