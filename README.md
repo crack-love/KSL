@@ -22,9 +22,9 @@
 
 ## DNN Studies
 
-- [Keras LSTM](http://3months.tistory.com/168)
+- [Keras LSTM(KR)](http://3months.tistory.com/168)
 
-- [understanding keras lstms](https://stackoverflow.com/questions/38714959/understanding-keras-lstms)
+- [Understanding keras lstms(time steps, etc)](https://stackoverflow.com/questions/38714959/understanding-keras-lstms)
 
 ## CV Studies
 
