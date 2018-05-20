@@ -624,7 +624,9 @@ void Kinect::save()
 	string fileName = "Spoints.txt";
 	stringstream sstream;
 	sstream << frameCollection.toString() << endl;
+
 	ofstream writeFile((folderPath + fileName).data(), std::ios::out|ios::trunc);
+
 	if (writeFile.is_open()) {
 		writeFile << sstream.str();
 		writeFile.close();

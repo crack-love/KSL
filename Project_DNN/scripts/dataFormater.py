@@ -1,5 +1,8 @@
 import numpy as np
 import os, sys
+import functools
+from PIL import Image
+import cv2
 
 # -------------------------------------------------------------- 
 #
@@ -91,3 +94,51 @@ def loadLabelFile(path, isShow = True):
                 print(str(number) + ': ' + str(name))
 
     return labelList
+
+
+def loadImageFiles(dirpath, fileList, isShow):
+    imgList = []
+    for file in fileList:
+        img = Image.open(dirpath + "/" + file)
+        img.load()
+        data = np.asarray(img, dtype="uint8" )  # numpy로 변형
+        # imgList.append(data)
+        for i in range(3):
+            imgList.append(data[:,:,i])
+        # print(data[:,:,0].shape)
+        # print(data.shape)
+    
+    imgNumpyArray = np.array(imgList)
+
+    if isShow:
+        print("imgList Length: " + str(len(imgList)))
+        print("imaNumpyArray Shape: " + str(imgNumpyArray.shape))
+
+    return imgNumpyArray
+
+def comp(a, b):
+    a = a[:a.find('_')]
+    b = b[:b.find('_')]
+    return int(a) - int(b)
+
+def loadSingleDataFromDir(dirpath, isShow):
+    fileList = os.listdir(dirpath)
+    
+    leftFiles = []
+    rightFiles = []
+
+    for file in fileList:
+        if file.find('L') != -1:
+            leftFiles.append(file)
+        elif file.find('R') != -1:
+            rightFiles.append(file)
+    
+    leftFiles.sort(key=functools.cmp_to_key(comp))
+    rightFiles.sort(key=functools.cmp_to_key(comp))
+
+    leftImageList = loadImageFiles(dirpath, leftFiles, isShow)
+    rightImageList = loadImageFiles(dirpath, rightFiles, isShow)
+
+    spointData, label = loadDataFromFile(dirpath + "/Spoints.txt", isShow)
+
+    return spointData, leftImageList, rightImageList, label
