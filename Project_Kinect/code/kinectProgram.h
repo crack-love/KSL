@@ -70,11 +70,8 @@ private:
 	cv::Mat colorMat; // showing mat
 
 	// Depth Buffer
-	// cv::Mat depthMap; // depth image
 	int depthWidth = 512, depthHeight = 424; // kinect v2의 depth 데이터 크기
-	USHORT depthMin, depthMax;
-	cv::Mat depthMat;
-	// std::vector<BYTE> depthBuffer;
+	cv::Mat depthMat; // CV_U8C4
 	BYTE depthBuffer[512 * 424 * 4];
   
 	// Body Buffer
@@ -93,13 +90,15 @@ private:
 	bool produced = false;
 	BOOLEAN tracked = false;
 
-	/// sPoint
-	float spinePx;
+	// sPoint
+	float spinePx; // cameraspcae
 	float spinePxColorSpaceVersion;
+	float spinePxDepthSpaceVersion;
 	std::array<SPoint, SPOINT_SIZE> sPoints;
 	CameraSpacePoint addtionalPoints[11];
+	bool atLeastOneTracked;
 
-	/// Status Text
+	// Status Text
 	double fps = 0;
 	TIMESPAN lastFrameRelativeTime;
 	TIMESPAN pastFrameRelativeTime;
@@ -113,7 +112,6 @@ private:
 	bool leftHandActivated = false;
 	bool rightHandActivated = false;
 	bool frameStacking = false;
-	//bool isDataready = false;
 	int recorded = 0;
 	FrameCollection frameCollection;
 	ImageFrameCollection lhandCollection;
@@ -124,11 +122,10 @@ private:
 	TIMESPAN recordStartTime;
 	int label;
 	string workerName = "None";
-	//float* data;
 
-
-	// cnn
-	//string lastPredict = "";
+	// Hand ROI
+	cv::Mat lHandImage;
+	cv::Mat rHandImage;
 
 public:
 	// Constructor
@@ -144,13 +141,6 @@ public:
 	void setLabel(int l);
 	void setMode(KINECT_MODE m);
 	void setWorkerName(string name);
-	//void setPredict(int l);
-
-	//inline bool isDataReady() { return isDataready; };
-
-	//void setDataBuffer(float* d) { this->data = d; }
-
-	//float* getData();
 
 private:
 	// Initialize
@@ -158,7 +148,6 @@ private:
 
 	void initializeSensor();
 
-	// Initialize HDFace
 	void initializeHDFace();
 
 	void initializeColor();
@@ -166,8 +155,6 @@ private:
 	void initializeComponents();
 
 	void initializeBody();
-
-	void initializeCNN();
 
 	void initializeDepth();
 
@@ -189,14 +176,16 @@ private:
 
 	void updateHDFace();
 
-	void updatePredict();
-
 	void updateDepth();
+
+	void updateROI();
 
 	// Draw Data
 	void draw();
 
 	inline void drawColor();
+
+	void drawExtractedROI();
 
 	inline void drawBody();
 
@@ -226,10 +215,10 @@ private:
 
 	void save();
 
+	void isFolderNotExistCreate(string path);
+
 	// for extract hand
-	void extractHand(cv::Mat& screen);			// colorFrame에서 손을 tracking하여 screen에 복사
-	void extractDepthHand(cv::Mat& screen);     // depthFrame에서 손을 tracking하여 screen에 복사
-	void extractBodyIndexHand(cv::Mat& screen); // bodyIndexFrame에서 손을 tracking하여 screen에 복사
+	void extractHand();
 
 	bool isHandTracking();
 };
