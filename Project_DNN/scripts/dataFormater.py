@@ -102,13 +102,19 @@ def loadImageFiles(dirpath, fileList, isShow):
         img = Image.open(dirpath + "/" + file)
         img.load()
         data = np.asarray(img, dtype="uint8" )  # numpy로 변형
-        imgList.append(data)
+        # imgList.append(data)
+        for i in range(3):
+            imgList.append(data[:,:,i])
+        # print(data[:,:,0].shape)
+        # print(data.shape)
     
+    imgNumpyArray = np.array(imgList)
+
     if isShow:
         print("imgList Length: " + str(len(imgList)))
-        print("img Shape: " + str(data.shape))
+        print("imaNumpyArray Shape: " + str(imgNumpyArray.shape))
 
-    return np.array(imgList)
+    return imgNumpyArray
 
 def comp(a, b):
     a = a[:a.find('_')]
@@ -135,6 +141,4 @@ def loadSingleDataFromDir(dirpath, isShow):
 
     spointData, label = loadDataFromFile(dirpath + "/Spoints.txt", isShow)
 
-    if isShow:
-        print()
     return spointData, leftImageList, rightImageList, label
