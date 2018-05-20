@@ -37,6 +37,10 @@
 #define IMAGE_WIDTH 128
 #define IMAGE_HEIGHT 128
 
+#define IMAEG_STANDARD_FRAME_SIZE 32
+#define IMAGE_WIDTH 128
+#define IMAGE_HEIGHT 128
+
 // ---------------------------------------------------------------------
 //	Macro
 // ---------------------------------------------------------------------

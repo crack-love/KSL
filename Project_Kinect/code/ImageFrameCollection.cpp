@@ -64,6 +64,7 @@ void ImageFrameCollection::setStandard(TIMESPAN startTime)
 	collection = result;
 }
 
+
 // 76_L.bmp
 void ImageFrameCollection::save(string dirpath, string suffix)
 {
