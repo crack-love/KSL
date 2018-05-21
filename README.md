@@ -26,6 +26,8 @@
 
 - 추천 [Understanding keras lstms (EN) (time steps, etc)](https://stackoverflow.com/questions/38714959/understanding-keras-lstms)
 
+- [Merge 2 models](https://stackoverflow.com/questions/45979848/merge-2-sequential-models-in-keras)
+
 ## CV Studies
 
 - [at vs pointer](http://swprog.tistory.com/entry/OpenCV-at%EA%B3%BC-%ED%8F%AC%EC%9D%B8%ED%84%B0-%EC%82%AC%EC%9A%A9%EA%B0%84%EC%9D%98-%EC%8B%9C%EA%B0%84-%EC%B0%A8%EC%9D%B4)
