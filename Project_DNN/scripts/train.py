@@ -1,12 +1,12 @@
 ﻿import numpy as np
 
-def calculateAccuracy(dataList, labelList, model, verbose):
+def calculateAccuracy(dataList, labelList, model, verbose, batch_size):
     '''
     return float accuracy
     '''
     size = len(dataList)
 
-    predictedList = np.argmax(model.predict(x=dataList, verbose=verbose), 1)
+    predictedList = np.argmax(model.predict(x=dataList, verbose=verbose, batch_size=batch_size), 1)
     predicteShouldBeList = np.argmax(labelList, 1)
 
     accuracy = np.sum(np.equal(predictedList, predicteShouldBeList)) / size
