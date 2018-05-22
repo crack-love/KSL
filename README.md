@@ -34,6 +34,8 @@
 
 - [Batch Normalization](https://shuuki4.wordpress.com/2016/01/13/batch-normalization-%EC%84%A4%EB%AA%85-%EB%B0%8F-%EA%B5%AC%ED%98%84/)
 
+- [LSTM input shape](https://machinelearningmastery.com/reshape-input-data-long-short-term-memory-networks-keras/)
+
 ## CV Studies
 
 - [at vs pointer](http://swprog.tistory.com/entry/OpenCV-at%EA%B3%BC-%ED%8F%AC%EC%9D%B8%ED%84%B0-%EC%82%AC%EC%9A%A9%EA%B0%84%EC%9D%98-%EC%8B%9C%EA%B0%84-%EC%B0%A8%EC%9D%B4)
