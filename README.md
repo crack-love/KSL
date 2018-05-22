@@ -36,6 +36,8 @@
 
 - [LSTM input shape](https://machinelearningmastery.com/reshape-input-data-long-short-term-memory-networks-keras/)
 
+- [CONV2D + LSTM example](https://kakalabblog.wordpress.com/2017/06/07/dance-dance-convolution/)
+
 ## CV Studies
 
 - [at vs pointer](http://swprog.tistory.com/entry/OpenCV-at%EA%B3%BC-%ED%8F%AC%EC%9D%B8%ED%84%B0-%EC%82%AC%EC%9A%A9%EA%B0%84%EC%9D%98-%EC%8B%9C%EA%B0%84-%EC%B0%A8%EC%9D%B4)
