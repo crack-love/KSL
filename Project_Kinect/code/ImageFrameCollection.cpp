@@ -66,13 +66,13 @@ void ImageFrameCollection::setStandard(TIMESPAN startTime)
 
 
 // 76_L.bmp
-void ImageFrameCollection::save(string dirpath, string suffix)
+void ImageFrameCollection::save(string dirpath, int numberPadding)
 {
 	string fileName;
 
 	for (int j = 0; j < IMAEG_STANDARD_FRAME_SIZE; ++j)
 	{
-		fileName = to_string(j) + "_" + suffix;
+		fileName = to_string(numberPadding + j);
 
 		collection[j].save(dirpath + fileName + ".bmp");
 	}

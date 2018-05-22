@@ -24,6 +24,7 @@ using namespace cv;
 
 enum KINECT_MODE
 {
+	KINECT_MODE_IDLE,
 	KINECT_MODE_OUTPUT,
 	KINECT_MODE_PREDICT,
 	KINECT_MODE_LEARNING,
@@ -41,6 +42,8 @@ static string to_string(KINECT_MODE mode)
 		return "KINECT_MODE_LEARNING";
 	case		KINECT_MODE_PREDICT:
 		return "KINECT_MODE_PREDICT";
+	case		KINECT_MODE_IDLE:
+		return "KINECT_MODE_IDLE";
 	default:
 		return "ERR_NOT_MODE_NUMBER";
 
@@ -221,4 +224,6 @@ private:
 	void extractHand();
 
 	bool isHandTracking();
+
+	CameraSpacePoint lerp(CameraSpacePoint src, CameraSpacePoint dst);
 };

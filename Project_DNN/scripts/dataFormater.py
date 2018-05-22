@@ -1,8 +1,12 @@
 import numpy as np
 import os, sys
 import functools
-from PIL import Image
-import cv2
+import matplotlib.pyplot as plt # plt.imshow
+import scripts.interfaceUtils as util #input(debug)
+from keras.preprocessing import image # image.load_img
+import defines
+
+#import cv2
 
 # -------------------------------------------------------------- 
 #
@@ -13,11 +17,13 @@ import cv2
 # np.array()로 wrap해서 내보내줘야한다.
 # wrap해도 데이터 구조는 변경 없는것으로 보임
 #
+# label is one hot
+#
+# 이미지 읽기를 위한 필요 패키지 설치 : pip install Pillow
+#
 #----------------------------------------------------------------
 
-LABEL_SIZE = 5
-
-def formatData(strdata, isShowLog):
+def _formatData(strdata, isShowLog):
     strdata = strdata.strip()
 
     items = strdata.split()
@@ -35,7 +41,7 @@ def formatData(strdata, isShowLog):
         data.append(items[i])
 
     data = np.reshape(data, (frameSize, spointSize, channelSize))
-    labelOneHot = np.zeros(LABEL_SIZE)
+    labelOneHot = np.zeros(defines.LABEL_SIZE)
     labelOneHot[label] = 1
 
     if isShowLog:
@@ -46,29 +52,31 @@ def formatData(strdata, isShowLog):
 
 
 ## return single data
-def loadDataFromFile(file, isShowLog):
+def _loadDataFromFile(file, isShowLog):
     fileStream = open(file)
     fileData = fileStream.readline()
 
-    data, label = formatData(fileData, isShowLog)
+    data, label = _formatData(fileData, isShowLog)
     fileStream.close()
 
     return data, label
     
-
 def loadDataFromDir(dirpath, isShowLog):
+    '''
+    # Previous version(for only spoint.txt)
+    '''
     fileList = os.listdir(dirpath)
     
     dataList = []
     labelList = []
 
     for file in fileList:
-        data, label = loadDataFromFile(dirpath + "/" + file, isShowLog)
+        data, label = _loadDataFromFile(dirpath + "/" + file, isShowLog)
         dataList.append(data)
         labelList.append(label)
 
     ## 로드 결과 각 라벨 몇개씩인지 프린트
-    labelCnt = [0] * LABEL_SIZE
+    labelCnt = [0] * defines.LABEL_SIZE
     for i in range(0, len(labelList)):
         labelIdx = np.argmax(labelList[i])
         labelCnt[labelIdx] += 1
@@ -76,10 +84,12 @@ def loadDataFromDir(dirpath, isShowLog):
 
     return np.array(dataList), np.array(labelList)
 
+# return dic k:integer, v:str
 def loadLabelFile(path, isShow = True):
     f = open(path)
 
     labelList = { -1:'None' }
+    labelList.pop(-1)
 
     for line in f:
         if len(line) > 3:
@@ -95,50 +105,99 @@ def loadLabelFile(path, isShow = True):
 
     return labelList
 
-
-def loadImageFiles(dirpath, fileList, isShow):
+# (frame_size, 128, 128, 3)
+def _loadImageFiles(dirpath, fileList, isShow):
     imgList = []
-    for file in fileList:
-        img = Image.open(dirpath + "/" + file)
-        img.load()
-        data = np.asarray(img, dtype="uint8" )  # numpy로 변형
-        # imgList.append(data)
-        for i in range(3):
-            imgList.append(data[:,:,i])
-        # print(data[:,:,0].shape)
-        # print(data.shape)
+
+    for file in fileList:      
+        img = image.load_img(dirpath + "/" + file)
+        array = image.img_to_array(img)
+        imgList.append(array)
     
     imgNumpyArray = np.array(imgList)
-
-    if isShow:
-        print("imgList Length: " + str(len(imgList)))
-        print("imaNumpyArray Shape: " + str(imgNumpyArray.shape))
+    #if isShow:
+        #print("imgList Length: " + str(len(imgList)))
+        #print("imaNumpyArray Shape: " + str(imgNumpyArray.shape))
 
     return imgNumpyArray
 
-def comp(a, b):
-    a = a[:a.find('_')]
-    b = b[:b.find('_')]
-    return int(a) - int(b)
+def _comp(a, b):
+    return int(a[:a.find('.')]) - int(b[:b.find('.')])
 
-def loadSingleDataFromDir(dirpath, isShow):
+def ROI_loadSingleDataFromDir(dirpath, isShow):
+    """
+    -> spointData, imageList, label
+      디렉토리 안에 있는 left, right hand 이미지, SPoint.txt 로드
+    
+    # return shape
+      spointData = [[f1x1, f1x2 ... f1xm], ... [fnx1 ... fnxm]]
+        shape eg. (76, 76, 1); frame, spoint, channel
+      imageList = [L1, L2 ... Ln, R1, R2 ... Rn]
+        Lx/Rx = image raw data. eg. (128, 128, 3)
+        shape eg. (200, 128, 128, 3); timestep, imgshape~
+      label = [0 0 0 1 0 0]. ig. onehot
+    """
+
+    imageList = [] # left, right sum
+
+    # 폴더내 이미지 파일명 소트
     fileList = os.listdir(dirpath)
+    fileList.sort(key=functools.cmp_to_key(_comp))
+
+    # 이미지 로드
+    imageList = _loadImageFiles(dirpath, fileList, isShow)
     
-    leftFiles = []
-    rightFiles = []
-
-    for file in fileList:
-        if file.find('L') != -1:
-            leftFiles.append(file)
-        elif file.find('R') != -1:
-            rightFiles.append(file)
+    # Spint 로드
+    spointData, label = _loadDataFromFile(dirpath + "/Spoints.txt", isShow)
     
-    leftFiles.sort(key=functools.cmp_to_key(comp))
-    rightFiles.sort(key=functools.cmp_to_key(comp))
+    # 이미지 확인법
+    #plt.imshow(imageList[0][0] / 255) #settingwindow
+    #plt.show() #show
+    
+    print(imageList.shape)
 
-    leftImageList = loadImageFiles(dirpath, leftFiles, isShow)
-    rightImageList = loadImageFiles(dirpath, rightFiles, isShow)
+    return spointData, imageList, label
 
-    spointData, label = loadDataFromFile(dirpath + "/Spoints.txt", isShow)
+def ROI_loadSingleImages(dirpath, isShow):
+    """
+    한 장 단위의 그림을 읽어서 학습/예측하는 모델에 쓰임
+      dirpath 안 파일: LabelDirs
+      LabelDir 명 규칙: labelNumber_anyting
+      LabelDir 안 파일: 이미지들
+      
+      eg.
+        dirpath/0_hello/helloimg0.jpg
+        dirpath/0_hello/helloimg1.bmp
+        dirpath/1_loves/img.jpg
+    
+    return imageList, labels
 
-    return spointData, leftImageList, rightImageList, label
+    이 함수는 Convolution 모델이 제대로 작동하는지 확인하기 위해 만듦
+    """
+    imageList = []
+    labels = []
+    labelSize = 2
+
+    # 디렉토리 서치
+    dirs = os.listdir(dirpath)
+
+    # 각 디렉트리당 이미지 로드
+    for directory in dirs:
+        label = int(directory.split('_')[0])
+        path = dirpath + '\\' + directory
+        
+        images = _loadImageFiles(path, os.listdir(path), isShow)
+        for image in images:
+            imageList.append(image)
+
+            labelOneHot = np.zeros(labelSize)
+            labelOneHot[label] = 1
+            labels.append(labelOneHot)
+
+    imageList = np.array(imageList)
+    labels = np.array(labels)
+
+    print(imageList.shape)
+    print(labels.shape)
+
+    return imageList, labels

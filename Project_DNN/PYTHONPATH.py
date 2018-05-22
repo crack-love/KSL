@@ -11,6 +11,6 @@ import os
 dirpath = os.path.dirname(os.path.realpath(__file__))
 dirpath = dirpath + "\\scripts"
 
-print('Using modified Pythonpath.')
+print('Using modified Pythonpath from PYTHONPATH.py')
 
 os.sys.path.append(dirpath)

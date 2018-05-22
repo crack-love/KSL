@@ -5,6 +5,7 @@ from keras.utils import plot_model # for model description png
 import dataFormater as DFormat
 import os
 import interfaceUtils as utils
+import defines
 
 def getCurrentModel():
     return model_kyg()
@@ -26,7 +27,7 @@ def model_kyg():
     model.add(Dropout(0.5))
     model.add(Dense(1024, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(DFormat.LABEL_SIZE, activation='softmax'))
+    model.add(Dense(defines.LABEL_SIZE, activation='softmax'))
 
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy']) #loss ?
     model.name = 'KYG_C4D2'

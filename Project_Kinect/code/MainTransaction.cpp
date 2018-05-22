@@ -18,14 +18,17 @@ void MainTransaction::initialize()
 
 void MainTransaction::chooseMenu()
 {
-	SHOW_ENUM(KINECT_MODE, KINECT_MODE_SIZE, 1);
+	SHOW_ENUM(KINECT_MODE, KINECT_MODE_SIZE, 0);
 
-	int menu = INPUT(int, "Mode") - 1;
+	int menu = INPUT(int, "Mode");
 	cout << ">>> " << to_string((KINECT_MODE)menu) << endl;
 
 	k.setMode((KINECT_MODE)menu);
 	switch (menu)
 	{
+	case KINECT_MODE_IDLE:
+		modeIdle();
+		break;
 	case KINECT_MODE_OUTPUT:
 		modeOutput();
 		break;
@@ -40,11 +43,32 @@ void MainTransaction::chooseMenu()
 	}
 }
 
+void MainTransaction::modeIdle()
+{
+	try{
+	while (true)
+	{
+		k.run_one_cycle();
+
+		const int key = cv::waitKey(10);
+		if (key == VK_ESCAPE) {
+			break;
+		}
+	}
+
+	}
+	catch (std::exception& ex) {
+		std::cout << ex.what() << std::endl;
+		system("pause");
+	}
+}
 
 void MainTransaction::modeOutput()
 {
+	LabelMapper::getInstance()->printLabel();
 	int label = INPUT(int, "Recording Label");
 	cout << ">>> " << label << ": " << LABEL(label) << endl;
+	
 	k.setLabel(label);
 
 	string name = INPUT(string, "Who is Recording");

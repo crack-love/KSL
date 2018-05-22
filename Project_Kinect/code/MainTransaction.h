@@ -17,6 +17,7 @@ private:
 	void initialize();
 	void chooseMenu();
 
+	void modeIdle();
 	void modeOutput();
 	void modePredict();
 	void modeLearning();

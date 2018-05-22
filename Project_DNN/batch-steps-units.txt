@@ -1,0 +1,16 @@
+output shape : (batch, steps, units)
+input shape : (batch, steps, units)
+(For having variable lengths in each batch, use input_shape=(None,features).
+
+batch : Tank A ~ N
+steps : 5 hours
+input unit : Temperature, Pressure
+ouput unit : Results
+
+In stateful=False, the second batch contains whole new sequences, independent from the first batch
+In stateful=True, the second batch continues the first batch, extending the same sequences.
+until you call model.reset_states()
+we need shuffle=False <- batch? step? ¼ÅÇÃ
+
+https://machinelearningmastery.com/timedistributed-layer-for-long-short-term-memory-networks-in-python/
+Sequence Learning ProblemºÎÅÍ

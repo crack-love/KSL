@@ -30,7 +30,7 @@ public:
 
 	// save image frames
 
-	void save(string dirpath, string suffix);
+	void save(string dirpath, int);
 
 	int getCollectionSize();
 	

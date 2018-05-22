@@ -6,9 +6,9 @@ import interfaceUtils as utils
 PATH 제공, 스크립트:
 relative path를 하드코드로 가지고 있다가 런타임에
 absolute path로 변경하여 Dictionary 형태로 제공한다
-(absolute path를 제공)
+(paths.get()으로 absolute path를 제공)
 
-0. absolute 변환 시 PATH 존재 여부 확인하여 에러 출력
+0. init 시 PATH 존재 여부 확인하여 에러 출력
 1. relative 기준은 이 스크립트 위치
 2. key는 대소문자 구별 없음
 
@@ -16,28 +16,29 @@ absolute path로 변경하여 Dictionary 형태로 제공한다
 
 _DIC = { }
 
-def relToAb(rel):
+def _relToAb(rel):
     dirpath = os.path.dirname(os.path.realpath(__file__))
     return dirpath + "\\" + rel
 
-def append(key, val):
+def _append(key, val):
     _DIC[key.upper()] = val
 
 def get(key):
     return _DIC[key.upper()]
 
-def init():
-    print('Using modified Paths.')
+def _init():
+    print('Using preset Paths from paths.py')
     
-    append('label', '..\\..\\data\\LABEL.txt')
-    append('weight', '..\\models\\weights.keras')
-    append('train', '..\\..\\data\\train')
-    append('test', '..\\..\\data\\test')
+    _append('label', '..\\..\\data\\LABEL.txt')
+    _append('weight', '..\\models\\weights.keras')
+    _append('train', '..\\..\\data\\train')
+    _append('test', '..\\..\\data\\test')
+    _append('data', '..\\..\\data')
 
     # Change relative to absolute
     # Error File/Folder is not exist
     for key in _DIC:
-        _DIC[key] = relToAb(_DIC[key])
+        _DIC[key] = _relToAb(_DIC[key])
 
         # Path 미존재
         if (os.path.exists(_DIC[key]) == False):
@@ -45,4 +46,5 @@ def init():
         #else:
             #print(key + ": OK")
 
-init()
+#임포트 하자마자 초기화함
+_init()
