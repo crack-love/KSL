@@ -124,28 +124,81 @@ def _loadImageFiles(dirpath, fileList, isShow):
 def _comp(a, b):
     return int(a[:a.find('.')]) - int(b[:b.find('.')])
 
-def ROI_loadSingleDataFromDir(dirpath, isShow):
+def ROI_loadAllSamplePaths(rootfolder):
     """
-    -> spointData, imageList, label
+    0_안녕하세요, 1_바다 ... 안의 각 샘플 폴더 모두 취합
+    
+    # arguments
+      e.g. rootfolder = ../data/train      
+    """
+
+    result = []
+
+    for labelFolder in  os.listdir(rootfolder):
+        path1 = os.path.join(rootfolder, labelFolder)
+
+        for sampleFolder in os.listdir(path1):
+            path2 = os.path.join(path1, sampleFolder)
+            result.append(path2)
+    
+    return result
+    
+def folderPaths(directory, dstList):
+    for filename in os.listdir(directory):
+        dstList.append(os.path.join(directory, filename))
+
+def ROI_loadDataList(samplePathList, isShow):
+    """
+    data 샘플 폴더들을 모두 읽어들인다.
+      e.g. imageSamples shape = (samples, timestep, imgshape~)
+    """
+    spointSamples = []
+    imageSamples = []
+    labelSamples = []
+    
+    for path in samplePathList:
+        spoint, images, label = \
+        ROI_loadData(path, isShow)
+
+        spointSamples.append(spoint)
+        imageSamples.append(images)
+        labelSamples.append(label)
+       
+    spointSamples = np.array(spointSamples)
+    imageSamples = np.array(imageSamples)
+    labelSamples = np.array(labelSamples)
+
+    return spointSamples, imageSamples, labelSamples
+
+def ROI_loadData(dirpath, isShow):
+    """
+    타임스텝 단위의 모든 데이터를 읽는다.
       디렉토리 안에 있는 left, right hand 이미지, SPoint.txt 로드
+
+    return spointData, imageList, label
     
     # return shape
+
       spointData = [[f1x1, f1x2 ... f1xm], ... [fnx1 ... fnxm]]
         shape eg. (76, 76, 1); frame, spoint, channel
       imageList = [L1, L2 ... Ln, R1, R2 ... Rn]
         Lx/Rx = image raw data. eg. (128, 128, 3)
-        shape eg. (200, 128, 128, 3); timestep, imgshape~
+        shape eg. (100, 128, 128, 3); timestep, imgshape~
       label = [0 0 0 1 0 0]. ig. onehot
     """
 
+    imageFileList = []
     imageList = [] # left, right sum
 
-    # 폴더내 이미지 파일명 소트
-    fileList = os.listdir(dirpath)
-    fileList.sort(key=functools.cmp_to_key(_comp))
+    # 폴더내 이미지 파일명 소트, Spoint.txt 리스트에서 제거
+    for f in os.listdir(dirpath):
+        if f.find('Spoints.txt') == -1:
+            imageFileList.append(f)
+
+    imageFileList.sort(key=functools.cmp_to_key(_comp))
 
     # 이미지 로드
-    imageList = _loadImageFiles(dirpath, fileList, isShow)
+    imageList = _loadImageFiles(dirpath, imageFileList, isShow)
     
     # Spint 로드
     spointData, label = _loadDataFromFile(dirpath + "/Spoints.txt", isShow)
@@ -153,8 +206,6 @@ def ROI_loadSingleDataFromDir(dirpath, isShow):
     # 이미지 확인법
     #plt.imshow(imageList[0][0] / 255) #settingwindow
     #plt.show() #show
-    
-    print(imageList.shape)
 
     return spointData, imageList, label
 

@@ -4,7 +4,7 @@ input shape : (batch, steps, units)
 
 batch : Tank A ~ N
 steps : 5 hours
-input unit : Temperature, Pressure
+input units : Temperature, Pressure
 ouput unit : Results
 
 In stateful=False, the second batch contains whole new sequences, independent from the first batch
