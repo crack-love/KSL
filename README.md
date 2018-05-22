@@ -22,7 +22,23 @@
 
 ## DNN Studies
 
-- [Keras LSTM](http://3months.tistory.com/168)
+- [Keras LSTM (KR)](http://3months.tistory.com/168)
+
+- 추천 [Understanding keras lstms (EN) (time steps, etc)](https://stackoverflow.com/questions/38714959/understanding-keras-lstms)
+
+- [Merge 2 models](https://stackoverflow.com/questions/45979848/merge-2-sequential-models-in-keras)
+
+- [Merge 2 models dense](https://statcompute.wordpress.com/2017/01/08/an-example-of-merge-layer-in-keras/)
+
+- [LSTM with Timedistributed](https://machinelearningmastery.com/timedistributed-layer-for-long-short-term-memory-networks-in-python/)
+
+- [Batch Normalization](https://shuuki4.wordpress.com/2016/01/13/batch-normalization-%EC%84%A4%EB%AA%85-%EB%B0%8F-%EA%B5%AC%ED%98%84/)
+
+- [LSTM input shape](https://machinelearningmastery.com/reshape-input-data-long-short-term-memory-networks-keras/)
+
+- [CONV2D + LSTM example](https://kakalabblog.wordpress.com/2017/06/07/dance-dance-convolution/)
+
+- [How the Flatten works](https://stackoverflow.com/questions/44176982/how-flatten-layer-works-in-keras)
 
 ## CV Studies
 
