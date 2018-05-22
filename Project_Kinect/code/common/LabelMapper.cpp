@@ -30,11 +30,20 @@ void LabelMapper::load()
 	while (is.good())
 	{
 		is >> id >> name;
-		cout << id << ", " << name << endl;
+		//cout << id << ", " << name << endl;
 
 		addMap(id, name);
 	}
 	is.close();
+}
+
+void LabelMapper::printLabel()
+{
+	int size = itosLabel.size();
+	for (int i = 0; i < size; ++i)
+	{
+		cout << i << ", " << lswap(i) << endl;
+	}
 }
 
 string LabelMapper::lswap(int i)

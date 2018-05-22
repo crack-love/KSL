@@ -95,6 +95,9 @@ void Kinect::initializeComponents()
 	{
 		sPoints[i] = SPoint((SPointsType)i); 
 	}
+
+	lHandPos = CameraSpacePoint();
+	rHandPos = CameraSpacePoint();
 }
 
 // Initialize Sensor
@@ -277,8 +280,8 @@ void Kinect::extractHand()
 	//float spinePx = spinePxDepthSpaceVersion;
 	//DepthSpacePoint handPos;
 
-	float width = spinePx * 1.2f;
-	float height = spinePx * 1.2f;
+	float width = spinePx * 1.15f;
+	float height = spinePx * 1.15f;
 	float hWidth = width / 2;
 	float hHeight = height / 2;
 
@@ -290,23 +293,19 @@ void Kinect::extractHand()
 
 		coordinateMapper->MapCameraPointToColorSpace(camHandPos, &handPos);
 		//coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
-
-		/* 범위 초과할 경우 ::: 문제 없을 것 같으므로 일단 해제
-		if (!(handPos.X - hWidth < 0 || handPos.X + hWidth >= colorWidth || handPos.Y - hHeight < 0 || handPos.Y + hHeight >= colorHeight))
-		{
-		continue;
-		}*/
-
-		// 관심영역 설정
-		Rect rect(handPos.X - hWidth, handPos.Y - hHeight, width, height);
-
-		cv::Mat extractedMat = srcMat(rect);
-		cv::Mat resizedMat;
-		cv::Mat convertedMat;
 		
-		cv::resize(extractedMat, resizedMat, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+		// 관심영역 설정
+		Rect roi(handPos.X - hWidth, handPos.Y - hHeight, width, height);
 
-		(i == 0 ? lHandImage : rHandImage) = resizedMat;
+		if (0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= srcMat.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= srcMat.rows)
+		{
+			cv::Mat extractedMat = srcMat(roi);
+			cv::Mat resizedMat;
+
+			cv::resize(extractedMat, resizedMat, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+
+			(i == 0 ? lHandImage : rHandImage) = resizedMat;
+		}
 	}
 }
 
@@ -535,7 +534,7 @@ void Kinect::updateFrame()
 		// 기록 끝
 		if (frameStacking && (!leftHandActivated && !rightHandActivated))
 		{
-			int needStackedCnt = (mode == KINECT_MODE_PREDICT ? 18 : 45);
+			int needStackedCnt = (mode == KINECT_MODE_PREDICT ? 18 : 41);
 
 			// 일정 frame 이상 쌓여야 함, 아니면 송신/저장 안함
 			if (frameCollection.getCollectionSize() > needStackedCnt)
@@ -558,10 +557,19 @@ void Kinect::updateFrame()
 					rhandCollection.setStandard(recordStartTime);
 					lhandCollection.setStandard(recordStartTime);
 
-					save();
-					++recorded;
+					if (frameCollection.getCollectionSize() == FRAME_STANDARD_SIZE &&
+						rhandCollection.getCollectionSize() == IMAEG_STANDARD_FRAME_SIZE &&
+						rhandCollection.getCollectionSize() == IMAEG_STANDARD_FRAME_SIZE)
+					{
+						save();
+						++recorded;
+					}
+					else
+					{
+						// setStandard에서 Frame 1개가 부족하게 채워지는 것으로 보임
+						cout << LABEL(label) << " Record saving ... fail (standardize bug)" << endl;
+					}
 
-					
 					break;
 				}
 			}
@@ -635,9 +643,8 @@ void Kinect::save()
 	}
 	else cout << LABEL(label) << " Record saving ... fail " << ++i << endl;
 
-	// 76_L.bmp || 76_R.bmp
-	lhandCollection.save(folderPath, "L");
-	rhandCollection.save(folderPath, "R");
+	lhandCollection.save(folderPath, 0);
+	rhandCollection.save(folderPath, IMAEG_STANDARD_FRAME_SIZE);
 }
 
 //----------------------------------------------------------------------------------
@@ -666,18 +673,15 @@ void Kinect::drawExtractedROI()
 {
 	if (!atLeastOneTracked) return;
 
+	int dstWidth = 256;
+
 	for (int i = 0; i < 2; ++i)
 	{
 		Mat srcImage = (i == 0 ? lHandImage : rHandImage);
 		if (srcImage.rows == 0) return;
-
-		//Mat dstImage = colorMat;
-
-		//for (int i = 0; i < IMAGE_HEIGHT; ++i)
-			//for (int j = 0; j < IMAGE_WIDTH; ++j)
-				//dstImage.at<>(i, j)
-
-		cv::Mat dstRect = colorMat(cv::Rect(colorWidth - IMAGE_WIDTH, IMAGE_HEIGHT * i, IMAGE_WIDTH, IMAGE_HEIGHT));
+		
+		cv::resize(srcImage, srcImage, cv::Size(dstWidth, dstWidth));
+		cv::Mat dstRect = colorMat(cv::Rect(colorWidth - dstWidth, dstWidth * i, dstWidth, dstWidth));
 		
 		// Mat Array 접근 수정
 		/*
@@ -1148,13 +1152,13 @@ void Kinect::findLRHandPos()
 	if (joint.TrackingState == TrackingState::TrackingState_NotTracked) {
 		return;
 	}
-	lHandPos = joint.Position;
+	lHandPos = lerp(lHandPos, joint.Position);
 
 	joint = joints[HAND_RECORD_TYPE_R];
 	if (joint.TrackingState == TrackingState::TrackingState_NotTracked) {
 		return;
 	}
-	rHandPos = joint.Position;
+	rHandPos = lerp(rHandPos, joint.Position);
 }
 
 bool operator < (Vec4b& l, Vec4b& r)
@@ -1190,4 +1194,15 @@ bool Kinect::isHandTracking()
 	}
 
 	return true;
+}
+
+CameraSpacePoint Kinect::lerp(CameraSpacePoint src, CameraSpacePoint dst)
+{
+	CameraSpacePoint result;
+
+	result.X = Lerp((float)LERP_PERCENT, src.X, dst.X);
+	result.Y = Lerp((float)LERP_PERCENT, src.Y, dst.Y);
+	result.Z = Lerp((float)LERP_PERCENT, src.Z, dst.Z);
+
+	return result;
 }

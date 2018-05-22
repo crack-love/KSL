@@ -1,7 +1,9 @@
 ﻿import numpy as np
 
 def calculateAccuracy(dataList, labelList, model, verbose):
-    
+    '''
+    return float accuracy
+    '''
     size = len(dataList)
 
     predictedList = np.argmax(model.predict(x=dataList, verbose=verbose), 1)

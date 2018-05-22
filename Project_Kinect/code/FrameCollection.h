@@ -26,8 +26,6 @@ public:
 
 	array<string, Show_Status_DistanceFrame_Size> lastFrameToString();
 
-	void getData(float*);
-
 	void setStandard(TIMESPAN startTime);
 
 	// for serialize

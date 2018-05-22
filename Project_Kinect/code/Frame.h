@@ -41,8 +41,6 @@ public:
 	bool getHAR();
 	double getDistanceL(int i);
 	double getDistanceR(int i);
-
-	void getData(float* dst);
 	
 private:
 
