@@ -77,20 +77,6 @@ double Frame::getDistanceR(int i)
 	return distanceR[i];
 }
 
-void Frame::getData(float * dst)
-{
-	dst[0] = (float)lHandActivated;
-	dst[1] = (float)rHandActivated;
-	
-	dst = &dst[2];
-
-	for (int i = 0; i < SPOINT_SIZE * 2; i+=2)
-	{
-		dst[i] = (float)distanceL[i / 2];
-		dst[i + 1] = (float)distanceR[i / 2];
-	}
-}
-
 TIMESPAN Frame::getTime()
 {
 	return this->lastFrameRelativeTime;

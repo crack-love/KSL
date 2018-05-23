@@ -30,6 +30,8 @@ public:
 	string label(int i);
 	int label(string s);
 
+	void printLabel();
+
 private:
 	LabelMapper(); // load »£√‚
 

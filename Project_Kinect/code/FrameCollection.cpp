@@ -26,16 +26,6 @@ array<string, Show_Status_DistanceFrame_Size> FrameCollection::lastFrameToString
 	return collection[collection.size() - 1].toString();
 }
 
-void FrameCollection::getData(float* dst)
-{
-	for (int i = 0; i < FRAME_STANDARD_SIZE; ++i)
-	{
-		// Frame[i]
-		collection[i].getData(&dst[i * (SPOINT_SIZE + 1) * 2]);
-	}
-
-}
-
 void FrameCollection::setStandard(TIMESPAN startTime)
 {
 	if (collection.size() < 2) return;

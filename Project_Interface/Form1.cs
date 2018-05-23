@@ -49,13 +49,13 @@ namespace Project_Interface2
         }
 
         private void initUserData()
-        {
+        {   // UserData 할당 후 userdata.dat에서 python 위치, kinectProgram 위치 정보를 불러옴
             data = new UserData();
             data.load();
         }
 
         private void initLogic()
-        {
+        {   // Login 할당 후 login에서 메소드를 호출할 수 있도록 메소드를 넘겨줌
             logic = new Logic();
             logic.processEnableChanged += executeButtonEnableChanged;
             logic.outputReceived += outputRecieved;
@@ -69,7 +69,7 @@ namespace Project_Interface2
         }
 
         private void runningCheck_Tick(object sender, EventArgs e)
-        {
+        {   // process가 돌아가는지 확인
 
             if (isLeftStarted)
             {
@@ -84,7 +84,7 @@ namespace Project_Interface2
 
 
         private void textBoxInputLeft_KeyDown(object sender, KeyEventArgs e)
-        {
+        {   // enter를 눌렀을 경우 0번 프로그램에 Text를 입력
             if (e.KeyCode == Keys.Enter)
             {
                 logic.input(0, textBoxInputLeft.Text);
@@ -93,7 +93,7 @@ namespace Project_Interface2
         }
 
         private void textBoxInputRight_KeyDown(object sender, KeyEventArgs e)
-        {
+        {   // enter를 눌렀을 경우 1번 프로그램에 Text를 입력
             if (e.KeyCode == Keys.Enter)
             {
                 logic.input(1, textBoxInputRight.Text);
@@ -102,7 +102,7 @@ namespace Project_Interface2
         }
 
         private void buttonLeft_Click(object sender, EventArgs e)
-        {
+        {   // 키넥트 프로그램 실행
             if (data.KinectProgramPath == null || !File.Exists(data.KinectProgramPath))
             {
                 MessageBox.Show(this, "키넥트 프로그램이 설정돼있지 않거나 파일이 존재하지 않습니다. 프로그램을 선택해주세요");
@@ -110,7 +110,7 @@ namespace Project_Interface2
                 dialog.Filter = "exe|*.exe";
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    data.KinectProgramPath = dialog.FileName;
+                    data.KinectProgramPath = dialog.FileName;  // UserData에 키넥트 경로 지정
                 }
                 else return;
             }
@@ -122,7 +122,7 @@ namespace Project_Interface2
         }
 
         private void buttonRight_Click(object sender, EventArgs e)
-        {
+        {   // 파이썬 프로그램 실행
             bool pythonChoose = false;
 
             if (data.pythonPath == null || !File.Exists(data.pythonPath))
@@ -146,7 +146,7 @@ namespace Project_Interface2
             dialog.Filter = "py|*.py";
             dialog.Title = "Open Python Script";
             if (dialog.ShowDialog() == DialogResult.OK)
-            {
+            {   // python을 이용하여 python script를 실행. 옵션 -u를 통해 python stdin, stderr buffer를 사용하지 않도록 함
                 logic.execute(1, data.pythonPath, "-u " + dialog.FileName);
                 textBoxOutputRight.Text = "";
                 isRightStarted = true;
@@ -157,7 +157,7 @@ namespace Project_Interface2
         private void Form_FormClosing(object sender, FormClosingEventArgs e)
         {
             data.save();
-            logic.finalize();
+            logic.finalize();  // process들을 모두 종료
         }
 
         private void executeButtonEnableChanged(int idx, bool processOK)
@@ -174,7 +174,7 @@ namespace Project_Interface2
                     buttonRight.Enabled = !processOK; break;
             }
 
-            setLabelStatus(idx, processOK ? ProcessStatus.Ready : ProcessStatus.Dead);
+            setLabelStatus(idx, processOK ? ProcessStatus.Ready : ProcessStatus.Dead);  // process의 상태에 따라 label을 업데이트 시킴
         }
 
         // called from other thread
@@ -206,7 +206,7 @@ namespace Project_Interface2
         private void setControl(Control control, Function call, string arg)
         {
             if (control.InvokeRequired)
-            {
+            {   // 다른 스레드에 있을 경우 대리자를 이용하여 함수를 실행
                 control.Invoke(call, arg);
             }
             else
