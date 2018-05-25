@@ -99,8 +99,8 @@ def generate_movies(n_samples=1200, n_frames=15):
 
 # Train the network
 noisy_movies, shifted_movies = generate_movies(n_samples=1200)
-seq.fit(noisy_movies[:1000], shifted_movies[:1000], batch_size=10,
-        epochs=12, validation_split=0.05)
+seq.fit(noisy_movies[:1000], shifted_movies[:1000], batch_size=32,
+        epochs=32, validation_split=0.05)
 
 # Testing the network on one movie
 # feed it with the first 7 positions and then

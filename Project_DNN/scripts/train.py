@@ -5,8 +5,8 @@ def calculateAccuracy(dataList, labelList, size, model, verbose, batch_size):
     print('raw predicted')
     print(model.predict(x=dataList, verbose=verbose, batch_size=batch_size))
     '''
-    print(model.predict(x=dataList, verbose=verbose, batch_size=batch_size))
-
+    '''print(model.predict(x=dataList, verbose=verbose, batch_size=batch_size))
+    '''
     predictedList = np.argmax(model.predict(x=dataList, verbose=verbose, batch_size=batch_size), 1)
     predicteShouldBeList = np.argmax(labelList, 1)
 

@@ -35,11 +35,15 @@ def _formatData(strdata, isShowLog):
     channelSize = int(items[4])
     data = []
 
-    dataSize = frameSize * spointSize * channelSize
-    lastDataPos = dataSize + 5
-    for i in range(5, lastDataPos):
-        data.append(items[i])
-
+    now = 5
+    
+    # 왼/오 하나의 row에 채우고 1채널로 함..
+    for c in range(channelSize):
+        for i in range(spointSize):
+            data.append(items[now])
+            now += 1
+    channelSize = 1
+    
     data = np.reshape(data, (frameSize, spointSize, channelSize))
     labelOneHot = np.zeros(defines.LABEL_SIZE)
     labelOneHot[label] = 1
@@ -128,7 +132,7 @@ def ROI_loadAllSamplePaths(rootfolder):
     """
     Path 읽기
     0_안녕하세요, 1_바다 ... 안의 각 샘플 폴더 모두 취합
-      샘플 폴더 e.g. ../2018-05-22_230321_kyg
+      샘플 폴더 e.g. 1_바다/../2018-05-22_230321_kyg
     
     # arguments
       e.g. rootfolder = ../data/ConvLSTM_train      
@@ -144,11 +148,7 @@ def ROI_loadAllSamplePaths(rootfolder):
             result.append(path2)
     
     return result
-    '''
-def folderPaths(directory, dstList):
-    for filename in os.listdir(directory):
-        dstList.append(os.path.join(directory, filename))
-'''
+
 def ROI_loadDataList(samplePathList, isShow):
     """
     샘플 폴더List 읽기
@@ -165,7 +165,7 @@ def ROI_loadDataList(samplePathList, isShow):
         spointSamples.append(spoint)
         imageSamples.append(images)
         labelSamples.append(label)
-       
+    
     spointSamples = np.array(spointSamples)
     imageSamples = np.array(imageSamples)
     labelSamples = np.array(labelSamples)
@@ -176,6 +176,7 @@ def ROI_loadDataList(samplePathList, isShow):
         labelIdx = np.argmax(labelSamples[i])
         labelCnt[labelIdx] += 1
     print(labelCnt)
+
 
     return spointSamples, imageSamples, labelSamples
 
@@ -211,7 +212,7 @@ def ROI_loadData(dirpath, isShow):
     
     # Spint 로드
     spointData, label = _loadDataFromFile(dirpath + "/Spoints.txt", isShow)
-    
+
     # 이미지 확인법
     #plt.imshow(imageList[0][0] / 255) #settingwindow
     #plt.show() #show
