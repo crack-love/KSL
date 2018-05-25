@@ -74,8 +74,8 @@ string FrameCollection::toString()
 	out << currentDateTime() << " ";
 	out << LABEL(label) << " ";
 	out << FRAME_STANDARD_SIZE << " ";
-	out << FRAME_STANDARD_SIZE << " ";
-	out << 1 << " "; // channel
+	out << SPOINT_SIZE << " ";
+	out << 2 << " "; // channel
 
 	for (int j = 0; j < FRAME_STANDARD_SIZE; ++j)
 	{

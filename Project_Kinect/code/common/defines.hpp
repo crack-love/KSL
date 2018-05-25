@@ -27,15 +27,15 @@
 #define LERP_PERCENT 0.35
 #define HAND_RECORD_TYPE_L JointType_HandLeft
 #define HAND_RECORD_TYPE_R JointType_HandRight
-#define FRAME_STANDARD_SIZE ((SPOINT_SIZE+1)*2) // 76, 이렇게 정한 이유는 mojo때 정방행렬로 만들어야 했기 때문
+#define FRAME_STANDARD_SIZE 100
 
 #define PATH_DATA_FOLDER "../../data/"
 #define FILE_LABEL "LABEL.txt"
 
 // ROI defines
-#define IMAEG_STANDARD_FRAME_SIZE 50
-#define IMAGE_WIDTH 80
-#define IMAGE_HEIGHT 80
+#define IMAEG_STANDARD_FRAME_SIZE 100
+#define IMAGE_WIDTH 128
+#define IMAGE_HEIGHT 128
 
 // ---------------------------------------------------------------------
 //	Macro

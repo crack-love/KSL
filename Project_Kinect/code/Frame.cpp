@@ -46,12 +46,16 @@ string Frame::toString(int nothing)
 {
 	stringstream sstream;
 
-	sstream << lHandActivated << " ";
-	sstream << rHandActivated << " ";
+	//sstream << lHandActivated << " ";
+	//sstream << rHandActivated << " ";
 
 	for (int i = 0; i < SPOINT_SIZE; ++i)
 	{
-		sstream << distanceL[i] << " " << distanceR[i] << " ";
+		sstream << distanceL[i] << " ";
+	}
+	for (int i = 0; i < SPOINT_SIZE; ++i)
+	{
+		 sstream << distanceR[i] << " ";
 	}
 
 	return sstream.str();
