@@ -126,10 +126,12 @@ def _comp(a, b):
 
 def ROI_loadAllSamplePaths(rootfolder):
     """
+    Path 읽기
     0_안녕하세요, 1_바다 ... 안의 각 샘플 폴더 모두 취합
+      샘플 폴더 e.g. ../2018-05-22_230321_kyg
     
     # arguments
-      e.g. rootfolder = ../data/train      
+      e.g. rootfolder = ../data/ConvLSTM_train      
     """
 
     result = []
@@ -142,14 +144,14 @@ def ROI_loadAllSamplePaths(rootfolder):
             result.append(path2)
     
     return result
-    
+    '''
 def folderPaths(directory, dstList):
     for filename in os.listdir(directory):
         dstList.append(os.path.join(directory, filename))
-
+'''
 def ROI_loadDataList(samplePathList, isShow):
     """
-    data 샘플 폴더들을 모두 읽어들인다.
+    샘플 폴더List 읽기
       e.g. imageSamples shape = (samples, timestep, imgshape~)
     """
     spointSamples = []
@@ -167,6 +169,13 @@ def ROI_loadDataList(samplePathList, isShow):
     spointSamples = np.array(spointSamples)
     imageSamples = np.array(imageSamples)
     labelSamples = np.array(labelSamples)
+    
+    ## 로드 결과 각 라벨 몇개씩인지 프린트
+    labelCnt = [0] * defines.LABEL_SIZE
+    for i in range(0, len(labelSamples)):
+        labelIdx = np.argmax(labelSamples[i])
+        labelCnt[labelIdx] += 1
+    print(labelCnt)
 
     return spointSamples, imageSamples, labelSamples
 

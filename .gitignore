@@ -7,7 +7,7 @@
 *.ipdb
 *.exe
 *.keras
-data/
+*.h5
 
 # User-specific files
 *.suo

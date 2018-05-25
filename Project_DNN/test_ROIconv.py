@@ -1,30 +1,62 @@
 '''
  손가락 예측 모델
- 128x128 3channel 76장 * 2(왼/오) sequential 이미지 입력
  CNN + LSTM
 '''
-import PYTHONPATH
-import scripts.dataFormater as df
-import scripts.paths as path
-import scripts.interfaceUtils as util
-import scripts.models as models
-import scripts.train as train
-
-## keras import
 import keras
 from keras.models import Model
 from keras.layers import Conv2D, Dense, LSTM, Flatten, Input, CuDNNLSTM, \
-Activation, Dropout, BatchNormalization, TimeDistributed
+Activation, Dropout, BatchNormalization, TimeDistributed, MaxPool2D
 
-def add_BatchNormal_Activation_Dropout(x):
-    x = TimeDistributed(BatchNormalization())(x)
-    x = TimeDistributed(Activation('relu'))(x)
-    x = TimeDistributed(Dropout(0.3))(x)
+import PYTHONPATH
+import scripts.paths as path
+import scripts.dataFormater as df
+import scripts.interfaceUtils as util
+import scripts.models as models
+import scripts.train as train
+import scripts.defines as define
+
+util.showProcess('Loading TF Session')
+import tensorflow as tf
+sess = tf.Session()
+from keras import backend as K
+K.set_session(sess)
+
+def add_BatchNormal_Activation_Dropout_TD(x, percent):
+    mainlayerName = str(x.name).split('/')[0]
+    x = TimeDistributed(BatchNormalization(momentum=0.01), name=str(mainlayerName + '_BN'))(x)
+    x = TimeDistributed(Activation('relu'), name=str(mainlayerName + '_AC'))(x)
+    x = TimeDistributed(Dropout(percent), name=str(mainlayerName + '_DO'))(x)
     return x    
 
+def add_BatchNormal_Activation_Dropout(x, percent):
+    mainlayerName = str(x.name).split('/')[0]
+    x = BatchNormalization(momentum=0.01, name=str(mainlayerName + '_BN'))(x)
+    x = Activation('relu', name=str(mainlayerName + '_AC'))(x)
+    x = Dropout(percent, name=str(mainlayerName + '_DO'))(x)
+    return x  
+
+import numpy as np
+import random
+def shuffleDataset(d1, d2, d3):
+    if len(d1) != len(d2) or len(d2) != len(d3):
+        raise Exception("Lengths don't match")
+    indexes = list(range(len(d1)))
+    random.shuffle(indexes)
+    d1_shuffled = [d1[i] for i in indexes]    
+    d2_shuffled = [d2[i] for i in indexes]
+    d3_shuffled = [d3[i] for i in indexes]
+    return np.array(d1_shuffled), np.array(d2_shuffled), np.array(d3_shuffled)
+
 # input epochs
-util.showDivisionSingle()
 epochs = int(util.input('How many epochs?'))
+b1_input_shape = (76, 76, 1)
+b2_input_shape = (100, 80, 80, 3)
+branch1_dropout = 0.5
+branch2_dropout = 0.5
+merge1_dropout = 0.5
+b1_batch_size = 5
+b2_batch_size = 3
+m1_batch_size = 1
 
 # load path
 trainDataPath = path.get('TRAIN')
@@ -43,135 +75,199 @@ spointList_train, roiSampleList_train, labelList_train = \
 spointList_test, roiSampleList_test, labelList_test = \
     df.ROI_loadDataList(samplePathList_test, True)
 
-# branch 1 (it will be spoint cnn branch)
-
+# shufle dataset
+spointList_train, roiSampleList_train, labelList_train = \
+    shuffleDataset(spointList_train, roiSampleList_train, labelList_train)
+'''spointList_test, roiSampleList_test, labelList_test = \
+    shuffleDataset(spointList_test, roiSampleList_test, labelList_test)
+'''
+# branch 1 (spoint cnn branch)
+branch1_input = Input(shape=b1_input_shape, name='B1_Input')
+b1 = Conv2D(filters=16,
+           kernel_size=(1, 3),
+           strides=(1, 1), 
+           data_format="channels_last",
+           name = 'B1_Conv2D_1')(branch1_input)
+b1 = add_BatchNormal_Activation_Dropout(b1, branch1_dropout)
+b1 = Conv2D(filters=16,
+           kernel_size=(1, 3),
+           strides=(1, 1), 
+           name = 'B1_Conv2D_2')(b1)
+b1 = add_BatchNormal_Activation_Dropout(b1, branch1_dropout)
+b1 = Conv2D(filters=16,
+           kernel_size=(1, 3),
+           strides=(1, 1), 
+           name = 'B1_Conv2D_3')(b1)
+b1 = add_BatchNormal_Activation_Dropout(b1, branch1_dropout)
+b1 = Flatten(name='B1_Flatten')(b1)
+b1 = add_BatchNormal_Activation_Dropout(b1, branch1_dropout)
+b1 = Dense(256, name='B1_Dense_1')(b1)
+b1 = add_BatchNormal_Activation_Dropout(b1, branch1_dropout)
+b1 = Dense(256, name='B1_Dense_2')(b1)
+b1 = add_BatchNormal_Activation_Dropout(b1, branch1_dropout)
+branch1_output = Dense(define.LABEL_SIZE, activation='softmax', name='B1_Output')(b1)
+# output activation을 relu로 했을 때 발산/소실하다가 softmax로 하니까 정상 예측한다.
+# softmax에 대해서 공부 필요
 
 # branch 2 (roi cnn+lstm branch)
-branch2_input = Input(shape=(100, 80, 80, 3), name='B2I')
-x = TimeDistributed(Conv2D(filters=16,
+branch2_input = Input(shape=b2_input_shape, name='B2_Input')
+b2 = TimeDistributed(Conv2D(filters=16,
                             kernel_size=3,
                             strides=1,
                             padding='same',
-                            data_format='channels_last',
-                            name='B2C'), name='TD_Conv2D_1')(branch2_input)
-x = TimeDistributed(BatchNormalization(), name='TD_Conv2D_1_BN')(x)
-x = TimeDistributed(Activation('relu'), name='TD_Conv2D_1_AC')(x)
-x = TimeDistributed(Dropout(0.3), name='TD_Conv2D_1_DO')(x)
-
-x = TimeDistributed(Conv2D(filters=16,
+                            data_format='channels_last',), name='B2_Conv2D_1')(branch2_input)
+b2 = TimeDistributed(MaxPool2D())(b2)
+b2 = add_BatchNormal_Activation_Dropout_TD(b2, branch2_dropout)
+b2 = TimeDistributed(Conv2D(filters=16,
                             kernel_size=3,
                             strides=1,
                             padding='same',
-                            data_format='channels_last',
-                            name='B2C'), name='TD_Conv2D_2')(x)
-x = TimeDistributed(BatchNormalization(), name='TD_Conv2D_2_BN')(x)
-x = TimeDistributed(Activation('relu'), name='TD_Conv2D_2_AC')(x)
-x = TimeDistributed(Dropout(0.3), name='TD_Conv2D_2_DO')(x)
+                            data_format='channels_last',), name='B2_Conv2D_2')(b2)
+b2 = TimeDistributed(MaxPool2D())(b2)
+b2 = add_BatchNormal_Activation_Dropout_TD(b2, branch2_dropout)
+b2 = TimeDistributed(Flatten(), name='B2_Flatten')(b2)
+b2 = add_BatchNormal_Activation_Dropout_TD(b2, branch2_dropout)
+b2 = TimeDistributed(Dense(128), name='B2_Dense_1')(b2)
+b2 = add_BatchNormal_Activation_Dropout_TD(b2, branch2_dropout)
+b2 = TimeDistributed(Dense(128), name='B2_Dense_2')(b2)
+b2 = add_BatchNormal_Activation_Dropout_TD(b2, branch2_dropout)
+b2 = LSTM(100, name='B2_LSTM_1')(b2)
+b2 = add_BatchNormal_Activation_Dropout(b2, branch2_dropout)
+b2 = Dense(128, name='B2_Dense_3')(b2)
+b2 = add_BatchNormal_Activation_Dropout(b2, branch2_dropout)
+b2 = Dense(64, name='B2_Dense_4')(b2)
+b2 = add_BatchNormal_Activation_Dropout(b2, branch2_dropout)
+branch2_output = Dense(define.LABEL_SIZE, activation='softmax', name='Softmax')(b2)
 
-x = TimeDistributed(Flatten(), name='TD_Flatten')(x)
-x = TimeDistributed(BatchNormalization(), name='TD_Flatten_BN')(x)
-x = TimeDistributed(Activation('relu'), name='TD_Flatten_AC')(x)
-x = TimeDistributed(Dropout(0.3), name='TD_Flatten_DO')(x)
-x = TimeDistributed(Dense(128), name='TD_Dense_1')(x)
-x = TimeDistributed(BatchNormalization(), name='TD_Dense_1_BN')(x)
-x = TimeDistributed(Activation('relu'), name='TD_Dense_1_AC')(x)
-x = TimeDistributed(Dropout(0.3), name='TD_Dense_1_DO')(x)
-x = TimeDistributed(Dense(64), name='TD_Dense_2')(x)
-x = TimeDistributed(BatchNormalization(), name='TD_Dense_2_BN')(x)
-x = TimeDistributed(Activation('relu'), name='TD_Dense_2_AC')(x)
-x = TimeDistributed(Dropout(0.3), name='TD_Dense_2_DO')(x)
-
-x = LSTM(20, dropout=0.3,
-             activation='relu',
-             name='LSTM_1')(x)
-
-x = Dense(32, name='Dense_1')(x)
-x = BatchNormalization(name='Dense_1_BN')(x)
-x = Activation('relu', name='Dense_1_AC')(x)
-x = Dropout(0.3, name='Dense_1_DO')(x)
-predictions = Dense(5, activation='softmax', name='Softmax')(x)
-
-model = Model(inputs=branch2_input, outputs=predictions)
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-model.summary()
-
-while (True):
-    yes = util.input('load weight? (y/n)')
-    if yes=='y':
-        model.load_weights(path.get('data') + '\\roiTempModel.h5')
-        break
-    if yes=='n':
-        break
-
+'''
 # Merge
+#model.compile(loss_weights={'main_output': 1., 'aux_output': 0.2})
+x = keras.layers.concatenate([branch1_output, branch2_output])
+x = Dense(128)(x)
+x = add_BatchNormal_Activation_Dropout(x, merge1_dropout)
+x = Dense(64)(x)
+x = add_BatchNormal_Activation_Dropout(x, merge1_dropout)
+merge1_output = Dense(define.LABEL_SIZE, activation='relu', name='Main_Output')(x)
+'''
+# Mode comile
+b1_model = Model(branch1_input, branch1_output)
+b1_model.name = 'KYG_Spoint1'
+b1_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
+b2_model = Model(branch2_input, branch2_output)
+b2_model.name = 'KYG_HROI1'
+b2_model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+'''
+m1_model = Model(inputs=[branch1_input, branch2_input], outputs=merge1_output)
+m1_model.name = 'KYG_Merge1'
+m1_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+'''
 # Train
-util.showProcess('Train')
-model.fit(roiSampleList_train, labelList_train, shuffle=True, epochs=epochs, verbose=1, batch_size=3)
+overwrite = True
+inputloop = True
+while (inputloop == True):
+    yes = util.input('load weight? (y/n)')
+    if yes == 'y':
+        b1_model.load_weights(path.get('data') + '\\' + b1_model.name + '.h5')
+        b2_model.load_weights(path.get('data') + '\\' + b2_model.name + '.h5')
+        '''m1_model.load_weights(path.get('data') + '\\' + m1_model.name + '.h5')'''
+        inputloop = False
+    if yes == 'n':
+        while (inputloop == True):
+            yes = util.input('overwrite weight? (y/n)')
+            if yes == 'y':
+                overwrite = True
+                inputloop = False
+            if yes == 'n':
+                overwrite = False
+                inputloop = False
 
-# Prediction
-util.showProcess('Prediction')
-accuracy = train.calculateAccuracy(roiSampleList_test, labelList_test, model, verbose=1, batch_size=3)
+# GPU 메모리 부족으로 Batch_size에 한계 있음
+util.showProcess('Train b1')
+b1_model.summary()
+b1_model.fit(spointList_train,
+             labelList_train,
+             epochs=int(epochs/2),
+             verbose=1,
+             batch_size=b1_batch_size)
+
+util.showProcess('Train b2')
+b2_model.summary()
+b2_model.fit(roiSampleList_train,
+             labelList_train,
+             epochs=epochs,
+             verbose=1,
+             batch_size=b2_batch_size)
+'''
+util.showProcess('Train m1')
+m1_model.summary()
+m1_model.fit({'B1_Input':spointList_train, 'B2_Input':roiSampleList_train},
+               labelList_train,
+               epochs=epochs,
+               verbose=1,
+               batch_size=m1_batch_size)
+'''
+# Evaluate
+util.showProcess('Evaluate b1')
+score, acc = b1_model.evaluate(spointList_test, labelList_test, batch_size=b1_batch_size)
+print('Test score:', score)
+print('Test accuracy:', acc)
+
+util.showProcess('Evaluate b2')
+score, acc = b2_model.evaluate(roiSampleList_test, labelList_test, batch_size=b2_batch_size)
+print('Test score:', score)
+print('Test accuracy:', acc)
+
+# Test
+util.showProcess('Test b1')
+accuracy = train.calculateAccuracy(spointList_test,
+                                   labelList_test,
+                                   len(labelList_test),
+                                   b1_model, verbose=1,
+                                   batch_size=b1_batch_size)
 print('Accuracy: ' + str(accuracy))
 
-model.save(path.get('data') + '\\roiTempModel.h5')
+util.showProcess('Test b2')
+accuracy = train.calculateAccuracy(roiSampleList_test,
+                                   labelList_test,
+                                   len(labelList_test),
+                                   b2_model, verbose=1,
+                                   batch_size=b2_batch_size)
+print('Accuracy: ' + str(accuracy))
 
-#accuracy = train.calculateAccuracy(x_test, y_test, model, 2)
-#print('Accuracy : ' + str(accuracy))
+util.showProcess('Test b1 with training data')
+accuracy = train.calculateAccuracy(spointList_train,
+                                   labelList_train,
+                                   len(labelList_train),
+                                   b1_model, verbose=1,
+                                   batch_size=b1_batch_size)
+print('Accuracy: ' + str(accuracy))
 
-# model
-#x = keras.layers.concatenate([l1, l2])
-#model = Model(inputs=[main_input, auxiliary_input], outputs=[main_output, auxiliary_output])
-#model.compile(loss='', optimizer='',
-#loss_weights={'main_output': 1., 'aux_output': 0.2})
-#model.fit({'main_input': headline_data, 'aux_input': additional_data},
-          #{'main_output': labels, 'aux_output': labels},
-          #epochs=50, batch_size=32)
-
+util.showProcess('Test b2 with training data')
+accuracy = train.calculateAccuracy(roiSampleList_train,
+                                   labelList_train,
+                                   len(labelList_train),
+                                   b2_model, verbose=1,
+                                   batch_size=b2_batch_size)
+print('Accuracy: ' + str(accuracy))
 '''
-# load model input -> cnn -> lstm -> dnn
-util.showProcess('Loading model')
-
-model = Sequential()
-model.add(Conv2D)
-
-model = Sequential()
-model.add(Conv2D(filters=16, kernel_size=(1, 3), strides=(1, 1), data_format="channels_last", activation="relu", input_shape=(76, 76, 1)))
-model.add(Conv2D(filters=16, kernel_size=(1, 3), strides=(1, 1), data_format="channels_last", activation="relu"))
-model.add(Conv2D(filters=16, kernel_size=(1, 3), strides=(1, 1), data_format="channels_last", activation="relu"))
-model.add(Conv2D(filters=16, kernel_size=(1, 3), strides=(1, 1), data_format="channels_last", activation="relu"))
-
-model.add(Flatten())
-model.add(Dense(1024, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(1024, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(DFormat.LABEL_SIZE, activation='softmax'))
-
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy']) #loss ?
-model.name = 'KYG_C4D2'
-
-
-# train
-util.showProcess('Train Start')
-#print('BATCH_SIZE: ' + str(BATCH_SIZE))
-#train.train(trainDatas, trainLabels, model, epoch, BATCH_SIZE)
-
-model.fit(X, y, epochs=n_epoch, batch_size=n_batch, verbose=2)
-# evaluate
-result = model.predict(X, batch_size=n_batch, verbose=0)
-
-# result
-print('Evaluate Accuracy')
-#accuracy = train.calculateAccuracy(trainDatas, trainLabels, model, 0)
-#print("Accuracy TRAIN: " + str(accuracy))
-#accuracy = train.calculateAccuracy(testDatas, testLabels, model, 0)
-#print("Accuracy TEST: " + str(accuracy))
-
-# save
-util.showProcess('Saving Weight')
-#models.saveModel(model, weightPath)
-
-print('Complete')
-
+accuracy = train.calculateAccuracy({'B1_Input':spointList_test, 'B2_Input':roiSampleList_test},
+                                    labelList_test,
+                                    len(labelList_test),
+                                    m1_model, verbose=1,
+                                    batch_size=m1_batch_size)
+print('Accuracy: ' + str(accuracy))
 '''
+if overwrite:
+    util.showProcess('Saving model')
+    b1_model.save(path.get('data') + '\\' + b1_model.name + '.h5')
+    print(b1_model.name + ' done')
+    b2_model.save(path.get('data') + '\\' + b2_model.name + '.h5')
+    print(b2_model.name + ' done')
+    '''
+    m1_model.save(path.get('data') + '\\' + m1_model.name + '.h5')
+    print(m1_model.name + ' done')
+    '''
+
+#K.clear_session()
+sess.close()
