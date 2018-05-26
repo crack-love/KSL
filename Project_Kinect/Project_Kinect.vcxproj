@@ -66,13 +66,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(VS_ExecutablePath);$(ExecutablePath)</ExecutablePath>
     <OutDir>$(projectDir)program\</OutDir>
     <IntDir>$(ProjectDir)program\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(VS_ExecutablePath);$(ExecutablePath)</ExecutablePath>
     <OutDir>$(projectDir)program\</OutDir>
     <IntDir>$(ProjectDir)program\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
