@@ -38,12 +38,15 @@ def _formatData(strdata, isShowLog):
     now = 5
     
     # 왼/오 하나의 row에 채우고 1채널로 함..
-    for c in range(channelSize):
-        for i in range(spointSize):
-            data.append(items[now])
-            now += 1
-    channelSize = 1
+    for f in range(frameSize):
+        for c in range(channelSize):
+            for i in range(spointSize):
+                data.append(items[now])
+                now += 1
     
+    channelSize = 1
+    spointSize *= 2
+
     data = np.reshape(data, (frameSize, spointSize, channelSize))
     labelOneHot = np.zeros(defines.LABEL_SIZE)
     labelOneHot[label] = 1
@@ -146,7 +149,7 @@ def ROI_loadAllSamplePaths(rootfolder):
         for sampleFolder in os.listdir(path1):
             path2 = os.path.join(path1, sampleFolder)
             result.append(path2)
-    
+
     return result
 
 def ROI_loadDataList(samplePathList, isShow):
@@ -160,8 +163,7 @@ def ROI_loadDataList(samplePathList, isShow):
     
     for path in samplePathList:
         spoint, images, label = \
-        ROI_loadData(path, isShow)
-
+            ROI_loadData(path, isShow)
         spointSamples.append(spoint)
         imageSamples.append(images)
         labelSamples.append(label)
@@ -169,14 +171,13 @@ def ROI_loadDataList(samplePathList, isShow):
     spointSamples = np.array(spointSamples)
     imageSamples = np.array(imageSamples)
     labelSamples = np.array(labelSamples)
-    
+
     ## 로드 결과 각 라벨 몇개씩인지 프린트
     labelCnt = [0] * defines.LABEL_SIZE
     for i in range(0, len(labelSamples)):
         labelIdx = np.argmax(labelSamples[i])
         labelCnt[labelIdx] += 1
     print(labelCnt)
-
 
     return spointSamples, imageSamples, labelSamples
 
