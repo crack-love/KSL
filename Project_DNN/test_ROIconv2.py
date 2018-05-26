@@ -55,7 +55,7 @@ configs = {}
 configs['epochs'] = 30
 configs['b1_dropout'] = 0.5
 configs['b2_dropout'] = 0.05
-configs['m1_dropout'] = 0.5
+configs['m1_dropout'] = 0.0
 configs['b1_batch_size'] = 15
 configs['b2_batch_size'] = 12
 configs['m1_batch_size'] = 12
@@ -64,8 +64,9 @@ print(configs)
 
 # input
 epochs = int(util.input('How many epochs?'))
-b2_dropout = float(util.input('Branch2 dropout?'))
+b2_dropout = float(util.input('Branch2 dropout? (recomend < 0.05)'))
 isTrainM1 = int(util.input('Is Train M1? (1 to yes)'))
+isLoadWeight = int(util.input('load weight? (1 to yes)'))
 configs['epochs'] = epochs
 configs['b2_dropout'] = b2_dropout
 
@@ -164,13 +165,8 @@ branch2_output = Dense(define.LABEL_SIZE, activation='softmax', name='Softmax')(
 
 # Merge 1
 #model.compile(loss_weights={'main_output': 1., 'aux_output': 0.2})
-m1_dropout = configs.get('m1_dropout')
+#m1_dropout = configs.get('m1_dropout')
 x = keras.layers.concatenate([branch1_output, branch2_output])
-x = Dropout(m1_dropout)(x)
-x = Dense(256)(x)
-x = Dropout(m1_dropout)(x)
-x = Dense(256)(x)
-x = Dropout(m1_dropout)(x)
 merge1_output = Dense(define.LABEL_SIZE, activation='softmax', name='Main_Output')(x)
 
 # Model compile
@@ -188,17 +184,10 @@ m1_model.name = 'KYG_Merge1'
 m1_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Load Weight
-overwrite = True
-inputloop = True
-while (inputloop == True):
-    yes = util.input('load weight? (y/n)')
-    if yes == 'y':
-        b1_model.load_weights(path.get('data') + '\\' + b1_model.name + '.h5')
-        b2_model.load_weights(path.get('data') + '\\' + b2_model.name + '.h5')
-        m1_model.load_weights(path.get('data') + '\\' + m1_model.name + '.h5')
-        inputloop = False
-    if yes == 'n':
-        inputloop = False
+if isLoadWeight == 1:
+    b1_model.load_weights(path.get('data') + '\\' + b1_model.name + '.h5')
+    b2_model.load_weights(path.get('data') + '\\' + b2_model.name + '.h5')
+    m1_model.load_weights(path.get('data') + '\\' + m1_model.name + '.h5')
 
 # Train
 # GPU 메모리 부족으로 Batch_size에 한계 있음
@@ -297,6 +286,7 @@ accuracy = train.calculateAccuracy({'B1_Input':spointList_train, 'B2_Input':roiS
                                     batch_size=m1_batch_size)
 print('Accuracy: ' + str(accuracy))
 '''
+overwrite = True
 if overwrite:
     util.showProcess('Saving model')
     b1_model.save(path.get('data') + '\\' + b1_model.name + '.h5')
