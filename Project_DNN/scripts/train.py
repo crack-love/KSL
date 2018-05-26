@@ -20,9 +20,3 @@ def calculateAccuracy(dataList, labelList, size, model, verbose, batch_size):
     accuracy = np.sum(np.equal(predicted_fit, predicteShouldBeList)) / size
 
     return accuracy
-    
-def train(trainDatas, trainLabels, model, epoch, batch):
-
-    # Training
-    # verbose 보여주는형식
-    model.fit(trainDatas, trainLabels, batch_size=batch, epochs=epoch, verbose=1, shuffle=True)

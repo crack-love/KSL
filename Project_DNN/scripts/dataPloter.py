@@ -6,7 +6,7 @@ import os
 import os.path
 import numpy as np
 
-def plotSpointData(path, colSize, rowSize, subidx, isShow, showToImg):
+def plotSpointData(path, colSize, rowSize, subidx, isImage, isShow, isWriteToFile, writePath):
     '''
     path=None 입력으로 plt.figure() 또는 plt.show() 호출만 가능
     '''
@@ -47,7 +47,7 @@ def plotSpointData(path, colSize, rowSize, subidx, isShow, showToImg):
         plt.title(date + ": " + label)
         res = np.array(res)
 
-        if showToImg:
+        if isImage:
             plt.xlabel("L/R Spoints")
             plt.ylabel("Frame Sequence")
             plt.imshow(res)
@@ -57,8 +57,12 @@ def plotSpointData(path, colSize, rowSize, subidx, isShow, showToImg):
             plt.plot(res)
         
     if isShow: plt.show()
+    #if isWriteToFile: plt.savefig('plot_datas.pdf', bbox_inchec='tight')
+    if isWriteToFile: plt.savefig(writePath)
+    #https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
+    
 
-def plotSpointDataList(rootPath, colSize, isGraphShow, isImgShow):
+def plotSpointDataList(rootPath, colSize, isGraphShow, isImgShow, isWriteToFile, writePath):
     labelfolders = os.listdir(rootPath)
     dataSize = (len(labelfolders))
     if isGraphShow and isImgShow: colSize *= 2
@@ -74,11 +78,14 @@ def plotSpointDataList(rootPath, colSize, isGraphShow, isImgShow):
         dpath = os.path.join(sampleFolder, "Spoints.txt")
         #graph
         if isGraphShow:
-            plotSpointData(dpath, colSize, rowSize, index, False, False)
+            plotSpointData(dpath, colSize, rowSize, index, False, False, False, None)
             index += 1
         #img
         if isImgShow:
-            plotSpointData(dpath, colSize, rowSize, index, False, True)
+            plotSpointData(dpath, colSize, rowSize, index, True, False, False, None)
             index += 1
 
-    plotSpointData(None, 0, 0, 0, True, False) #show
+    if isWriteToFile:
+        plotSpointData(None, 0, 0, 0, False, False, True, writePath)
+    else:
+        plotSpointData(None, 0, 0, 0, False, True, False, None)

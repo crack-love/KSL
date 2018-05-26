@@ -68,31 +68,8 @@ def _loadDataFromFile(file, isShowLog):
 
     return data, label
     
-def loadDataFromDir(dirpath, isShowLog):
-    '''
-    # Previous version(for only spoint.txt)
-    '''
-    fileList = os.listdir(dirpath)
-    
-    dataList = []
-    labelList = []
-
-    for file in fileList:
-        data, label = _loadDataFromFile(dirpath + "/" + file, isShowLog)
-        dataList.append(data)
-        labelList.append(label)
-
-    ## 로드 결과 각 라벨 몇개씩인지 프린트
-    labelCnt = [0] * defines.LABEL_SIZE
-    for i in range(0, len(labelList)):
-        labelIdx = np.argmax(labelList[i])
-        labelCnt[labelIdx] += 1
-    print(os.path.basename(dirpath) + ": " + str(labelCnt))
-
-    return np.array(dataList), np.array(labelList)
-
 # return dic k:integer, v:str
-def loadLabelFile(path, isShow = True):
+def _loadLabelFile(path, isShow = True):
     f = open(path)
 
     labelList = { -1:'None' }
@@ -131,7 +108,7 @@ def _loadImageFiles(dirpath, fileList, isShow):
 def _comp(a, b):
     return int(a[:a.find('.')]) - int(b[:b.find('.')])
 
-def ROI_loadAllSamplePaths(rootfolder):
+def _ROI_loadAllSamplePaths(rootfolder):
     """
     Path 읽기
     0_안녕하세요, 1_바다 ... 안의 각 샘플 폴더 모두 취합
@@ -152,7 +129,22 @@ def ROI_loadAllSamplePaths(rootfolder):
 
     return result
 
-def ROI_loadDataList(samplePathList, isShow):
+def ROI_loadDataListAll(rootPath, isShow, isShuffle):
+    '''
+    rootpath = data/ConvLSTM/
+    '''
+    samplePathList = _ROI_loadAllSamplePaths(rootPath)
+
+    spointList, roiSampleList, labelList = \
+        _ROI_loadDataList(samplePathList, isShow)
+    
+    if isShuffle:
+        spointList, roiSampleList, labelList = \
+            shuffleDataset(spointList, roiSampleList, labelList)
+
+    return spointList, roiSampleList, labelList
+
+def _ROI_loadDataList(samplePathList, isShow):
     """
     샘플 폴더List 읽기
       e.g. imageSamples shape = (samples, timestep, imgshape~)
@@ -163,7 +155,7 @@ def ROI_loadDataList(samplePathList, isShow):
     
     for path in samplePathList:
         spoint, images, label = \
-            ROI_loadData(path, isShow)
+            _ROI_loadData(path, isShow)
         spointSamples.append(spoint)
         imageSamples.append(images)
         labelSamples.append(label)
@@ -181,7 +173,7 @@ def ROI_loadDataList(samplePathList, isShow):
 
     return spointSamples, imageSamples, labelSamples
 
-def ROI_loadData(dirpath, isShow):
+def _ROI_loadData(dirpath, isShow):
     """
     타임스텝 단위의 모든 데이터를 읽는다.
       디렉토리 안에 있는 left, right hand 이미지, SPoint.txt 로드
@@ -263,3 +255,19 @@ def ROI_loadSingleImages(dirpath, isShow):
     print(labels.shape)
 
     return imageList, labels
+
+import numpy as np
+import random
+def shuffleDataset(d1, d2, d3):
+    '''
+    # Return
+      shuffled data (d1, d2, d3)
+    '''
+    if len(d1) != len(d2) or len(d2) != len(d3):
+        raise Exception("Lengths don't match")
+    indexes = list(range(len(d1)))
+    random.shuffle(indexes)
+    d1_shuffled = [d1[i] for i in indexes]    
+    d2_shuffled = [d2[i] for i in indexes]
+    d3_shuffled = [d3[i] for i in indexes]
+    return np.array(d1_shuffled), np.array(d2_shuffled), np.array(d3_shuffled)

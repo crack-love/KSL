@@ -30,10 +30,12 @@ def _init():
     print('Using preset Paths from paths.py')
     
     _append('label', '..\\..\\data\\LABEL.txt')
-    _append('weight', '..\\models\\weights.keras')
-    _append('train', '..\\..\\data\\train')
-    _append('test', '..\\..\\data\\test')
+    #_append('weight', '..\\models\\weights.keras')
+    #_append('train', '..\\..\\data\\train')
+    #_append('test', '..\\..\\data\\test')
     _append('data', '..\\..\\data')
+    _append('weight', '..\\weight')
+    _append('img', '..\\img')
 
     # Change relative to absolute
     # Error File/Folder is not exist
