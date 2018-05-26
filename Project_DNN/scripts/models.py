@@ -116,7 +116,6 @@ def Model_M1(b1, b2):
     m1_learningRate = 5e-5
     
     x = Add()([b1.outputs[0], b2.outputs[0]])
-    x = Dropout(m1_dropout)(x)
     x = Dense(128, activation='relu')(x)
     x = Dropout(m1_dropout)(x)
     x = Dense(128, activation='relu')(x)
@@ -155,7 +154,7 @@ def saveWeight(model, dirPath):
     model.save_weights(path)
 
 def saveModelDescription(model, path, isShow):
-    path = os.path.join(path, model.name + '.jpg')
+    path = os.path.join(path, 'md_' + model.name + '.jpg')
     plot_model(model, to_file=path, show_shapes=True)
     if isShow:
         print(model.name + ' done')

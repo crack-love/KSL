@@ -6,7 +6,6 @@
 *.iobj
 *.ipdb
 *.exe
-*.keras
 *.h5
 
 # User-specific files
