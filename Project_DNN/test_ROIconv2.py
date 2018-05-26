@@ -161,13 +161,15 @@ b2 = Dense(256, activation='relu')(b2)
 b2 = Dropout(b2_dropout)(b2)
 b2 = Dense(256, activation='relu')(b2)
 b2 = Dropout(b2_dropout)(b2)
-branch2_output = Dense(define.LABEL_SIZE, activation='softmax', name='Softmax')(b2)
+branch2_output = Dense(define.LABEL_SIZE, activation='softmax', name='B2_Output')(b2)
 
 # Merge 1
 #model.compile(loss_weights={'main_output': 1., 'aux_output': 0.2})
 #m1_dropout = configs.get('m1_dropout')
-x = keras.layers.concatenate([branch1_output, branch2_output])
-merge1_output = Dense(define.LABEL_SIZE, activation='softmax', name='Main_Output')(x)
+x = keras.layers.Add()([branch2_output, branch1_output])
+x = Dense(128, activation='relu')(x)
+x = Dense(128, activation='relu')(x)
+merge1_output = Dense(define.LABEL_SIZE, activation='softmax', name='M1_Output')(x)
 
 # Model compile
 b1_model = Model(branch1_input, branch1_output)
@@ -179,7 +181,7 @@ b2_model = Model(branch2_input, branch2_output)
 b2_model.name = 'KYG_HROI1'
 b2_model.compile(optimizer=rms, loss='categorical_crossentropy', metrics=['accuracy'])
 
-m1_model = Model(inputs=[branch1_input, branch2_input], outputs=merge1_output)
+m1_model = Model(inputs=[branch1_input, branch2_input], outputs=[merge1_output])
 m1_model.name = 'KYG_Merge1'
 m1_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
@@ -191,11 +193,12 @@ if isLoadWeight == 1:
 
 # Train
 # GPU 메모리 부족으로 Batch_size에 한계 있음
+
 util.showProcess('Train b1')
 b1_model.summary()
 b1_model.fit(spointList_train,
              labelList_train,
-             epochs=int(configs.get('epochs')/3),
+             epochs=int(configs.get('epochs')/2),
              verbose=1,
              batch_size=configs.get('b1_batch_size'))
 
@@ -206,17 +209,20 @@ b2_model.fit(roiSampleList_train,
              epochs=int(configs.get('epochs')),
              verbose=1,
              batch_size=configs.get('b2_batch_size'))
-
+'''
 if isTrainM1 == 1:
     util.showProcess('Train m1')
     m1_model.summary()
     m1_model.fit({'B1_Input':spointList_train, 'B2_Input':roiSampleList_train},
-                labelList_train,
-                epochs=int(epochs/3),
+                [labelList_train, labelList_train, labelList_train],
+                epochs=int(epochs),
                 verbose=1,
                 batch_size=configs.get('m1_batch_size'))
-
+'''
 # Evaluate
+b1_batch_size = configs.get('b1_batch_size')
+b2_batch_size = configs.get('b2_batch_size')
+m1_batch_size = configs.get('m1_batch_size')
 '''
 util.showProcess('Evaluate b1')
 score, acc = b1_model.evaluate(spointList_test, labelList_test, batch_size=b1_batch_size)
@@ -229,16 +235,13 @@ print('Test score:', score)
 print('Test accuracy:', acc)
 
 util.showProcess('Evaluate b2 with test')
-score, acc = b2_model.evaluate(roiSampleList_test, labelList_test, batch_size=b2_batch_size)
-print('Test score:', score)
-print('Test accuracy:', acc)
+m1_model.evaluate([spointList_test, roiSampleList_test], [labelList_test, labelList_test, labelList_test], batch_size=b2_batch_size)
+#print('Test score:', score)
+#print('Test accuracy:', acc)
 '''
 
 # Test
 util.showProcess('Test b1')
-b1_batch_size = configs.get('b1_batch_size')
-b2_batch_size = configs.get('b2_batch_size')
-m1_batch_size = configs.get('m1_batch_size')
 accuracy = train.calculateAccuracy(spointList_test,
                                    labelList_test,
                                    len(labelList_test),
@@ -253,7 +256,7 @@ accuracy = train.calculateAccuracy(roiSampleList_test,
                                    b2_model, verbose=1,
                                    batch_size=b2_batch_size)
 print('Accuracy: ' + str(accuracy))
-
+'''
 util.showProcess('Test m1')
 accuracy = train.calculateAccuracy({'B1_Input':spointList_test, 'B2_Input':roiSampleList_test},
                                     labelList_test,
@@ -261,7 +264,7 @@ accuracy = train.calculateAccuracy({'B1_Input':spointList_test, 'B2_Input':roiSa
                                     m1_model, verbose=1,
                                     batch_size=m1_batch_size)
 print('Accuracy: ' + str(accuracy))
-'''
+
 util.showProcess('Test b1 with training data')
 accuracy = train.calculateAccuracy(spointList_train,
                                    labelList_train,
