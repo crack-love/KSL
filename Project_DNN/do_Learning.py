@@ -11,12 +11,12 @@ from keras.layers import Conv2D, Dense, LSTM, Flatten, Input, \
                          Activation, Dropout, TimeDistributed, MaxPool2D
 
 import PYTHONPATH
-import scripts.paths as path
 import scripts.dataFormater as df
 import scripts.dataPloter as dp
 import scripts.models as models
 import scripts.train as train
 import scripts.defines as define
+from scripts.Path import Path
 
 import tensorflow as tf
 from keras import backend as K
@@ -25,8 +25,8 @@ sess = tf.Session()
 K.set_session(sess)
 
 #initialize
-path.ifNoDirThanMakeDir('img')
-path.ifNoDirThanMakeDir('weight')
+Path.ifNoDirThanMakeDir('img')
+Path.ifNoDirThanMakeDir('weight')
 
 # configs
 epochs = util.inputInt('How many epochs?')
@@ -38,8 +38,8 @@ overwrite = True
 
 # load dataset
 util.showProcess('Loading dataset')
-dirPath_train = path.get('data') + '\\ConvLSTM_train'
-dirPath_test = path.get('data') + '\\ConvLSTM_test'
+dirPath_train = Path.get('train')
+dirPath_test = Path.get('test')
 
 print('Loading Train Samples : ')
 spointList_train, roiSampleList_train, labelList_train = \
@@ -49,8 +49,8 @@ spointList_test, roiSampleList_test, labelList_test = \
     df.ROI_loadDataListAll(dirPath_test, isShow=False, isShuffle=False)
 
 # write data plot graph
-dp.plotSpointDataList(dirPath_train, 2, True, False, True, path.get('img') + '\\d_graph.jpg')
-dp.plotSpointDataList(dirPath_train, 2, False, True, True, path.get('img') + '\\d_image.jpg')
+dp.plotSpointDataList(dirPath_train, 2, 2, False, Path.get('img') + '\\d_graph')
+dp.plotSpointDataList(dirPath_train, 2, 2, True, Path.get('img') + '\\d_image')
 
 # make model
 util.showProcess('Model Generating')
@@ -63,14 +63,14 @@ print('M1 done')
 m1.summary()
 
 # plot to file
-models.saveModelDescription(b1, path.get('img'), False)
-models.saveModelDescription(b2, path.get('img'), False)
-models.saveModelDescription(m1, path.get('img'), False)
+models.saveModelDescription(b1, Path.get('img'), False)
+models.saveModelDescription(b2, Path.get('img'), False)
+models.saveModelDescription(m1, Path.get('img'), False)
 
 # Load Weight
 if isLoadWeight == 1:
     util.showProcess('Loading Weight')
-    models.loadWeight(m1, path.get('weight'))
+    models.loadWeight(m1, Path.get('weight'))
 
 # Train
 util.showProcess('Train M1')
@@ -98,6 +98,6 @@ print('Accuracy: ' + str(accuracy))
 # Write Weight
 if overwrite:
     util.showProcess('Saving Weight')
-    models.saveWeight(m1, path.get('weight'))
+    models.saveWeight(m1, Path.get('weight'))
 
 sess.close()
