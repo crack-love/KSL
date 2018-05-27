@@ -48,5 +48,10 @@ def _init():
         #else:
             #print(key + ": OK")
 
+def ifNoDirThanMakeDir(key):
+    path = get(key)
+    if not os.path.exists(path):
+        os.mkdir(path)
+
 #임포트 하자마자 초기화함
 _init()

@@ -2,6 +2,9 @@
  손가락 예측 모델
  CNN + LSTM
 '''
+import scripts.interfaceUtils as util
+util.showProcess('Start Program')
+
 import keras
 from keras.models import Model
 from keras.layers import Conv2D, Dense, LSTM, Flatten, Input, \
@@ -11,7 +14,6 @@ import PYTHONPATH
 import scripts.paths as path
 import scripts.dataFormater as df
 import scripts.dataPloter as dp
-import scripts.interfaceUtils as util
 import scripts.models as models
 import scripts.train as train
 import scripts.defines as define
@@ -22,14 +24,18 @@ util.showProcess('Loading TF Session')
 sess = tf.Session()
 K.set_session(sess)
 
+#initialize
+path.ifNoDirThanMakeDir('img')
+path.ifNoDirThanMakeDir('weight')
+
 # configs
-epochs = int(util.input('How many epochs?'))
+epochs = util.inputInt('How many epochs?')
 b1_batch_size = 20 # GPU 메모리 부족으로 Batch_size에 한계 있음
 b2_batch_size = 11
 m1_batch_size = 11
-isLoadWeight = int(util.input('Load weight? (1 to yes)'))
+isLoadWeight = util.inputInt('Load weight? (1 to yes)')
 overwrite = True
-isGuidenceTrain = int(util.input('Guidence Train? (1 to yes)'))
+isGuidenceTrain = util.inputInt('Guidence Train? (1 to yes)')
 
 # load dataset
 util.showProcess('Loading dataset')
@@ -44,6 +50,7 @@ spointList_test, roiSampleList_test, labelList_test = \
     df.ROI_loadDataListAll(dirPath_test, isShow=False, isShuffle=False)
 
 # write data plot graph
+print('Writing Data Plot Graph ...')
 dp.plotSpointDataList(dirPath_train, 2, True, False, True, path.get('img') + '\\d_graph.jpg')
 dp.plotSpointDataList(dirPath_train, 2, False, True, True, path.get('img') + '\\d_image.jpg')
 

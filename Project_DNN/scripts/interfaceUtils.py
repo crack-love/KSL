@@ -33,3 +33,6 @@ def input(msg):
     response = sys.stdin.readline().strip()
     print('>>> ' + response)
     return response
+
+def inputInt(msg):
+    return int(input(msg))
