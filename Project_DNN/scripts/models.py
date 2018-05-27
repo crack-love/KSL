@@ -4,6 +4,8 @@ from keras.models import Model
 from keras.layers import *
 from keras.optimizers import RMSprop, Adam
 from keras.utils import plot_model # for model description png
+from keras.losses import *
+from keras.activations import relu
 
 import dataFormater as DFormat
 import interfaceUtils as utils
@@ -31,25 +33,28 @@ def Model_B1():
     branch1_input = Input(shape=(150, 74, 1), name='B1_Input')
     b1 = Conv2D(filters=16,
             kernel_size=(1, 10),
-            strides=(1, 1), 
+            strides=(1, 2), 
             data_format="channels_last",
             name = 'B1_Conv2D_1')(branch1_input)
     b1 = _add_Activation_Dropout(b1, b1_dropout)
     b1 = Conv2D(filters=16,
             kernel_size=(1, 10),
-            strides=(1, 1), 
+            strides=(1, 2), 
             name = 'B1_Conv2D_2')(b1)
     b1 = _add_Activation_Dropout(b1, b1_dropout)
     b1 = Conv2D(filters=16,
             kernel_size=(1, 10),
-            strides=(1, 1), 
+            strides=(1, 2), 
             name = 'B1_Conv2D_3')(b1)
     b1 = _add_Activation_Dropout(b1, b1_dropout)
     b1 = Flatten(name='B1_Flatten')(b1)
     b1 = _add_Activation_Dropout(b1, b1_dropout)
     b1 = Dense(256, name='B1_Dense_1')(b1)
     b1 = _add_Activation_Dropout(b1, b1_dropout)
-    branch1_output = Dense(define.LABEL_SIZE, activation='softmax', name='B1_Softmax')(b1)
+    b1 = Dense(256, name='B1_Dense_2')(b1)
+    branch1_output = b1
+    #b1 = _add_Activation_Dropout(b1, b1_dropout)
+    #branch1_output = Dense(define.LABEL_SIZE, activation='softmax', name='B1_Softmax')(b1)
     
     adma = Adam(lr=b1_learningrate)
 
@@ -63,11 +68,11 @@ def Model_B2():
     '''
     branch 2 (roi cnn+lstm branch)
     '''
-    b2_dropout = 0.01
-    b2_learningRate = 5e-5
+    b2_dropout = 0.025
+    b2_learningRate = 1e-4
 
     branch2_input = Input(shape=(90, 100, 100, 3), name='B2_Input')
-    b2 = TimeDistributed(Conv2D(filters=32,
+    b2 = TimeDistributed(Conv2D(filters=16,
                                 kernel_size=5,
                                 strides=1,
                                 padding='same',
@@ -76,14 +81,14 @@ def Model_B2():
                                 ), name='B2_Conv2D_1')(branch2_input)
     b2 = TimeDistributed(MaxPool2D(), name='B2_MaxPool2D_1')(b2)
     b2 = _add_Activation_Dropout_TD(b2, b2_dropout)
-    b2 = TimeDistributed(Conv2D(filters=32,
+    b2 = TimeDistributed(Conv2D(filters=16,
                                 kernel_size=5,
                                 strides=1,
                                 padding='same',
                                 activation='relu',), name='B2_Conv2D_2')(b2)
     b2 = TimeDistributed(MaxPool2D(), name='B2_MaxPool2D_2')(b2)
     b2 = _add_Activation_Dropout_TD(b2, b2_dropout)
-    b2 = TimeDistributed(Conv2D(filters=32,
+    b2 = TimeDistributed(Conv2D(filters=16,
                                 kernel_size=5,
                                 strides=1,
                                 padding='same',
@@ -91,14 +96,18 @@ def Model_B2():
     b2 = TimeDistributed(MaxPool2D(), name='B2_MaxPool2D_3')(b2)
     b2 = _add_Activation_Dropout_TD(b2, b2_dropout)
     b2 = TimeDistributed(Flatten(), name="B2_Flatten")(b2)
-    b2 = TimeDistributed(Dense(512, activation='relu'), name="B2_Dense_1")(b2)
+    b2 = TimeDistributed(Dense(256, activation='relu'), name="B2_Dense_1")(b2)
     b2 = TimeDistributed(Dropout(b2_dropout), name="B2_Dense_1_DO")(b2)
-    b2 = TimeDistributed(Dense(512, activation='relu'), name="B2_Dense_2")(b2)
+    b2 = TimeDistributed(Dense(256, activation='relu'), name="B2_Dense_2")(b2)
     b2 = TimeDistributed(Dropout(b2_dropout), name="B2_Dense_2_DO")(b2)
-    b2 = LSTM(512, dropout=b2_dropout, name='B2_LSTM_1')(b2)
+    b2 = LSTM(256, dropout=b2_dropout, name='B2_LSTM_1')(b2)
+    branch2_output = b2
     b2 = Dense(256, activation='relu', name='B2_Dense_3')(b2)
     b2 = Dropout(b2_dropout, name='B2_Dense_3_DO')(b2)
-    branch2_output = Dense(define.LABEL_SIZE, activation='softmax', name='B2_Softmax')(b2)
+    b2 = Dense(256, activation='relu', name='B2_Dense_4')(b2)
+    branch2_output = b2
+    #b2 = Dropout(b2_dropout, name='B2_Dense_4_DO')(b2)
+    #branch2_output = Dense(define.LABEL_SIZE, activation='softmax', name='B2_Softmax')(b2)
 
     rms = RMSprop(lr=b2_learningRate) # lr 중요
 
@@ -111,18 +120,25 @@ def Model_B2():
 def Model_M1(b1, b2):
     '''
     Merge 1 (b1 + b2)
+    # comment
+      lr=1e-4로 최소 epoch 60번은 돌려야 2,3을 구분할 수 있더라
     '''
-    m1_dropout = 0.01
-    m1_learningRate = 5e-5
-    
-    x = Add()([b1.outputs[0], b2.outputs[0]])
-    x = Dense(128, activation='relu')(x)
-    x = Dropout(m1_dropout)(x)
-    x = Dense(128, activation='relu')(x)
-    x = Dropout(m1_dropout)(x)
-    merge1_output = Dense(define.LABEL_SIZE, activation='softmax', name='M1_Softmax')(x)
+    #m1_dropout = 0.5
+    m1_learningRate = 1e-4
+    #decay_rate = m1_learningRate / 20 # lr/epoches
+    #decay_rate = 0
+    relu_alpha = 0.25
 
-    rms = RMSprop(lr=m1_learningRate) # lr 중요
+    x = Concatenate()([b1.outputs[0], b2.outputs[0]])
+    x = Dense(512)(x)
+    x = LeakyReLU(relu_alpha)(x)
+    #x = Dropout(m1_dropout)(x)
+    x = Dense(512)(x)
+    x = LeakyReLU(relu_alpha)(x)
+    #x = Dropout(m1_dropout)(x)
+    merge1_output = Dense(define.LABEL_SIZE, activation='softmax', name='M1_Softmax')(x)
+    
+    rms = RMSprop(lr=m1_learningRate)
 
     # Model compile
     # model.compile(loss_weights={'main_output': 1., 'aux_output': 0.2})
