@@ -534,7 +534,7 @@ void Kinect::updateFrame()
 		// 기록 끝
 		if (frameStacking && (!leftHandActivated && !rightHandActivated))
 		{
-			int needStackedCnt = (mode == KINECT_MODE_PREDICT ? 18 : 41);
+			int needStackedCnt = (mode == KINECT_MODE_PREDICT ? 18 : 35);
 
 			// 일정 frame 이상 쌓여야 함, 아니면 송신/저장 안함
 			if (frameCollection.getCollectionSize() > needStackedCnt)
@@ -624,7 +624,7 @@ void Kinect::save()
 	string folderPath = string(PATH_DATA_FOLDER);
 	folderPath += "/" + to_string(label) + "_" + LABEL(label);
 	isFolderNotExistCreate(folderPath);
-	folderPath += "/" + currentDateTime() + "_" + label + "_" + workerName;
+	folderPath += "/" + currentDateTime() + "_" + to_string(label) + "_" + workerName;
 	isFolderNotExistCreate(folderPath);
 	folderPath += "/";
 

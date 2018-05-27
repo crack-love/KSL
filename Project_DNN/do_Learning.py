@@ -30,9 +30,9 @@ path.ifNoDirThanMakeDir('weight')
 
 # configs
 epochs = util.inputInt('How many epochs?')
-b1_batch_size = 20 # GPU 메모리 부족으로 Batch_size에 한계 있음
-b2_batch_size = 11
-m1_batch_size = 11
+b1_batch_size = 15 # GPU 메모리 부족으로 Batch_size에 한계 있음
+b2_batch_size = 4
+m1_batch_size = 4
 isLoadWeight = util.inputInt('Load weight? (1 to yes)')
 overwrite = True
 isGuidenceTrain = util.inputInt('Guidence Train? (1 to yes)')
@@ -95,7 +95,7 @@ m1.fit([spointList_train, roiSampleList_train], [labelList_train],
 util.showProcess('Evaluate M1')
 score, acc = m1.evaluate([spointList_train, roiSampleList_train],
                          [labelList_train],
-                         batch_size=b1_batch_size)
+                         batch_size=m1_batch_size)
 print('Test score:', score)
 print('Test accuracy:', acc)
 
