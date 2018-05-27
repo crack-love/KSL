@@ -1,1 +1,1 @@
-LABEL_SIZE = 2
+LABEL_SIZE = 5
