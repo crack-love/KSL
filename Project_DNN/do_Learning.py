@@ -32,7 +32,7 @@ Path.ifNoDirThanMakeDir('weight')
 epochs = util.inputInt('How many epochs?')
 b1_batch_size = 15 # GPU 메모리 부족으로 Batch_size에 한계 있음
 b2_batch_size = 15
-m1_batch_size = 15
+m1_batch_size = 20
 isLoadWeight = util.inputInt('Load weight? (1 to yes)')
 overwrite = True
 
@@ -55,16 +55,18 @@ dp.plotSpointDataList(dirPath_train, 2, 2, True, Path.get('img') + '\\d_image')
 # make model
 util.showProcess('Model Generating')
 b1 = models.Model_B1()
-print('B1 done')
+util.showProcess('B1')
+b1.summary()
 b2 = models.Model_B2()
-print('B2 done')
-m1 = models.Model_M1(b1, b2)
-print('M1 done')
-m1.summary()
+util.showProcess('B2')
+b2.summary()
+m1 = models.Model_M1()
+#util.showProcess('M1')
+#m1.summary()
 
 # plot to file
-models.saveModelDescription(b1, Path.get('img'), False)
-models.saveModelDescription(b2, Path.get('img'), False)
+models.saveModelDescription(models.Model_B1(), Path.get('img'), False)
+models.saveModelDescription(models.Model_B2(), Path.get('img'), False)
 models.saveModelDescription(m1, Path.get('img'), False)
 
 # Load Weight

@@ -33,7 +33,7 @@ class _Path():
 
             # Path 미존재
             if (os.path.exists(self.__DIC[key]) == False):
-                utils.showError('{0} 파일/폴더를 찾을 수 없습니다.'.format(_DIC[key]))
+                utils.showError('{0} 파일/폴더를 찾을 수 없습니다.'.format(self.__DIC[key]))
             #else:
                 #print(key + ": OK")
 
