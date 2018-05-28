@@ -24,6 +24,7 @@ class _Path():
         self.__append('data', '..\\..\\data')
         self.__append('weight', '..\\weight')
         self.__append('img', '..\\img')
+        self.__append('temp', '..\\..\\data\\temp')
 
         # Change relative to absolute
         # Error File/Folder is not exist
