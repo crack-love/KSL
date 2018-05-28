@@ -29,6 +29,8 @@ while (True):
     spointData = np.array([spointData])
     imageList = np.array([imageList])
     label = np.array([label])
+    #print(spointData.shape)
+    #print(imageList.shape)
 
     # 예측
     # (150, 74, 1)을 리스트로 wrap(1, 150, 74, 1)해서 넣고

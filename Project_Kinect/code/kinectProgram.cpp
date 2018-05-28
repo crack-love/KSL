@@ -665,9 +665,9 @@ void Kinect::save(bool isSending)
 		writeFile << sstream.str();
 		writeFile.close();
 
-		cout << LABEL(label) << " Record saving ... done " << ++i << endl;
+		cout << LABEL(label) << " Record saving ... done " << ++i << path << endl;
 	}
-	else cout << LABEL(label) << " Record saving ... fail " << ++i << endl;
+	else cout << LABEL(label) << " Record saving ... fail " << ++i << path << endl;
 
 	// ROI Images
 	lhandCollection.save(path, 0);
