@@ -26,6 +26,8 @@
 
 1. 빌드를 위해서 VC15(Visual studio 2017)가 필요하다. (C++/C# 개발 환경 설치) -> [site](https://docs.microsoft.com/ko-kr/visualstudio/install/install-visual-studio)
 
+    C++, C#(.Net) 모듈 설치 
+
 1. 빌드 파일 실행을 위해서는 vc 재배포 패키지 2012 설치가 필요하다. -> [link](https://github.com/crack-love/KSL/blob/master/dependency/vcredist_x64.exe)
 
 1. 키넥트 런타임 패키지가 설치가 필요하다. -> [link](https://drive.google.com/open?id=1_m3lO9dSzmrTBmx_6e3x4FYEU7mtPwXO)
