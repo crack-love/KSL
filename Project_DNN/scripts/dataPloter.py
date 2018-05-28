@@ -89,9 +89,11 @@ def plotSpointDataList(rootPath, rowSize, colSize, isImg, writePath):
 
     figureSize = rowSize * colSize
     labelSize = len(labelFolders)
-
     my_dpi = 144
-    plt.figure(figsize=(1600/my_dpi, 900/my_dpi), dpi=my_dpi)
+    w = 1600
+    h = 900
+
+    plt.figure(figsize=(w/my_dpi, h/my_dpi), dpi=my_dpi)
     for i in range(labelSize):
         labelFolder = labelFolders[i]
         path = os.path.join(rootPath, labelFolder)
@@ -105,4 +107,4 @@ def plotSpointDataList(rootPath, rowSize, colSize, isImg, writePath):
 
         if index == figureSize or i == labelSize - 1:
             _plotWriteFile(writePath + '_' + str(i + 1))
-            plt.figure(figsize=(1600/my_dpi, 900/my_dpi), dpi=my_dpi)
+            plt.figure(figsize=(w/my_dpi, h/my_dpi), dpi=my_dpi)
