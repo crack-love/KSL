@@ -7,7 +7,7 @@ interfaces, etc
 import tensorflow as tf
 import sys
 
-DIVISION_LINE_LENGTH = 65
+DIVISION_LINE_LENGTH = 62
 
 def showDivision():
     print('=' * DIVISION_LINE_LENGTH)

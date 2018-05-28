@@ -148,6 +148,9 @@ def Model_M1(b1, b2):
 
     return m1_model
 
+def Model_M1_Self():
+    return Model_M1(Model_B1(), Model_B2())
+
 def loadWeight(model, dirPath):
     path = os.path.join(dirPath, model.name + '.h5')
 
