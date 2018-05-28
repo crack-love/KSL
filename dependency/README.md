@@ -2,8 +2,6 @@
 
 모든 과정은 Windows 10 64bit 환경 기준입니다. 만약 link가 깨져있거나 설치 과정에 문제가 있으면 issue 부탁드립니다.
 
-설치 순서는 C++, C#, Kinect 개발 환경, Python, Tensorflow, Keras, GPU 지원 순이며 Python 이후 부터는 설치 과정이 CLI 환경에서 이뤄집니다.
-
 -------------------------------------------------------------------
 
 ## Index
@@ -15,6 +13,8 @@
     - [Install Keras](#install-keras)
 
     - [GPU using](#gpu-using)
+    
+    - [Python modules](#python-modules)
 
 1. [Building Guide](#building-guide)
 
@@ -125,6 +125,38 @@ NVIDIA의 CUDA를 이용한 cuDNN을 사용하기 위해서는 GPU가 compute ca
     ```
 
     아무것도 출력되지 않으면 로그 출력 범위(I, W, E)를 확인해보거나 기계학습을 돌려보고 체감속도가 빨라졌는지 또는 GPU를 사용중인지(작업관리자) 확인해본다..
+
+### Python modules
+
+1. Pillow 설치
+
+    Pillow는 Python Imaging library로 이미지 저장 및 처리에 이용된다.
+    
+    ```shell
+    pip install pillow
+    ```
+
+1. Matplotlib 설치
+    
+    파이썬 plotting 라이브러리이다. (메트렙의 그 Plot)
+    
+    ```shell
+    pip install matplotlib
+    ```
+
+1. Graphbiz 설치
+
+    그래프 Visualization 소프트웨어로 파이썬에서는 Pydot 을 이용해 interface를 구성해야한다. Graphbiz 설치, Path 설정 그리고 Pydot 설치가 필요하다.
+    
+    1. [Graphbiz download](https://www.graphviz.org/download/)
+    
+    1. 설치 후 Graphbiz의 bin폴더 Path 환경변수에 등록
+    
+    1. Pydot 인터페이스 설치
+    
+        ```shell
+        pip install pydot
+        ```
 
 [top](#index)
 
