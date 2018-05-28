@@ -56,12 +56,13 @@
             this.tableLayoutPanel1.Controls.Add(this.labelMain, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 3;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(794, 501);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(907, 626);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // tableLayoutPanel3
@@ -72,12 +73,12 @@
             this.tableLayoutPanel3.Controls.Add(this.buttonCloseAll, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.buttonSet, 1, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 475);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 594);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(794, 26);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(907, 32);
             this.tableLayoutPanel3.TabIndex = 1;
             // 
             // buttonCloseAll
@@ -88,7 +89,7 @@
             this.buttonCloseAll.Location = new System.Drawing.Point(0, 0);
             this.buttonCloseAll.Margin = new System.Windows.Forms.Padding(0);
             this.buttonCloseAll.Name = "buttonCloseAll";
-            this.buttonCloseAll.Size = new System.Drawing.Size(397, 26);
+            this.buttonCloseAll.Size = new System.Drawing.Size(453, 32);
             this.buttonCloseAll.TabIndex = 2;
             this.buttonCloseAll.TabStop = false;
             this.buttonCloseAll.Text = "Close All (ESC)";
@@ -99,10 +100,10 @@
             // 
             this.buttonSet.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonSet.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonSet.Location = new System.Drawing.Point(397, 0);
+            this.buttonSet.Location = new System.Drawing.Point(453, 0);
             this.buttonSet.Margin = new System.Windows.Forms.Padding(0);
             this.buttonSet.Name = "buttonSet";
-            this.buttonSet.Size = new System.Drawing.Size(397, 26);
+            this.buttonSet.Size = new System.Drawing.Size(454, 32);
             this.buttonSet.TabIndex = 3;
             this.buttonSet.Text = "Set";
             this.buttonSet.UseVisualStyleBackColor = true;
@@ -122,25 +123,25 @@
             this.tableLayoutPanel2.Controls.Add(this.textBoxOutputLeft, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.labelStatusLeft, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 142);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 178);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 4;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(794, 333);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(907, 416);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // buttonRight
             // 
             this.buttonRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonRight.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonRight.Location = new System.Drawing.Point(397, 308);
+            this.buttonRight.Location = new System.Drawing.Point(453, 385);
             this.buttonRight.Margin = new System.Windows.Forms.Padding(0);
             this.buttonRight.Name = "buttonRight";
-            this.buttonRight.Size = new System.Drawing.Size(397, 25);
+            this.buttonRight.Size = new System.Drawing.Size(454, 31);
             this.buttonRight.TabIndex = 5;
             this.buttonRight.Text = "Execute";
             this.buttonRight.UseVisualStyleBackColor = true;
@@ -150,10 +151,10 @@
             // 
             this.buttonLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonLeft.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonLeft.Location = new System.Drawing.Point(0, 308);
+            this.buttonLeft.Location = new System.Drawing.Point(0, 385);
             this.buttonLeft.Margin = new System.Windows.Forms.Padding(0);
             this.buttonLeft.Name = "buttonLeft";
-            this.buttonLeft.Size = new System.Drawing.Size(397, 25);
+            this.buttonLeft.Size = new System.Drawing.Size(453, 31);
             this.buttonLeft.TabIndex = 4;
             this.buttonLeft.Text = "Execute";
             this.buttonLeft.UseVisualStyleBackColor = true;
@@ -162,11 +163,11 @@
             // textBoxInputLeft
             // 
             this.textBoxInputLeft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxInputLeft.Location = new System.Drawing.Point(0, 283);
+            this.textBoxInputLeft.Location = new System.Drawing.Point(0, 354);
             this.textBoxInputLeft.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxInputLeft.Multiline = true;
             this.textBoxInputLeft.Name = "textBoxInputLeft";
-            this.textBoxInputLeft.Size = new System.Drawing.Size(397, 25);
+            this.textBoxInputLeft.Size = new System.Drawing.Size(453, 31);
             this.textBoxInputLeft.TabIndex = 2;
             this.textBoxInputLeft.Text = "textBoxInputLeft";
             this.textBoxInputLeft.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxInputLeft_KeyDown);
@@ -174,11 +175,11 @@
             // textBoxInputRight
             // 
             this.textBoxInputRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxInputRight.Location = new System.Drawing.Point(397, 283);
+            this.textBoxInputRight.Location = new System.Drawing.Point(453, 354);
             this.textBoxInputRight.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxInputRight.Multiline = true;
             this.textBoxInputRight.Name = "textBoxInputRight";
-            this.textBoxInputRight.Size = new System.Drawing.Size(397, 25);
+            this.textBoxInputRight.Size = new System.Drawing.Size(454, 31);
             this.textBoxInputRight.TabIndex = 3;
             this.textBoxInputRight.Text = "textBoxInputRight";
             this.textBoxInputRight.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxInputRight_KeyDown);
@@ -187,13 +188,13 @@
             // 
             this.textBoxOutputRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxOutputRight.Font = new System.Drawing.Font("돋움체", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.textBoxOutputRight.Location = new System.Drawing.Point(397, 20);
+            this.textBoxOutputRight.Location = new System.Drawing.Point(453, 25);
             this.textBoxOutputRight.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxOutputRight.Multiline = true;
             this.textBoxOutputRight.Name = "textBoxOutputRight";
             this.textBoxOutputRight.ReadOnly = true;
             this.textBoxOutputRight.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxOutputRight.Size = new System.Drawing.Size(397, 263);
+            this.textBoxOutputRight.Size = new System.Drawing.Size(454, 329);
             this.textBoxOutputRight.TabIndex = 7;
             this.textBoxOutputRight.TabStop = false;
             this.textBoxOutputRight.Text = "textBoxOutputRight";
@@ -204,10 +205,10 @@
             this.labelStatusRight.BackColor = System.Drawing.SystemColors.Control;
             this.labelStatusRight.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.labelStatusRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelStatusRight.Location = new System.Drawing.Point(397, 0);
+            this.labelStatusRight.Location = new System.Drawing.Point(453, 0);
             this.labelStatusRight.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatusRight.Name = "labelStatusRight";
-            this.labelStatusRight.Size = new System.Drawing.Size(397, 20);
+            this.labelStatusRight.Size = new System.Drawing.Size(454, 25);
             this.labelStatusRight.TabIndex = 9;
             this.labelStatusRight.Text = "labelStatusRight";
             this.labelStatusRight.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -216,13 +217,13 @@
             // 
             this.textBoxOutputLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxOutputLeft.Font = new System.Drawing.Font("돋움체", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.textBoxOutputLeft.Location = new System.Drawing.Point(0, 20);
+            this.textBoxOutputLeft.Location = new System.Drawing.Point(0, 25);
             this.textBoxOutputLeft.Margin = new System.Windows.Forms.Padding(0);
             this.textBoxOutputLeft.Multiline = true;
             this.textBoxOutputLeft.Name = "textBoxOutputLeft";
             this.textBoxOutputLeft.ReadOnly = true;
             this.textBoxOutputLeft.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxOutputLeft.Size = new System.Drawing.Size(397, 263);
+            this.textBoxOutputLeft.Size = new System.Drawing.Size(453, 329);
             this.textBoxOutputLeft.TabIndex = 7;
             this.textBoxOutputLeft.TabStop = false;
             this.textBoxOutputLeft.Text = "textBoxOutputLeft";
@@ -236,7 +237,7 @@
             this.labelStatusLeft.Location = new System.Drawing.Point(0, 0);
             this.labelStatusLeft.Margin = new System.Windows.Forms.Padding(0);
             this.labelStatusLeft.Name = "labelStatusLeft";
-            this.labelStatusLeft.Size = new System.Drawing.Size(397, 20);
+            this.labelStatusLeft.Size = new System.Drawing.Size(453, 25);
             this.labelStatusLeft.TabIndex = 8;
             this.labelStatusLeft.Text = "labelStatusLeft";
             this.labelStatusLeft.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -249,18 +250,19 @@
             this.labelMain.Font = new System.Drawing.Font("굴림", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.labelMain.Location = new System.Drawing.Point(3, 0);
             this.labelMain.Name = "labelMain";
-            this.labelMain.Size = new System.Drawing.Size(788, 142);
+            this.labelMain.Size = new System.Drawing.Size(901, 178);
             this.labelMain.TabIndex = 1;
             this.labelMain.Text = "labelMain";
             this.labelMain.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Form
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCloseAll;
-            this.ClientSize = new System.Drawing.Size(794, 501);
+            this.ClientSize = new System.Drawing.Size(907, 626);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "Form";
             this.Text = "Predic_demo";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form_FormClosing);

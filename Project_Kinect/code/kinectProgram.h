@@ -216,7 +216,7 @@ private:
 
 	string status2string(const FaceModelBuilderCollectionStatus collection);
 
-	void save();
+	void save(bool);
 
 	void isFolderNotExistCreate(string path);
 

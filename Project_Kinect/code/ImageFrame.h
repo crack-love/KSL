@@ -33,5 +33,7 @@ public:
 
 	void LerpMe(float p, const ImageFrame &right);
 
+	void toString(stringstream &s, char delimeter);
+
 private:
 };

@@ -60,7 +60,7 @@ void ImageFrameCollection::setStandard(TIMESPAN startTime)
 		}
 	}
 
-	cout << cnt << endl;
+	//cout << cnt << endl;
 	collection = result;
 }
 

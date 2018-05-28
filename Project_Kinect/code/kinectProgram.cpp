@@ -520,6 +520,8 @@ void Kinect::updateStatus()
 // update frame and save if need
 void Kinect::updateFrame()
 {
+	if (mode == KINECT_MODE_IDLE) return;
+
 	if (!frameStacking)
 	{
 		// 기록 시작
@@ -544,11 +546,23 @@ void Kinect::updateFrame()
 				case KINECT_MODE_PREDICT:
 
 					frameCollection.setStandard(recordStartTime);
+					rhandCollection.setStandard(recordStartTime);
+					lhandCollection.setStandard(recordStartTime);
+					
+					if (frameCollection.getCollectionSize() == FRAME_STANDARD_SIZE &&
+						rhandCollection.getCollectionSize() == IMAEG_STANDARD_FRAME_SIZE &&
+						rhandCollection.getCollectionSize() == IMAEG_STANDARD_FRAME_SIZE)
+					{
+						save(true);
+						++recorded;
 
-					cout << currentDateTime() << ": sending data" << endl;
-					cout << "[Predict]" << frameCollection.toString() << endl;
-					++recorded; // this represent sendCnt
-					break;
+						cout << "[Predict]" << endl;
+					}
+					else
+					{
+						// setStandard에서 Frame 1개가 부족하게 채워지는 것으로 보임
+						cout << LABEL(label) << " Record saving ... fail (standardize bug)" << endl;
+					}
 
 				case KINECT_MODE_OUTPUT:
 
@@ -561,7 +575,7 @@ void Kinect::updateFrame()
 						rhandCollection.getCollectionSize() == IMAEG_STANDARD_FRAME_SIZE &&
 						rhandCollection.getCollectionSize() == IMAEG_STANDARD_FRAME_SIZE)
 					{
-						save();
+						save(false);
 						++recorded;
 					}
 					else
@@ -615,26 +629,38 @@ void Kinect::isFolderNotExistCreate(string path)
 	}
 }
 
-void Kinect::save()
+void Kinect::save(bool isSending)
 {
+	string path;
+
 	frameCollection.setLabel(LABEL(label));
 	static int i = 0;
 
-	// folder :: data/0_안녕하세요/20180519_kyg/
-	string folderPath = string(PATH_DATA_FOLDER);
-	folderPath += "/" + to_string(label) + "_" + LABEL(label);
-	isFolderNotExistCreate(folderPath);
-	folderPath += "/" + currentDateTime() + "_" + to_string(label) + "_" + workerName;
-	isFolderNotExistCreate(folderPath);
-	folderPath += "/";
+	if (!isSending)
+	{
+		// folder :: data/0_안녕하세요/20180519_kyg/
+		path = string(PATH_DATA_FOLDER);
+		path += "/" + to_string(label) + "_" + LABEL(label);
+		isFolderNotExistCreate(path);
+		path += "/" + currentDateTime() + "_" + to_string(label) + "_" + workerName;
+		isFolderNotExistCreate(path);
+		path += "/";
+	}
+	else
+	{ 
+		// folder :: data/temp/
+		path = string(PATH_DATA_FOLDER);
+		path += "temp";
+		isFolderNotExistCreate(path);
+		path += "/";
+	}
 
 	// Spoints.txt
 	string fileName = "Spoints.txt";
 	stringstream sstream;
 	sstream << frameCollection.toString() << endl;
 
-	ofstream writeFile((folderPath + fileName).data(), std::ios::out|ios::trunc);
-
+	ofstream writeFile((path + fileName).data(), std::ios::out|ios::trunc);
 	if (writeFile.is_open()) {
 		writeFile << sstream.str();
 		writeFile.close();
@@ -643,8 +669,9 @@ void Kinect::save()
 	}
 	else cout << LABEL(label) << " Record saving ... fail " << ++i << endl;
 
-	lhandCollection.save(folderPath, 0);
-	rhandCollection.save(folderPath, IMAEG_STANDARD_FRAME_SIZE);
+	// ROI Images
+	lhandCollection.save(path, 0);
+	rhandCollection.save(path, IMAEG_STANDARD_FRAME_SIZE);
 }
 
 //----------------------------------------------------------------------------------

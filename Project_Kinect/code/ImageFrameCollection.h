@@ -38,6 +38,8 @@ public:
 
 	string getLabel();
 
+	void toStream(stringstream&, char delimeter);
+
 private:
 
 };
