@@ -13,7 +13,9 @@ void ImageFrame::memorize(cv::Mat image, TIMESPAN endtime)
 
 void ImageFrame::save(string filepath)
 {
-	cv::imwrite(filepath, image);
+	cv::Mat gray;
+	cv::cvtColor(image, gray, CV_RGB2GRAY);
+	cv::imwrite(filepath, gray);
 }
 
 

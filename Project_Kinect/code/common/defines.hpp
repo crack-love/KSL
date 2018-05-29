@@ -33,9 +33,9 @@
 #define FILE_LABEL "LABEL.txt"
 
 // ROI defines
-#define IMAEG_STANDARD_FRAME_SIZE 45 // 왼/오 각 채널당 프레임 개수 (총 *2)
-#define IMAGE_WIDTH 100
-#define IMAGE_HEIGHT 100
+#define IMAEG_STANDARD_FRAME_SIZE 35 // 왼/오 각 채널당 프레임 개수 (총 *2)
+#define IMAGE_WIDTH 80
+#define IMAGE_HEIGHT 80
 
 // ---------------------------------------------------------------------
 //	Macro

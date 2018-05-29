@@ -85,7 +85,7 @@ def Layer_B2():
     '''
     b2_dropout = 0.00
 
-    b2_input = Input(shape=(90, 100, 100, 3), name='B2_Input')
+    b2_input = Input(shape=(70, 80, 80, 1), name='B2_Input')
     #b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
     b2 = TimeDistributed(Conv2D(filters=16,
                                 kernel_size=3,
