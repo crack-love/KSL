@@ -624,7 +624,7 @@ void Kinect::save()
 	string folderPath = string(PATH_DATA_FOLDER);
 	folderPath += "/" + to_string(label) + "_" + LABEL(label);
 	isFolderNotExistCreate(folderPath);
-	folderPath += "/" + currentDateTime() + "_" + label + "_" + workerName;
+	folderPath += "/" + currentDateTime() + "_" + workerName;
 	isFolderNotExistCreate(folderPath);
 	folderPath += "/";
 
