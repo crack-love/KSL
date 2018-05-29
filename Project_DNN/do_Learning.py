@@ -81,7 +81,14 @@ m1.fit([spointList_train, roiSampleList_train], [labelList_train],
     verbose=1,
     batch_size=m1_batch_size)
 
-util.showProcess('Evaluate M1')
+util.showProcess('Evaluate M1 Batch_Size_1')
+score, acc = m1.evaluate([spointList_train, roiSampleList_train],
+                         [labelList_train],
+                         batch_size=1)
+print('Test score:', score)
+print('Test accuracy:', acc)
+
+util.showProcess('Evaluate M1 Batch_Size')
 score, acc = m1.evaluate([spointList_train, roiSampleList_train],
                          [labelList_train],
                          batch_size=m1_batch_size)
