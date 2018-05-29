@@ -150,7 +150,7 @@ def Model_M1():
       lr=1e-4로 최소 epoch 60번은 돌려야 2,3을 구분할 수 있더라
     '''
     m1_dropout = 0.0
-    m1_learningRate = 1e-3
+    m1_learningRate = 5e-3
     #decay_rate = m1_learningRate / 20 # lr/epoches
     #relu_alpha = 0.1
 
@@ -158,6 +158,7 @@ def Model_M1():
     b2i, b2o = Layer_B2()
 
     x = Concatenate(name='M1M1')([b1o, b2o])
+    x = _add_BN_ReLU_DO(x, m1_dropout)
     x = Dense(128, name='M1D1')(x)
     x = _add_BN_ReLU_DO(x, m1_dropout)
     x = Dense(128, name='M1D2')(x)
