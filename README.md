@@ -1,4 +1,4 @@
-# KSL
+﻿# KSL
 
 한국 수화 언어(KSL)를 정면 카메라 비전 컴퓨팅, 딥러닝 이용 실시간 번역
 
@@ -39,6 +39,8 @@
 - [CONV2D + LSTM example](https://kakalabblog.wordpress.com/2017/06/07/dance-dance-convolution/)
 
 - [How the Flatten works](https://stackoverflow.com/questions/44176982/how-flatten-layer-works-in-keras)
+
+- [Gradient Descent Algorithm Overview](http://shuuki4.github.io/deep%20learning/2016/05/20/Gradient-Descent-Algorithm-Overview.html)
 
 ## CV Studies
 

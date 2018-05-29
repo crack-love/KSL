@@ -30,10 +30,12 @@ def _init():
     print('Using preset Paths from paths.py')
     
     _append('label', '..\\..\\data\\LABEL.txt')
-    _append('weight', '..\\models\\weights.keras')
-    _append('train', '..\\..\\data\\train')
-    _append('test', '..\\..\\data\\test')
+    #_append('weight', '..\\models\\weights.keras')
+    #_append('train', '..\\..\\data\\train')
+    #_append('test', '..\\..\\data\\test')
     _append('data', '..\\..\\data')
+    _append('weight', '..\\weight')
+    _append('img', '..\\img')
 
     # Change relative to absolute
     # Error File/Folder is not exist
@@ -45,6 +47,11 @@ def _init():
             utils.showError('{0} 파일/폴더를 찾을 수 없습니다.'.format(_DIC[key]))
         #else:
             #print(key + ": OK")
+
+def ifNoDirThanMakeDir(key):
+    path = get(key)
+    if not os.path.exists(path):
+        os.mkdir(path)
 
 #임포트 하자마자 초기화함
 _init()

@@ -24,18 +24,18 @@
 //#define Show_Status_DistanceFrame
 #define Show_Status_DistanceFrame_Size 4 // do not Change/disable this
 
-#define LERP_PERCENT 0.6
+#define LERP_PERCENT 0.35
 #define HAND_RECORD_TYPE_L JointType_HandLeft
 #define HAND_RECORD_TYPE_R JointType_HandRight
-#define FRAME_STANDARD_SIZE ((SPOINT_SIZE+1)*2) // 76
+#define FRAME_STANDARD_SIZE 150
 
 #define PATH_DATA_FOLDER "../../data/"
 #define FILE_LABEL "LABEL.txt"
 
 // ROI defines
-#define IMAEG_STANDARD_FRAME_SIZE 76
-#define IMAGE_WIDTH 128
-#define IMAGE_HEIGHT 128
+#define IMAEG_STANDARD_FRAME_SIZE 45 // 왼/오 각 채널당 프레임 개수 (총 *2)
+#define IMAGE_WIDTH 100
+#define IMAGE_HEIGHT 100
 
 #define IMAEG_STANDARD_FRAME_SIZE 32
 #define IMAGE_WIDTH 128
@@ -55,9 +55,9 @@
 #define SHOW_ENUM(Type, size, paading) show_enumeration<Type>(std::cout, size, paading)
 
 // Error Check Macro (HRESULT)
-#define ERROR_CHECK( ret )                                        \
-    if( FAILED( ret ) ){                                          \
-        std::stringstream ss;                                     \
-        ss << "failed " << #ret << " " << std::hex << ret << std::endl; \
-        throw std::runtime_error( ss.str().c_str() );             \
+#define ERROR_CHECK( ret )											    \
+    if( FAILED( ret ) ){											    \
+        std::stringstream ss;										    \
+        ss << "failed " << #ret << " " << std::hex << ret << std::endl;	\
+        throw std::runtime_error( ss.str().c_str() );					\
     }
