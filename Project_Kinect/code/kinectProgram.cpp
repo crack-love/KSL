@@ -564,6 +564,8 @@ void Kinect::updateFrame()
 						cout << LABEL(label) << " Record saving ... fail (standardize bug)" << endl;
 					}
 
+					break;
+
 				case KINECT_MODE_OUTPUT:
 
 					// record

@@ -12,7 +12,7 @@ labelDic = DFormat._loadLabelFile(Path.get('label'))
 
 #load model
 utils.showProcess('Model Loading Process')
-model = models.Model_M1_Self()
+model = models.Model_M1()
 models.loadWeight(model, Path.get('weight'))
 
 #logic
