@@ -22,8 +22,8 @@ utils.showProcess('Predict Process')
 while (True):
 
     # 수신
-    data = sys.stdin.readline()
-    dataFomated, label = DFormat.formatData(data, True)
+    data = sys.stdin.readline()  # C#에서 WriteLine을 통해 입력한 데이터를 읽음
+    dataFomated, label = DFormat.formatData(data, True)  # 읽어온 데이터를 모델에 넣을 수 있도록 포맷팅
 
     # 예측
     # (76, 76, 1)을 리스트로 wrap(1, 76, 76, 1)해서 넣고
@@ -43,7 +43,7 @@ while (True):
 
     print(str(allresult) + ' -> ' + labelName)
 
-    # 결과를 메인창에 보여주기 위해[Result]접두사 추가
+    # 결과를 메인창에 보여주기 위해[Result]접두사 추가. C#에서 Login 클래스에서 출력값을 받았을 때 [Result]가 앞에 붙어 있을 경우 form의 labelMain에 출력
     resultMessage = str('[Result]') + str(labelName) + ' ' + str(believe) + '%'
 
     # 전송

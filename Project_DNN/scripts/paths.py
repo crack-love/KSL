@@ -17,8 +17,8 @@ absolute path로 변경하여 Dictionary 형태로 제공한다
 _DIC = { }
 
 def _relToAb(rel):
-    dirpath = os.path.dirname(os.path.realpath(__file__))
-    return dirpath + "\\" + rel
+    dirpath = os.path.dirname(os.path.realpath(__file__))  # 현재 작업 디렉토리의 부모 디렉토리 경로를 변수에 저장
+    return dirpath + "\\" + rel  # 부모 디렉토리 + 상대 경로 => 절대 경로
 
 def _append(key, val):
     _DIC[key.upper()] = val

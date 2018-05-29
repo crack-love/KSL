@@ -406,7 +406,7 @@ inline void Kinect::updateHDFace()
 
 void Kinect::updateSPoint()
 {
-	const ComPtr<IBody> body = bodies[trackingCount];
+	const ComPtr<IBody> body = bodies[trackingCount];  // updateBody를 통해 받아온 body중 가장 가까운 body를 불러옴
 
 	// Retrieve Joint (Head), calculste spinepx
 	std::array<Joint, JointType::JointType_Count> joints;

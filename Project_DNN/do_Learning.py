@@ -33,9 +33,9 @@ train.train(trainDatas, trainLabels, model, epoch, BATCH_SIZE)
 
 # result
 print('Evaluate Accuracy')
-accuracy = train.calculateAccuracy(trainDatas, trainLabels, model, 0)
+accuracy = train.calculateAccuracy(trainDatas, trainLabels, model, 0, 32)
 print("Accuracy TRAIN: " + str(accuracy))
-accuracy = train.calculateAccuracy(testDatas, testLabels, model, 0)
+accuracy = train.calculateAccuracy(testDatas, testLabels, model, 0, 32)
 print("Accuracy TEST: " + str(accuracy))
 
 # save
