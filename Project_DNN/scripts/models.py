@@ -86,7 +86,6 @@ def Layer_B2():
     b2_dropout = 0.00
 
     b2_input = Input(shape=(70, 80, 80, 1), name='B2_Input')
-    #b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
     b2 = TimeDistributed(Conv2D(filters=16,
                                 kernel_size=3,
                                 strides=1,
@@ -110,21 +109,23 @@ def Layer_B2():
                                 name='B2C3')(b2)
     b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
     b2 = TimeDistributed(Flatten(), name="B2F1")(b2)
-    b2 = TimeDistributed(Dense(128), name="B2D1")(b2)
+    b2 = TimeDistributed(Dense(256), name="B2D1")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
-    b2 = TimeDistributed(Dense(128), name="B2D2")(b2)
+    b2 = TimeDistributed(Dense(256), name="B2D2")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
-    b2 = TimeDistributed(Dense(128), name="B2D3")(b2)
+    b2 = TimeDistributed(Dense(256), name="B2D3")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
-    b2 = LSTM(256, dropout=b2_dropout, return_sequences=True, name='B2R1')(b2)
+    b2 = LSTM(256, return_sequences=True, name='B2R1')(b2)
+    b2 = BatchNormalization()(b2)
+    b2 = LSTM(256, return_sequences=True,  name='B2R2')(b2)
+    b2 = BatchNormalization()(b2)
+    b2 = LSTM(256, name='B2R3')(b2)
+    b2 = BatchNormalization()(b2)
+    b2 = Dense(256, name='B2D4')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
-    b2 = LSTM(256, dropout=b2_dropout, name='B2R2')(b2)
+    b2 = Dense(256, name='B2D5')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
-    b2 = Dense(128, name='B2D4')(b2)
-    b2 = _add_BN_ReLU_DO(b2, b2_dropout)
-    b2 = Dense(128, name='B2D5')(b2)
-    b2 = _add_BN_ReLU_DO(b2, b2_dropout)
-    b2 = Dense(128, name='B2D6')(b2)
+    b2 = Dense(256, name='B2D6')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
     
     b2_output = b2
@@ -150,7 +151,7 @@ def Model_M1():
       lr=1e-4로 최소 epoch 60번은 돌려야 2,3을 구분할 수 있더라
     '''
     m1_dropout = 0.0
-    m1_learningRate = 1e-3
+    m1_learningRate = 5e-5
     #decay_rate = m1_learningRate / 20 # lr/epoches
     #relu_alpha = 0.1
 
@@ -158,11 +159,12 @@ def Model_M1():
     b2i, b2o = Layer_B2()
 
     x = Concatenate(name='M1M1')([b1o, b2o])
-    x = Dense(128, name='M1D1')(x)
+    x = BatchNormalization()(x)
+    x = Dense(256, name='M1D1')(x)
     x = _add_BN_ReLU_DO(x, m1_dropout)
-    x = Dense(128, name='M1D2')(x)
+    x = Dense(256, name='M1D2')(x)
     x = _add_BN_ReLU_DO(x, m1_dropout)
-    x = Dense(128, name='M1D3')(x)
+    x = Dense(256, name='M1D3')(x)
     x = _add_BN_ReLU_DO(x, m1_dropout)
     
     x = Dense(define.LABEL_SIZE, name='M1D4')(x)
@@ -170,12 +172,14 @@ def Model_M1():
     x = Softmax(name='Softmax')(x)
     m1o = x
     
-    optimizer = Adam(lr=m1_learningRate)
+    optimizer = RMSprop(lr=m1_learningRate)
 
     # model.compile(loss_weights={'main_output': 1., 'aux_output': 0.2})
     model = Model(inputs=[b1i, b2i], outputs=[m1o])
     model.name = 'M1'
-    model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=optimizer,
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
 
     return model
 

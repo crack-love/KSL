@@ -94,7 +94,7 @@ def _loadImageFiles(dirpath, fileList, isShow):
     imgList = []
 
     for file in fileList:      
-        img = image.load_img(dirpath + "/" + file)
+        img = image.load_img(dirpath + "/" + file, grayscale=True)
         array = image.img_to_array(img)
         imgList.append(array)
     
