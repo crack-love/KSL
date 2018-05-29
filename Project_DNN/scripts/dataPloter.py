@@ -5,13 +5,27 @@ import sys
 import os
 import os.path
 import numpy as np
+from LabelMapper import LabelMapper
+import matplotlib
 
-def plotSpointData(path, colSize, rowSize, subidx, isImage, isShow, isWriteToFile, writePath):
+# 한글 폰트
+nanum = "C:/Windows/Fonts/NanumGothicBold.ttf"
+font_name = matplotlib.font_manager.FontProperties(fname=nanum).get_name()
+matplotlib.rc('font', family=font_name)
+
+def _plotWriteFile(path):
+    '''
+    this adding suffix .jpg
+    https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
+    '''
+    plt.savefig(path + '.jpg')
+
+def plotSpointData(samplePath, rowSize, colSize, subidx, isImage):
     '''
     path=None 입력으로 plt.figure() 또는 plt.show() 호출만 가능
     '''
-    if (path != None):
-        if os.path.isfile(path) != True:
+    if (samplePath != None):
+        if os.path.isfile(samplePath) != True:
             print("not file")
             return
 
@@ -19,8 +33,8 @@ def plotSpointData(path, colSize, rowSize, subidx, isImage, isShow, isWriteToFil
     colSize=str(colSize)
     subidx=str(subidx)
 
-    if path != None:
-        splited = open(path).readline().strip().split()
+    if samplePath != None:
+        splited = open(samplePath).readline().strip().split()
         date = splited[0]
         label = splited[1]
         frames = int(splited[2])
@@ -43,49 +57,54 @@ def plotSpointData(path, colSize, rowSize, subidx, isImage, isShow, isWriteToFil
                     nowIdx += 1
             res.append(oneFrame)
     
-        plt.subplot(rowSize+colSize+subidx)
-        plt.title(date + ": " + label)
+        pos = rowSize+colSize+subidx
+        plt.subplot(pos)
+        plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95])
+        labelName = LabelMapper.getName(int(label))
         res = np.array(res)
 
         if isImage:
-            plt.xlabel("L/R Spoints")
-            plt.ylabel("Frame Sequence")
+            res = np.transpose(res)
+            plt.title(str(label) + '_' + labelName)
+            plt.ylabel("L/R Spoints")
+            plt.xlabel("Frame Sequence")
             plt.imshow(res)
         else:
+            plt.title(date + ': ' + str(label) + '_' + labelName)
             plt.xlabel("Frame Sequence")
-            plt.ylabel("Spoint distance")
+            plt.ylabel("Spoint Distance")
             plt.plot(res)
-        
-    if isShow: plt.show()
-    #if isWriteToFile: plt.savefig('plot_datas.pdf', bbox_inchec='tight')
-    if isWriteToFile: plt.savefig(writePath)
-    #https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
-    
 
-def plotSpointDataList(rootPath, colSize, isGraphShow, isImgShow, isWriteToFile, writePath):
-    labelfolders = os.listdir(rootPath)
-    dataSize = (len(labelfolders))
-    if isGraphShow and isImgShow: colSize *= 2
-    rowSize = int(dataSize / colSize)
-    if rowSize * colSize < len(labelfolders): rowSize += 1
-    
-    index = 1
-    plt.figure(str(isGraphShow) + str(isImgShow))
-    for labelFolder in labelfolders:
-        labelFolder = os.path.join(rootPath, labelFolder)
-        sampleFolder = os.listdir(labelFolder)[0]
-        sampleFolder = os.path.join(labelFolder, sampleFolder)
-        dpath = os.path.join(sampleFolder, "Spoints.txt")
-        #graph
-        if isGraphShow:
-            plotSpointData(dpath, colSize, rowSize, index, False, False, False, None)
-            index += 1
-        #img
-        if isImgShow:
-            plotSpointData(dpath, colSize, rowSize, index, True, False, False, None)
-            index += 1
+def plotSpointDataList(rootPath, rowSize, colSize, isImg, writePath):
+    '''
+    모든 라벨 Plot 파일로 출력
 
-    if isWriteToFile:
-        plotSpointData(None, 0, 0, 0, False, False, True, writePath)
-    else:
-        plotSpointData(None, 0, 0, 0, False, True, False, None)
+    rowSize, colSize 양식에 맞게 파일 개수 늘어남
+
+    # Parameter
+        rootPath : labelFolder(0_안녕하세요)의 상위 폴더
+    '''
+    labelFolders = os.listdir(rootPath)
+    labelFolders = sorted(labelFolders)
+
+    figureSize = rowSize * colSize
+    labelSize = len(labelFolders)
+    my_dpi = 144
+    w = 1600
+    h = 900
+
+    plt.figure(figsize=(w/my_dpi, h/my_dpi), dpi=my_dpi)
+    for i in range(labelSize):
+        labelFolder = labelFolders[i]
+        path = os.path.join(rootPath, labelFolder)
+        sampleList = os.listdir(path)
+        lastSample = sampleList[len(sampleList) - 1]
+        path = os.path.join(path, lastSample)
+        path = os.path.join(path, 'Spoints.txt')
+        index = (i % figureSize) + 1
+
+        plotSpointData(path, rowSize, colSize, index, isImg)
+
+        if index == figureSize or i == labelSize - 1:
+            _plotWriteFile(writePath + '_' + str(i + 1))
+            plt.figure(figsize=(w/my_dpi, h/my_dpi), dpi=my_dpi)

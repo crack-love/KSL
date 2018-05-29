@@ -8,6 +8,11 @@
 *.exe
 
 *.h5
+#data/ConvLSTM_train/
+#data/ConvLSTM_test/
+#data/temp/
+
+*.zip
 
 # User-specific files
 *.suo

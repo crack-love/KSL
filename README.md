@@ -42,6 +42,10 @@
 
 - [Gradient Descent Algorithm Overview](http://shuuki4.github.io/deep%20learning/2016/05/20/Gradient-Descent-Algorithm-Overview.html)
 
+- [lr Decay, Optimizers](https://towardsdatascience.com/learning-rate-schedules-and-adaptive-learning-rate-methods-for-deep-learning-2c8f433990d1)
+
+- [Where should BN be](https://stackoverflow.com/questions/34716454/where-do-i-call-the-batchnormalization-function-in-keras)
+
 ## CV Studies
 
 - [at vs pointer](http://swprog.tistory.com/entry/OpenCV-at%EA%B3%BC-%ED%8F%AC%EC%9D%B8%ED%84%B0-%EC%82%AC%EC%9A%A9%EA%B0%84%EC%9D%98-%EC%8B%9C%EA%B0%84-%EC%B0%A8%EC%9D%B4)

@@ -156,7 +156,7 @@ def _ROI_loadDataList(samplePathList, isShow):
     
     for path in samplePathList:
         spoint, images, label = \
-            _ROI_loadData(path, isShow)
+            ROI_loadData(path, isShow)
         spointSamples.append(spoint)
         imageSamples.append(images)
         labelSamples.append(label)
@@ -174,7 +174,7 @@ def _ROI_loadDataList(samplePathList, isShow):
 
     return spointSamples, imageSamples, labelSamples
 
-def _ROI_loadData(dirpath, isShow):
+def ROI_loadData(dirpath, isShow):
     """
     타임스텝 단위의 모든 데이터를 읽는다.
       디렉토리 안에 있는 left, right hand 이미지, SPoint.txt 로드

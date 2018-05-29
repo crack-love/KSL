@@ -156,11 +156,16 @@ namespace Project_Interface2
                     data = data.Substring("[Result]".Length);  // [Result]를 잘라내어 결과값만 저장
                 }
 
-                // 예측 요청 메시지일 경우
-                if (data.StartsWith("[Predict]"))
+                // 예측 요청 메시지일 경우 (Spoint)
+                else if (data.StartsWith("[Predict]"))
                 {
                     // 파이썬에 넘김
-                    data = data.Substring("[Predict]".Length);  // [Predict]를 잘라내어 예측해야할 데이터만 저장
+
+                    /* 과거코드
+                    data = data.Substring("[Predict0]".Length);
+                    processStdInput(1, data);
+                    */
+
                     processStdInput(1, data);
                     return; 
                 }
