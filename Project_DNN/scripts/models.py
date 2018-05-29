@@ -101,7 +101,7 @@ def Layer_B2():
                                 padding='same'),
                                 name='B2C2')(b2)
     b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
-    #b2 = TimeDistributed(MaxPool2D(), name='B2C2_MP')(b2)
+    b2 = TimeDistributed(MaxPool2D(), name='B2C2_MP')(b2)
     b2 = TimeDistributed(Conv2D(filters=16,
                                 kernel_size=3,
                                 strides=1,
