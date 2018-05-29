@@ -154,7 +154,7 @@ def Model_M1():
       lr=1e-4로 최소 epoch 60번은 돌려야 2,3을 구분할 수 있더라
     '''
     m1_dropout = 0.0
-    m1_learningRate = 1e-4
+    m1_learningRate = 1e-3
     #decay_rate = m1_learningRate / 20 # lr/epoches
     #relu_alpha = 0.1
 
