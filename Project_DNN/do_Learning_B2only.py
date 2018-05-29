@@ -13,7 +13,7 @@ from keras.layers import Conv2D, Dense, LSTM, Flatten, Input, \
 import PYTHONPATH
 import scripts.dataFormater as df
 import scripts.dataPloter as dp
-import scripts.models as models
+import scripts.models_B2only as models
 import scripts.train as train
 import scripts.defines as define
 from scripts.Path import Path
@@ -32,7 +32,7 @@ Path.ifNoDirThanMakeDir('weight')
 epochs = util.inputInt('How many epochs?')
 b1_batch_size = 15 # GPU 메모리 부족으로 Batch_size에 한계 있음
 b2_batch_size = 15
-m1_batch_size = 12
+m1_batch_size = 20
 isLoadWeight = util.inputInt('Load weight? (1 to yes)')
 overwrite = True
 
@@ -54,19 +54,13 @@ dp.plotSpointDataList(dirPath_train, 2, 2, True, Path.get('img') + '\\d_image')
 
 # make model, b1/b2는 구조 print용
 util.showProcess('Model Generating')
-b1 = models.Model_B1()
-util.showProcess('B1')
-b1.summary()
-b2 = models.Model_B2()
-util.showProcess('B2')
-b2.summary()
 m1 = models.Model_M1()
-#util.showProcess('M1')
-#m1.summary()
+util.showProcess('M1')
+m1.summary()
 
 # plot to file
-models.saveModelDescription(b1, Path.get('img'), False)
-models.saveModelDescription(b2, Path.get('img'), False)
+#models.saveModelDescription(b1, Path.get('img'), False)
+#models.saveModelDescription(b2, Path.get('img'), False)
 models.saveModelDescription(m1, Path.get('img'), False)
 
 # Load Weight
@@ -76,13 +70,13 @@ if isLoadWeight == 1:
 
 # Train
 util.showProcess('Train M1')
-m1.fit([spointList_train, roiSampleList_train], [labelList_train],
+m1.fit([roiSampleList_train], [labelList_train],
     epochs=int(epochs),
     verbose=1,
     batch_size=m1_batch_size)
 
 util.showProcess('Evaluate M1')
-score, acc = m1.evaluate([spointList_train, roiSampleList_train],
+score, acc = m1.evaluate([roiSampleList_train],
                          [labelList_train],
                          batch_size=m1_batch_size)
 print('Test score:', score)
@@ -90,7 +84,7 @@ print('Test accuracy:', acc)
 
 # Test
 util.showProcess('Test M1')
-accuracy = train.calculateAccuracy([spointList_test, roiSampleList_test],
+accuracy = train.calculateAccuracy([roiSampleList_test],
                                    labelList_test,
                                    len(labelList_test),
                                    m1, verbose=1,
