@@ -7,7 +7,7 @@
 *.ipdb
 *.exe
 *.h5
-
+data/
 *.zip
 
 # User-specific files

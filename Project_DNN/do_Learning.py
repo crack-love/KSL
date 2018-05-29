@@ -32,7 +32,7 @@ Path.ifNoDirThanMakeDir('weight')
 epochs = util.inputInt('How many epochs?')
 b1_batch_size = 15 # GPU 메모리 부족으로 Batch_size에 한계 있음
 b2_batch_size = 15
-m1_batch_size = 20
+m1_batch_size = 15
 isLoadWeight = util.inputInt('Load weight? (1 to yes)')
 overwrite = True
 
@@ -52,7 +52,7 @@ spointList_test, roiSampleList_test, labelList_test = \
 dp.plotSpointDataList(dirPath_train, 2, 2, False, Path.get('img') + '\\d_graph')
 dp.plotSpointDataList(dirPath_train, 2, 2, True, Path.get('img') + '\\d_image')
 
-# make model
+# make model, b1/b2는 구조 print용
 util.showProcess('Model Generating')
 b1 = models.Model_B1()
 util.showProcess('B1')
@@ -65,8 +65,8 @@ m1 = models.Model_M1()
 #m1.summary()
 
 # plot to file
-models.saveModelDescription(models.Model_B1(), Path.get('img'), False)
-models.saveModelDescription(models.Model_B2(), Path.get('img'), False)
+models.saveModelDescription(b1, Path.get('img'), False)
+models.saveModelDescription(b2, Path.get('img'), False)
 models.saveModelDescription(m1, Path.get('img'), False)
 
 # Load Weight
@@ -94,7 +94,7 @@ accuracy = train.calculateAccuracy([spointList_test, roiSampleList_test],
                                    labelList_test,
                                    len(labelList_test),
                                    m1, verbose=1,
-                                   batch_size=m1_batch_size)
+                                   batch_size=1)
 print('Accuracy: ' + str(accuracy))
 
 # Write Weight
