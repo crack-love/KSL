@@ -43,7 +43,7 @@ dirPath_test = Path.get('test')
 
 print('Loading Train Samples : ')
 spointList_train, roiSampleList_train, labelList_train = \
-    df.ROI_loadDataListAll(dirPath_train, isShow=False, isShuffle=False)
+    df.ROI_loadDataListAll(dirPath_train, isShow=False, isShuffle=True)
 print('Loading Test Samples : ')
 spointList_test, roiSampleList_test, labelList_test = \
     df.ROI_loadDataListAll(dirPath_test, isShow=False, isShuffle=False)

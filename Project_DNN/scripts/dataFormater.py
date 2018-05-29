@@ -121,6 +121,9 @@ def _ROI_loadAllSamplePaths(rootfolder):
     result = []
 
     for labelFolder in  os.listdir(rootfolder):
+        if labelFolder == 'temp':
+            continue
+            
         path1 = os.path.join(rootfolder, labelFolder)
 
         for sampleFolder in os.listdir(path1):

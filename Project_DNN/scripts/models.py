@@ -178,7 +178,7 @@ def Model_M1():
 
     # model.compile(loss_weights={'main_output': 1., 'aux_output': 0.2})
     model = Model(inputs=[b1i, b2i], outputs=[m1o])
-    model.name = 'M1_180529_0'
+    model.name = 'M1'
     model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
     return model
