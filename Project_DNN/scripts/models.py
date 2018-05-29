@@ -43,7 +43,7 @@ def Layer_B1():
     '''
     branch 1 (spoint cnn branch)
     '''
-    b1_dropout = 0.0
+    b1_dropout = 0.4
 
     b1_input = Input(shape=(150, 74, 1), name='B1_Input')
     #b1 = _add_BN_ReLU_DO(b1, b1_dropout)
@@ -84,7 +84,7 @@ def Layer_B2():
     '''
     branch 2 (roi cnn+lstm branch)
     '''
-    b2_dropout = 0.0
+    b2_dropout = 0.00
 
     b2_input = Input(shape=(90, 100, 100, 3), name='B2_Input')
     #b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
@@ -118,7 +118,11 @@ def Layer_B2():
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
     b2 = TimeDistributed(Dense(256), name="B2D3")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
-    b2 = LSTM(1024, dropout=b2_dropout, name='B2R1')(b2)
+    b2 = LSTM(256, dropout=b2_dropout, return_sequences=True, name='B2R1')(b2)
+    b2 = _add_BN_ReLU_DO(b2, b2_dropout)
+    b2 = LSTM(256, dropout=b2_dropout, return_sequences=True, name='B2R2')(b2)
+    b2 = _add_BN_ReLU_DO(b2, b2_dropout)
+    b2 = LSTM(256, dropout=b2_dropout, name='B2R3')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
     b2 = Dense(256, name='B2D4')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
@@ -150,7 +154,7 @@ def Model_M1():
       lr=1e-4로 최소 epoch 60번은 돌려야 2,3을 구분할 수 있더라
     '''
     m1_dropout = 0.0
-    m1_learningRate = 5e-5
+    m1_learningRate = 1e-4
     #decay_rate = m1_learningRate / 20 # lr/epoches
     #relu_alpha = 0.1
 
@@ -170,7 +174,7 @@ def Model_M1():
     x = Softmax(name='Softmax')(x)
     m1o = x
     
-    optimizer = RMSprop(lr=m1_learningRate)
+    optimizer = Adam(lr=m1_learningRate)
 
     # model.compile(loss_weights={'main_output': 1., 'aux_output': 0.2})
     model = Model(inputs=[b1i, b2i], outputs=[m1o])
