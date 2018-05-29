@@ -7,9 +7,6 @@
 *.ipdb
 *.exe
 *.h5
-#data/ConvLSTM_train/
-#data/ConvLSTM_test/
-#data/temp/
 
 *.zip
 
