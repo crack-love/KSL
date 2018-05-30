@@ -35,8 +35,6 @@ int main(int argc, char* argv[])
 	*/
 	MainTransaction m;
 	m.run();
-	
 
-	waitKey(0);
 	return 0;
 }

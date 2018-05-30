@@ -5,11 +5,6 @@
 import scripts.interfaceUtils as util
 util.showProcess('Start Program')
 
-import keras
-from keras.models import Model
-from keras.layers import Conv2D, Dense, LSTM, Flatten, Input, \
-                         Activation, Dropout, TimeDistributed, MaxPool2D
-
 import PYTHONPATH
 import scripts.dataFormater as df
 import scripts.dataPloter as dp
@@ -49,8 +44,8 @@ spointList_test, roiSampleList_test, labelList_test = \
     df.ROI_loadDataListAll(dirPath_test, isShow=False, isShuffle=False)
 
 # write data plot graph
-dp.plotSpointDataList(dirPath_train, 2, 2, False, Path.get('img') + '\\d_graph')
-dp.plotSpointDataList(dirPath_train, 2, 2, True, Path.get('img') + '\\d_image')
+dp.plotSpointDataList(dirPath_train, 1, 1, False, Path.get('img') + '\\d_graph')
+dp.plotSpointDataList(dirPath_train, 1, 1, True, Path.get('img') + '\\d_image')
 
 # make model, b1/b2는 구조 print용
 util.showProcess('Model Generating')

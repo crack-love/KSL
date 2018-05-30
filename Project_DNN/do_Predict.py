@@ -5,6 +5,14 @@ import scripts.models as models
 import scripts.dataFormater as DFormat
 import scripts.interfaceUtils as utils
 from scripts.Path import Path
+import tensorflow as tf
+from keras import backend as K
+
+utils.showProcess('Loading TF Session')
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+K.set_session(session)
 
 #load labelDic
 utils.showProcess('Label Loading Process')
@@ -24,7 +32,7 @@ while (True):
         continue
     
     spointData, imageList, label = \
-        DFormat.ROI_loadData(Path.get('temp'), True)
+        DFormat.ROI_loadData(Path.get('temp'), False)
 
     spointData = np.array([spointData])
     imageList = np.array([imageList])
@@ -48,7 +56,11 @@ while (True):
         each_percent = int(each_result * 100)
         allresult.append(each_percent)
     
-    labelName = labelDic[highstIdx]
+    if highstIdx in labelDic:
+        labelName = labelDic[highstIdx]
+    else:
+        labelName = 'None'
+
     print(str(allresult) + ' -> ' + labelName)
 
     # 결과를 메인창에 보여주기 위해[Result]접두사 추가
