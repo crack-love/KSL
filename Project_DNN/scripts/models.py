@@ -108,17 +108,20 @@ def Layer_B2():
                                 name='B2C3')(b2)
     b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
     b2 = TimeDistributed(Flatten(), name="B2F1")(b2)
+    b2 = Flatten()(b2)
+    '''
     b2 = TimeDistributed(Dense(256), name="B2D1")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
     b2 = TimeDistributed(Dense(256), name="B2D2")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
     b2 = TimeDistributed(Dense(256), name="B2D3")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
-    b2 = LSTM(256, return_sequences=True, name='B2R1')(b2)
-    b2 = BatchNormalization()(b2)
-    b2 = LSTM(256, return_sequences=True,  name='B2R2')(b2)
-    b2 = BatchNormalization()(b2)
-    b2 = LSTM(256, name='B2R3')(b2)
+    #b2 = LSTM(256, return_sequences=True, name='B2R1')(b2)
+    #b2 = BatchNormalization()(b2)
+    #b2 = LSTM(256, return_sequences=True,  name='B2R2')(b2)
+    #b2 = BatchNormalization()(b2)
+    #b2 = LSTM(256, name='B2R3')(b2)
+    '''
     b2 = BatchNormalization()(b2)
     b2 = Dense(256, name='B2D4')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
@@ -150,7 +153,7 @@ def Model_M1():
       lr=1e-4로 최소 epoch 60번은 돌려야 2,3을 구분할 수 있더라
     '''
     m1_dropout = 0.0
-    m1_learningRate = 2e-4
+    m1_learningRate = 1e-4
     #decay_rate = m1_learningRate / 20 # lr/epoches
     #relu_alpha = 0.1
 
@@ -171,7 +174,7 @@ def Model_M1():
     x = Softmax(name='Softmax')(x)
     m1o = x
     
-    optimizer = RMSprop(lr=m1_learningRate)
+    optimizer = Adam(lr=m1_learningRate)
 
     # model.compile(loss_weights={'main_output': 1., 'aux_output': 0.2})
     model = Model(inputs=[b1i, b2i], outputs=[m1o])
