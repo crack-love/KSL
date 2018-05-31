@@ -1,4 +1,4 @@
-# KSL
+#KSL
 
 한국 수화 언어(KSL)를 정면 카메라 비전 컴퓨팅, 딥러닝 이용 실시간 번역
 
@@ -24,7 +24,7 @@
 
 - [Keras LSTM (KR)](http://3months.tistory.com/168)
 
-- 추천 [Understanding keras lstms (EN) (time steps, etc)](https://stackoverflow.com/questions/38714959/understanding-keras-lstms)
+- [Understanding keras lstms (EN) (time steps, etc)](https://stackoverflow.com/questions/38714959/understanding-keras-lstms)
 
 - [Merge 2 models](https://stackoverflow.com/questions/45979848/merge-2-sequential-models-in-keras)
 
