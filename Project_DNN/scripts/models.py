@@ -85,48 +85,50 @@ def Layer_B2():
     b2_dropout = 0.00
 
     b2_input = Input(shape=(70, 80, 80, 1), name='B2_Input')
-    b2 = TimeDistributed(Conv2D(filters=16,
-                                kernel_size=3,
-                                strides=1,
+    b2 = TimeDistributed(Conv2D(filters=32,
+                                kernel_size=5,
+                                strides=2,
                                 padding='same',
                                 data_format='channels_last'),
                                 name='B2C1')(b2_input)
     b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
-    b2 = TimeDistributed(MaxPool2D(), name='B2C1_MP')(b2)
-    b2 = TimeDistributed(Conv2D(filters=16,
-                                kernel_size=3,
-                                strides=1,
+    #b2 = TimeDistributed(MaxPool2D(), name='B2C1_MP')(b2)
+    b2 = TimeDistributed(Conv2D(filters=32,
+                                kernel_size=5,
+                                strides=2,
                                 padding='same'),
                                 name='B2C2')(b2)
     b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
-    b2 = TimeDistributed(MaxPool2D(), name='B2C2_MP')(b2)
-    b2 = TimeDistributed(Conv2D(filters=16,
+    #b2 = TimeDistributed(MaxPool2D(), name='B2C2_MP')(b2)
+    b2 = TimeDistributed(Conv2D(filters=64,
                                 kernel_size=3,
                                 strides=1,
                                 padding='same',
                                 activation='relu'),
                                 name='B2C3')(b2)
     b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
+    #b2 = TimeDistributed(MaxPool2D(), name='B2C2_MP')(b2)
+    b2 = TimeDistributed(Conv2D(filters=64,
+                                kernel_size=3,
+                                strides=1,
+                                padding='same',
+                                activation='relu'),
+                                name='B2C4')(b2)
+    b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
     b2 = TimeDistributed(Flatten(), name="B2F1")(b2)
-
-    b2 = TimeDistributed(Dense(512), name="B2D1")(b2)
+    b2 = TimeDistributed(Dense(256), name="B2D1")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
-    b2 = TimeDistributed(Dense(512), name="B2D2")(b2)
+    b2 = TimeDistributed(Dense(256), name="B2D2")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
-    b2 = TimeDistributed(Dense(512), name="B2D3")(b2)
+    b2 = TimeDistributed(Dense(256), name="B2D3")(b2)
     b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
-    b2 = LSTM(512, return_sequences=True, name='B2R1')(b2)
+    b2 = LSTM(512, name='B2R3')(b2)    
     b2 = BatchNormalization()(b2)
-    b2 = LSTM(512, return_sequences=True,  name='B2R2')(b2)
-    b2 = BatchNormalization()(b2)
-    b2 = LSTM(512, name='B2R3')(b2)
-    
-    b2 = BatchNormalization()(b2)
-    b2 = Dense(512, name='B2D4')(b2)
+    b2 = Dense(256, name='B2D4')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
-    b2 = Dense(512, name='B2D5')(b2)
+    b2 = Dense(256, name='B2D5')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
-    b2 = Dense(512, name='B2D6')(b2)
+    b2 = Dense(256, name='B2D6')(b2)
     b2 = _add_BN_ReLU_DO(b2, b2_dropout)
     
     b2_output = b2

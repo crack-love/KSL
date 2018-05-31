@@ -140,7 +140,7 @@ def ROI_loadDataListAll(rootPath, isShow, isShuffle):
 
     spointList, roiSampleList, labelList = \
         _ROI_loadDataList(samplePathList, isShow)
-    
+
     if isShuffle:
         spointList, roiSampleList, labelList = \
             shuffleDataset(spointList, roiSampleList, labelList)
@@ -159,9 +159,11 @@ def _ROI_loadDataList(samplePathList, isShow):
     for path in samplePathList:
         spoint, images, label = \
             ROI_loadData(path, isShow)
-        spointSamples.append(spoint)
-        imageSamples.append(images)
-        labelSamples.append(label)
+
+        if len(images) is not 0:
+            spointSamples.append(spoint)
+            imageSamples.append(images)
+            labelSamples.append(label)
     
     spointSamples = np.array(spointSamples)
     imageSamples = np.array(imageSamples)
