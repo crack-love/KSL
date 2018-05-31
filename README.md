@@ -46,7 +46,7 @@
 
 - [Where should BN be](https://stackoverflow.com/questions/34716454/where-do-i-call-the-batchnormalization-function-in-keras)
 
-- [Conv Tutorial]
+- [Conv Tutorial(https://jkjung-avt.github.io/keras-tutorial/)
 
 ## CV Studies
 
