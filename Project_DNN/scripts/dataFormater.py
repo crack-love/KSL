@@ -57,9 +57,8 @@ def _formatData(strdata, isShowLog):
 
     return np.array(data), np.array(labelOneHot)
 
-
 ## return single data
-def _loadDataFromFile(file, isShowLog):
+def _loadDataFromFile(file, isShowLog=False):
     fileStream = open(file)
     fileData = fileStream.readline()
 
@@ -90,11 +89,11 @@ def _loadLabelFile(path, isShow = True):
     return labelList
 
 # (frame_size, 128, 128, 3)
-def _loadImageFiles(dirpath, fileList, isShow):
+def _loadImageFiles(dirpath, fileList, isShow, imageSize):
     imgList = []
 
     for file in fileList:      
-        img = image.load_img(dirpath + "/" + file, grayscale=True)
+        img = image.load_img(dirpath + "/" + file, grayscale=True, target_size=imageSize)
         array = image.img_to_array(img)
         imgList.append(array)
     
@@ -132,14 +131,14 @@ def _ROI_loadAllSamplePaths(rootfolder):
 
     return result
 
-def ROI_loadDataListAll(rootPath, isShow, isShuffle):
+def ROI_loadDataListAll(rootPath, isShow, isShuffle, imgSize):
     '''
     rootpath = data/ConvLSTM/
     '''
     samplePathList = _ROI_loadAllSamplePaths(rootPath)
 
     spointList, roiSampleList, labelList = \
-        _ROI_loadDataList(samplePathList, isShow)
+        _ROI_loadDataList(samplePathList, isShow, imgSize)
 
     if isShuffle:
         spointList, roiSampleList, labelList = \
@@ -147,7 +146,7 @@ def ROI_loadDataListAll(rootPath, isShow, isShuffle):
 
     return spointList, roiSampleList, labelList
 
-def _ROI_loadDataList(samplePathList, isShow):
+def _ROI_loadDataList(samplePathList, isShow, imgSize):
     """
     샘플 폴더List 읽기
       e.g. imageSamples shape = (samples, timestep, imgshape~)
@@ -158,7 +157,7 @@ def _ROI_loadDataList(samplePathList, isShow):
     
     for path in samplePathList:
         spoint, images, label = \
-            ROI_loadData(path, isShow)
+            ROI_loadData(path, isShow, imgSize)
 
         if len(images) is not 0:
             spointSamples.append(spoint)
@@ -178,7 +177,7 @@ def _ROI_loadDataList(samplePathList, isShow):
 
     return spointSamples, imageSamples, labelSamples
 
-def ROI_loadData(dirpath, isShow):
+def ROI_loadData(dirpath, isShow, imageSize):
     """
     타임스텝 단위의 모든 데이터를 읽는다.
       디렉토리 안에 있는 left, right hand 이미지, SPoint.txt 로드
@@ -206,7 +205,7 @@ def ROI_loadData(dirpath, isShow):
     imageFileList.sort(key=functools.cmp_to_key(_comp))
 
     # 이미지 로드
-    imageList = _loadImageFiles(dirpath, imageFileList, isShow)
+    imageList = _loadImageFiles(dirpath, imageFileList, isShow, imageSize)
     
     # Spint 로드
     spointData, label = _loadDataFromFile(dirpath + "/Spoints.txt", isShow)
@@ -217,7 +216,7 @@ def ROI_loadData(dirpath, isShow):
 
     return spointData, imageList, label
 
-def ROI_loadSingleImages(dirpath, isShow):
+def ROI_loadSingleImages(dirpath, isShow, imgSize):
     """
     한 장 단위의 그림을 읽어서 학습/예측하는 모델에 쓰임
       dirpath 안 파일: LabelDirs
@@ -245,7 +244,7 @@ def ROI_loadSingleImages(dirpath, isShow):
         label = int(directory.split('_')[0])
         path = dirpath + '\\' + directory
         
-        images = _loadImageFiles(path, os.listdir(path), isShow)
+        images = _loadImageFiles(path, os.listdir(path), isShow, imgSize)
         for image in images:
             imageList.append(image)
 
@@ -276,3 +275,60 @@ def shuffleDataset(d1, d2, d3):
     d2_shuffled = [d2[i] for i in indexes]
     d3_shuffled = [d3[i] for i in indexes]
     return np.array(d1_shuffled), np.array(d2_shuffled), np.array(d3_shuffled)
+
+# path list 생성
+def getSamplePathList(dir):
+    labelFolders = os.listdir(dir)
+    sampleFolders = []
+    for lf in labelFolders:
+        lf = os.path.join(dir, lf)
+        for path in os.listdir(lf):
+            path = os.path.join(lf, path)
+            sampleFolders.append(path)
+    return sampleFolders
+
+# spoint, img, label generator
+def generator_multiple(imgGen, dir, imageSize, batchSize):
+    
+    pathList = getSamplePathList(dir)
+
+    batchX1 = []
+    batchX2 = []
+    batchY = []
+    stackedBatchSize = 0
+    pathLength = len(pathList)
+    pathIndex = 0
+
+    while True:
+        if pathIndex >= pathLength:
+            break
+
+        # load from path
+        path = pathList[pathIndex]
+        x1, x2, y = ROI_loadData(path, False, imageSize)
+        pathIndex += 1
+        if len(x2) <= 0:
+            #print('BAD DATA')
+            continue
+
+        # random transform
+        x2t = []
+        for x in x2:
+            x2t.append(imgGen.random_transform(x))
+        x2t = np.array(x2t)
+        
+        # add batch
+        batchX1.append(x1)
+        batchX2.append(x2t)
+        batchY.append(y)
+        stackedBatchSize += 1
+
+        if stackedBatchSize >= batchSize:
+            yield [np.array(batchX1), np.array(batchX2)], np.array(batchY)
+            batchX1 = []
+            batchX2 = []
+            batchY = []
+            stackedBatchSize = 0
+
+    if stackedBatchSize > 0:
+        yield [np.array(batchX1), np.array(batchX2)], np.array(batchY)
