@@ -24,7 +24,7 @@
 
 - [Keras LSTM (KR)](http://3months.tistory.com/168)
 
-- 추천 [Understanding keras lstms (EN) (time steps, etc)](https://stackoverflow.com/questions/38714959/understanding-keras-lstms)
+- [Understanding keras lstms (EN) (time steps, etc)](https://stackoverflow.com/questions/38714959/understanding-keras-lstms)
 
 - [Merge 2 models](https://stackoverflow.com/questions/45979848/merge-2-sequential-models-in-keras)
 
@@ -45,6 +45,8 @@
 - [lr Decay, Optimizers](https://towardsdatascience.com/learning-rate-schedules-and-adaptive-learning-rate-methods-for-deep-learning-2c8f433990d1)
 
 - [Where should BN be](https://stackoverflow.com/questions/34716454/where-do-i-call-the-batchnormalization-function-in-keras)
+
+- [image classification using very little data](https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html)
 
 ## CV Studies
 
