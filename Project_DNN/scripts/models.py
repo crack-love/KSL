@@ -6,6 +6,7 @@ from keras.optimizers import RMSprop, Adam
 from keras.utils import plot_model # for model description png
 from keras.losses import *
 from keras.activations import relu
+from keras.applications.xception import Xception, preprocess_input
 
 import interfaceUtils as utils
 import defines as define
@@ -77,6 +78,62 @@ def Layer_B1():
     b1_output = b1
 
     return b1_input, b1_output
+
+def Model_B2_FT(inputShape):
+    '''
+    branch 2 (Fine tune mode)
+    '''
+    FREEZE_LAYERS = 5
+    
+    net = Xception(
+        include_top=False,
+        weights='imagenet',
+        input_tensor=None,
+        input_shape=inputShape,
+    )
+
+    xi = Input(shape=(70,)+inputShape) #1
+    x = TimeDistributed(net)(xi) #2
+    #x = Reshape(target_shape=(70, 2048))(x)
+    x = TimeDistributed(GlobalAveragePooling2D())(x) #3
+    x = TimeDistributed(BatchNormalization())(x) #4
+    x = TimeDistributed(Activation('relu'))(x) #5 #컨브망을 추가할까?
+    x = LSTM(512, return_sequences=True)(x) # 유닛크기늘려보자 3중R망은어떨가?
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = LSTM(512, return_sequences=True)(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = LSTM(512)(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Dense(512)(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Dense(512)(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    xo = Dense(define.LABEL_SIZE, activation='softmax', name='softmax')(x)
+    model = Model(inputs=xi, outputs=xo)
+    model.name = 'Model_B2_FT'
+
+    i = 0
+    print(len(model.layers))
+    for layer in model.layers:
+        i += 1
+        if i <= FREEZE_LAYERS:
+            layer.trainable = False
+        else:
+            layer.trainable = True
+        print(str(i) + ': ' + str(layer) + ' ' + str(layer.trainable))
+
+    model.compile(
+        optimizer=Adam(lr=1e-4),
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
+        )
+    
+    return model
 
 def Layer_B2():    
     '''

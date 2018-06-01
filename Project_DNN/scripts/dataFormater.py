@@ -93,7 +93,7 @@ def _loadImageFiles(dirpath, fileList, isShow, imageSize):
     imgList = []
 
     for file in fileList:      
-        img = image.load_img(dirpath + "/" + file, grayscale=True, target_size=imageSize)
+        img = image.load_img(dirpath + "/" + file, grayscale=False, target_size=imageSize)
         array = image.img_to_array(img)
         imgList.append(array)
     
@@ -288,9 +288,8 @@ def getSamplePathList(dir):
     return sampleFolders
 
 # spoint, img, label generator
-def generator_multiple(imgGen, dir, imageSize, batchSize):
-    
-    pathList = getSamplePathList(dir)
+def generator_multiple(imgGen, directory, imageSize, batchSize):
+    pathList = getSamplePathList(directory)
 
     batchX1 = []
     batchX2 = []
@@ -301,7 +300,7 @@ def generator_multiple(imgGen, dir, imageSize, batchSize):
 
     while True:
         if pathIndex >= pathLength:
-            break
+            pathIndex = 0
 
         # load from path
         path = pathList[pathIndex]
@@ -324,11 +323,8 @@ def generator_multiple(imgGen, dir, imageSize, batchSize):
         stackedBatchSize += 1
 
         if stackedBatchSize >= batchSize:
-            yield [np.array(batchX1), np.array(batchX2)], np.array(batchY)
+            yield np.array(batchX2), np.array(batchY)
             batchX1 = []
             batchX2 = []
             batchY = []
             stackedBatchSize = 0
-
-    if stackedBatchSize > 0:
-        yield [np.array(batchX1), np.array(batchX2)], np.array(batchY)

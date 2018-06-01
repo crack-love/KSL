@@ -19,8 +19,8 @@ class _Path():
 
     def __init__(self):
         self.__append('label', '..\\..\\data\\LABEL.txt')
-        self.__append('train', '..\\..\\data\\ConvLSTM_train')
-        self.__append('test', '..\\..\\data\\ConvLSTM_test')
+        self.__append('train', '..\\..\\data\\ConvLSTM\\train')
+        self.__append('test', '..\\..\\data\\ConvLSTM\\test')
         self.__append('data', '..\\..\\data')
         self.__append('weight', '..\\weight')
         self.__append('img', '..\\img')
