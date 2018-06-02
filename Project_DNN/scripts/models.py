@@ -98,19 +98,16 @@ def Model_B2_FT(inputShape):
     x = TimeDistributed(GlobalAveragePooling2D())(x) #3
     x = TimeDistributed(BatchNormalization())(x) #4
     x = TimeDistributed(Activation('relu'))(x) #5 #컨브망을 추가할까?
-    x = LSTM(512, return_sequences=True)(x) # 유닛크기늘려보자 3중R망은어떨가?
+    x = LSTM(2048, return_sequences=True)(x) # 유닛크기늘려보자 3중R망은어떨가?
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = LSTM(512, return_sequences=True)(x)
+    x = LSTM(2048, return_sequences=False)(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = LSTM(512)(x)
+    x = Dense(2048)(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Dense(512)(x)
-    x = BatchNormalization()(x)
-    x = Activation('relu')(x)
-    x = Dense(512)(x)
+    x = Dense(1024)(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     xo = Dense(define.LABEL_SIZE, activation='softmax', name='softmax')(x)

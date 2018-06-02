@@ -49,18 +49,18 @@ overwrite = True
 sampleSize_train = len(df.getSamplePathList(DATASET_PATH_TRAIN))
 sampleSize_test = len(df.getSamplePathList(DATASET_PATH_TEST))
 util.showDivisionSingle()
-print(sampleSize_train)
-print(sampleSize_test)
+print('train: ' + str(sampleSize_train))
+print('test: ' + str(sampleSize_test))
 
 train_imgGen = ImageDataGenerator(
     #preprocessing_function=preprocess_input,
     #rescale=1./255,
-    rotation_range=10,
-    shear_range=1.0,
-    zoom_range=0.10,
-    width_shift_range=0.10,
-    height_shift_range=0.10,
-    channel_shift_range=0.1,
+    rotation_range=22,
+    shear_range=3,
+    zoom_range=0.2,
+    width_shift_range=0.18,
+    height_shift_range=0.18,
+    channel_shift_range=5,
     #vertical_flip=False,
     #horizontal_flip=False,
     fill_mode='nearest'
