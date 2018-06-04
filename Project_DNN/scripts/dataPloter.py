@@ -9,9 +9,13 @@ from LabelMapper import LabelMapper
 import matplotlib
 
 # 한글 폰트
-nanum = "C:/Windows/Fonts/NanumGothicBold.ttf"
+nanum = "C:\\Windows\\Fonts\\NanumGothicBold.ttf"
+
 font_name = matplotlib.font_manager.FontProperties(fname=nanum).get_name()
-matplotlib.rc('font', family=font_name)
+font = {'family' : font_name,
+        'weight' : 'bold'}
+        
+matplotlib.rc('font', **font)
 
 def _plotWriteFile(path):
     '''

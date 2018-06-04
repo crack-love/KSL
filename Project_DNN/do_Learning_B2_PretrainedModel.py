@@ -91,6 +91,23 @@ for cls, idx in train_batchIter.class_indices.items():
 # write data plot graph
 dp.plotSpointDataList(Path.get('train'), 2, 2, False, Path.get('img') + '\\d_graph')
 dp.plotSpointDataList(Path.get('train'), 2, 2, True, Path.get('img') + '\\d_image')
+print('data plot done')
+
+'''
+_, imglist, _ = df.ROI_loadData('D:/Projects/Git/KSL/data/ConvLSTM/train/2_둘/2018-05-30_005101_2_kyg', False, (80, 80, 3))
+import os
+j = 0
+
+for i in train_imgGen.flow(
+    imglist,
+    save_to_dir='preview',
+    save_format='jpeg',
+    save_prefix='t',
+    batch_size=70):
+
+    j+=1
+    util.input('next?')
+'''
 
 # make model, b1/b2는 구조 print용
 util.showProcess('Model Generating')
