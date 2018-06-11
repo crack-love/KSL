@@ -19,18 +19,26 @@ class _Path():
 
     def __init__(self):
         self.__append('label', '..\\..\\data\\LABEL.txt')
-        self.__append('train', '..\\..\\data\\ConvLSTM_train')
-        self.__append('test', '..\\..\\data\\ConvLSTM_test')
+        self.__append('train', '..\\..\\data\\train')
+        self.__append('test', '..\\..\\data\\test')
         self.__append('data', '..\\..\\data')
         self.__append('weight', '..\\weight')
         self.__append('img', '..\\img')
         self.__append('temp', '..\\..\\data\\temp')
 
         # Change relative to absolute
-        # Error File/Folder is not exist
         for key in self.__DIC:
             self.__DIC[key] = self.__relToAb(self.__DIC[key])
 
+        self.ifNoDirThanMakeDir('data')
+        self.ifNoDirThanMakeDir('train')
+        self.ifNoDirThanMakeDir('test')
+        self.ifNoDirThanMakeDir('weight')
+        self.ifNoDirThanMakeDir('img')
+        self.ifNoDirThanMakeDir('temp')
+
+        # Error File/Folder is not exist
+        for key in self.__DIC:
             # Path 미존재
             if (os.path.exists(self.__DIC[key]) == False):
                 utils.showError('{0} 파일/폴더를 찾을 수 없습니다.'.format(self.__DIC[key]))

@@ -260,7 +260,9 @@ inline void Kinect::updateColor()
 // call extract hand
 void Kinect::updateROI()
 {
-	extractHand();
+	// extractHand();
+	// extractDepthHand();
+	extractDepthHandWithRemovedBackground();
 }
 
 // extract hand
@@ -309,6 +311,355 @@ void Kinect::extractHand()
 	}
 }
 
+// extract hand
+void Kinect::extractDepthHand()
+{
+	if (!atLeastOneTracked) return;
+	if (colorMat.rows == 0) return;
+	if (depthMat.rows == 0) return;
+
+	// 이곳 수정하여 color <-> depth 전환
+
+	Mat srcMat = colorMat;
+	// float spinePx = spinePxColorSpaceVersion;
+	float spinePx = spinePxDepthSpaceVersion;
+
+	// ColorSpacePoint handPos;
+	DepthSpacePoint handPos;
+
+	//Mat srcMat = depthMat;
+	//float spinePx = spinePxDepthSpaceVersion;
+	//DepthSpacePoint handPos;
+
+	float width = spinePx * 1.15f;
+	float height = spinePx * 1.15f;
+	float hWidth = width / 2;
+	float hHeight = height / 2;
+
+
+
+	for (int i = 0; i < 2; ++i)
+	{
+		unsigned short minDepth = 8000;
+		unsigned short maxDepth = 0;
+
+		CameraSpacePoint camHandPos = (i == 0 ? lHandPos : rHandPos);
+
+		// 이곳 수정하여 color <-> depth 전환
+		coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+		//coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+
+		// 관심영역 설정
+		Rect roi(handPos.X - hWidth, handPos.Y - hHeight, width, height);
+
+		if (0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= depthMat.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= depthMat.rows)
+		{
+			cv::Mat extractedMat;
+			depthMat(roi).copyTo(extractedMat);
+
+			for (int i = 0; i < extractedMat.rows; ++i) {
+				// cout << "뀨" << endl;
+				Vec<unsigned short, 4>* row = extractedMat.ptr<Vec<unsigned short, 4>>(i);
+				for (int j = 0; j < extractedMat.cols; j++) {
+
+					if (row[j].val[0] > maxDepth)
+					{
+						maxDepth = row[j].val[0];
+					}
+
+					if (row[j].val[0] < minDepth)
+					{
+						minDepth = row[j].val[0];
+					}
+				}
+				cout << maxDepth << endl;
+				cout << minDepth << endl;
+
+				/*
+				for (int i = 0; i < extractedMat.rows; ++i) {
+					Vec<unsigned short, 4>* row = extractedMat.ptr<Vec<unsigned short, 4>>(i);
+					for (int j = 0; j < extractedMat.cols; j++) {
+						BYTE intensity = static_cast<BYTE>(255.0f * ((double)(row[j].val[0] - minDepth) / (double)(maxDepth - minDepth)));
+						row[j].val[0] = intensity;
+						row[j].val[1] = intensity;
+						row[j].val[2] = intensity;
+						row[j].val[3] = 255;
+					}
+
+				}*/
+			}
+
+			cv::Mat resizedMat;
+
+			cv::resize(extractedMat, resizedMat, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+
+			(i == 0 ? lHandDepthImage : rHandDepthImage) = resizedMat;
+		}
+	}
+}
+
+
+// extract hand
+void Kinect::extractDepthHandWithRemovedBackground()
+{
+	if (!atLeastOneTracked) return;
+	if (colorMat.rows == 0) return;
+	if (depthMat.rows == 0) return;
+
+	// 이곳 수정하여 color <-> depth 전환
+	// float spinePx = spinePxColorSpaceVersion;
+	float spinePx = spinePxDepthSpaceVersion;
+
+	// ColorSpacePoint handPos;
+	DepthSpacePoint handPos;
+
+	//Mat srcMat = depthMat;
+	//float spinePx = spinePxDepthSpaceVersion;
+	//DepthSpacePoint handPos;
+
+	float width = spinePx * 1.15f;
+	float height = spinePx * 1.15f;
+	float hWidth = width / 2;
+	float hHeight = height / 2;
+
+	/*
+	unsigned short sum = 0;
+	unsigned short handCnt = 0;
+	for (int i = 0; i < 2; ++i)
+	{
+		CameraSpacePoint camHandPos = (i == 0 ? lHandPos : rHandPos);
+
+		// 이곳 수정하여 color <-> depth 전환
+		coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+		//coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+
+		// 관심영역 설정
+		Rect roi(handPos.X - hWidth, handPos.Y - hHeight, width, height);
+		//Rect average(handPos.X - 3, handPos.Y - 3, 3, 3);
+
+		if (0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= depthMat.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= depthMat.rows)
+		{
+			cv::Mat extractedMat = depthMat(roi);
+
+			unsigned short handDepth = depthMat.at<Vec<unsigned short, 4>>(Point(handPos.X, handPos.Y)).val[0];
+			sum += handDepth;
+			handCnt++;
+		}
+	}
+	
+	unsigned short handDepth;
+	if (handCnt > 0)
+		handDepth = sum / handCnt;
+	*/
+
+	/*
+	unsigned short minDepth = 8000;
+	unsigned short maxDepth = 0;
+
+	for (int i = 0; i < 2; ++i)
+	{
+		CameraSpacePoint camHandPos = (i == 0 ? lHandPos : rHandPos);
+
+		// 이곳 수정하여 color <-> depth 전환
+		coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+		//coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+
+		// 관심영역 설정
+		Rect roi(handPos.X - hWidth, handPos.Y - hHeight, width, height);
+		//Rect average(handPos.X - 3, handPos.Y - 3, 3, 3);
+
+		if (0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= depthMat.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= depthMat.rows)
+		{
+			cv::Mat extractedMat = depthMat(roi);
+
+			int count = 0;
+			for (int i = 0; i < extractedMat.rows; ++i) {
+				// cout << "뀨" << endl;
+				Vec<unsigned short, 4>* row = extractedMat.ptr<Vec<unsigned short, 4>>(i);
+				for (int j = 0; j < extractedMat.cols; j++) {
+
+					if (row[j].val[0] > maxDepth)
+					{
+						maxDepth = row[j].val[0];
+					}
+
+					if (row[j].val[0] < minDepth)
+					{
+						minDepth = row[j].val[0];
+					}
+				}
+			}
+		}
+	}
+	*/
+	
+	unsigned short sum = 0;
+	int cnt = 0;
+	for (int i = 0; i < 2; ++i)
+	{
+		CameraSpacePoint camHandPos = (i == 0 ? lHandPos : rHandPos);
+
+		// 이곳 수정하여 color <-> depth 전환
+		coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+		//coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+
+		// 관심영역 설정
+		Rect roi(handPos.X - hWidth, handPos.Y - hHeight, width, height);
+
+		if (0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= depthMat.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= depthMat.rows)
+		{
+			unsigned short handDepth = depthMat.at<Vec<unsigned short, 4>>(Point(handPos.X, handPos.Y)).val[0];
+			sum += handDepth;
+			cnt++;
+		}
+	}
+
+	unsigned short minDepth;
+	unsigned short maxDepth;
+	if (cnt > 0)
+	{
+		sum /= cnt;
+		minDepth = sum - 100;
+		maxDepth = sum + 100;
+	}
+
+	for (int i = 0; i < 2; ++i)
+	{
+		CameraSpacePoint camHandPos = (i == 0 ? lHandPos : rHandPos);
+
+		// 이곳 수정하여 color <-> depth 전환
+		coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+		//coordinateMapper->MapCameraPointToDepthSpace(camHandPos, &handPos);
+
+		// 관심영역 설정
+		Rect roi(handPos.X - hWidth, handPos.Y - hHeight, width, height);
+		//Rect average(handPos.X - 3, handPos.Y - 3, 3, 3);
+
+		if (0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= depthMat.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= depthMat.rows)
+		{
+			cv::Mat extractedMat;
+			depthMat(roi).copyTo(extractedMat);
+			// unsigned short handDepth = depthMat.at<unsigned short>(Point(handPos.X, handPos.Y));
+			// cout << handDepth << endl;
+			// unsigned short minDepth = handDepth - 10;
+			// unsigned short maxDepth = handDepth + 10;
+			/*
+			cv::Mat averageMat = depthMat(average);
+			int total = 0;
+			for (int i = 0; i < averageMat.rows; ++i)
+			{
+				Vec<unsigned short, 4>* row = averageMat.ptr<Vec<unsigned short, 4>>(i);
+				for (int j = 0; j < averageMat.cols; ++j)
+				{
+					total += row[j].val[0];
+				}
+			}
+			unsigned short handDepth = total /= 36.0f;
+			*/
+			// unsigned short handDepth = depthMat.at<Vec<unsigned short, 4>>(Point(handPos.X, handPos.Y)).val[0];
+			// unsigned short minDepth = handDepth - 50;
+			// unsigned short maxDepth = handDepth + 50;
+			
+			/*
+			unsigned short minDepth = 8000;
+			unsigned short maxDepth = 0;
+			for (int i = 0; i < extractedMat.rows; ++i) {
+				// cout << "뀨" << endl;
+				Vec<unsigned short, 4>* row = extractedMat.ptr<Vec<unsigned short, 4>>(i);
+				for (int j = 0; j < extractedMat.cols; j++) {
+
+					if (row[j].val[0] > maxDepth)
+					{
+						maxDepth = row[j].val[0];
+					}
+
+					if (row[j].val[0] < minDepth)
+					{
+						minDepth = row[j].val[0];
+					}
+				}
+			}
+			*/
+
+
+			// int delta = 100;
+			for (int i = 0; i < extractedMat.rows; ++i) {
+				// cout << "뀨" << endl;
+				Vec<unsigned short, 4>* row = extractedMat.ptr<Vec<unsigned short, 4>>(i);
+				for (int j = 0; j < extractedMat.cols; j++) {
+					/*
+					if (row[j].val[0] > maxDepth)
+					{
+						row[j].val[0] = 255;
+						row[j].val[1] = 255;
+						row[j].val[2] = 255;
+						row[j].val[3] = 255;
+					}
+					
+					else
+					*/
+					if (row[j].val[0] < minDepth)
+					{
+						row[j].val[0] = 255;
+						row[j].val[1] = 255;
+						row[j].val[2] = 255;
+						row[j].val[3] = 255;
+					}
+					else if (row[j].val[0] > maxDepth)
+					{
+						row[j].val[0] = 255;
+						row[j].val[1] = 255;
+						row[j].val[2] = 255;
+						row[j].val[3] = 255;
+					}
+					else
+					{
+						// BYTE intensity = static_cast<BYTE>((row[j].val[0] * (-255.0f / 8000) + 255.0f));
+						BYTE intensity = static_cast<BYTE>(255.0f * ((double)(row[j].val[0] - minDepth) / (double)(maxDepth - minDepth)));
+						row[j].val[0] = intensity;
+						row[j].val[1] = intensity;
+						row[j].val[2] = intensity;
+						row[j].val[3] = 255;
+					}
+
+					/*
+					if (row[j].val[0] <= avg)
+					{
+						// row[j].val[0] -= minDepth;
+						BYTE intensity = static_cast<BYTE>((row[j].val[0] * (-255.0f / 8000) + 255.0f));
+						// BYTE intensity = static_cast<BYTE>(128 + 128 *);
+						// BYTE intensity = static_cast<BYTE>(255.0f * ((double)(row[j].val[0] - minDepth) / (double)(maxDepth - minDepth)));
+						// if (row[j].val[0] - (double)minDepth < 0)
+						//	intensity = 0;
+
+						// cout << intensity << endl;
+						row[j].val[0] = intensity;
+						row[j].val[1] = intensity;
+						row[j].val[2] = intensity;
+						row[j].val[3] = 255;
+					}
+					else {
+						row[j].val[0] = 0;
+						row[j].val[1] = 0;
+						row[j].val[2] = 0;
+						row[j].val[3] = 255;
+					}
+					*/
+				}
+
+			}
+
+			extractedMat.convertTo(extractedMat, CV_8UC4);
+			cv::Mat resizedMat;
+
+			cv::resize(extractedMat, resizedMat, cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT));
+
+			(i == 0 ? lHandDepthImage : rHandDepthImage) = resizedMat;
+		}
+	}
+}
+
+
 // updete depth
 inline void Kinect::updateDepth()
 {
@@ -325,22 +676,28 @@ inline void Kinect::updateDepth()
 
 	const unsigned short* curr = (const unsigned short*)buf;
 	const unsigned short* dataEnd = curr + (depthWidth * depthHeight);
-	BYTE* dest = depthBuffer;
+	unsigned short* dest = depthBuffer;
+
+	unsigned short min = 8001;
+	unsigned short max = -1;
 
 	int idx = 0;
 	while (curr < dataEnd) {
 		// Get depth in millimeters
 		unsigned short depth = (*curr++);
-    
-		BYTE intensity = static_cast<BYTE>((depth * (-255.0f / 8000.0f) + 255.0f));
 
+		// BYTE intensity = static_cast<BYTE>((depth * (-255.0f / 8000.0f) + 255.0f));
+		// BYTE intensity = static_cast<BYTE>((depth / 8000.0f));
 		for (int i = 0; i < 3; ++i)
-			*dest++ = intensity;
+			*dest++ = depth;
 		*dest++ = 0xff;
 	}
-
+	
 	// draw image...
-	depthMat = cv::Mat(depthHeight, depthWidth, CV_8UC4, &depthBuffer[0]);
+	
+	depthMat = cv::Mat(depthHeight, depthWidth, CV_16UC4, &depthBuffer[0]);
+
+	// cout << "Done!" << endl;
 }
 
 // Update Body
@@ -405,7 +762,7 @@ inline void Kinect::updateHDFace()
 
 void Kinect::updateSPoint()
 {
-	const ComPtr<IBody> body = bodies[trackingCount];  // updateBody를 통해 받아온 body중 가장 가까운 body를 불러옴
+	const ComPtr<IBody> body = bodies[trackingCount];
 
 	// Retrieve Joint (Head), calculste spinepx
 	std::array<Joint, JointType::JointType_Count> joints;
@@ -564,6 +921,8 @@ void Kinect::updateFrame()
 						cout << LABEL(label) << " Record saving ... fail (standardize bug)" << endl;
 					}
 
+					break;
+
 				case KINECT_MODE_OUTPUT:
 
 					// record
@@ -601,8 +960,10 @@ void Kinect::updateFrame()
 		Frame f;
 
 		f.memorize(lHandPos, rHandPos, sPoints, leftHandActivated, rightHandActivated, lastFrameRelativeTime);
-		l.memorize(lHandImage, lastFrameRelativeTime);
-		r.memorize(rHandImage, lastFrameRelativeTime);
+		// l.memorize(lHandImage, lastFrameRelativeTime);
+		// r.memorize(rHandImage, lastFrameRelativeTime);
+		l.memorize(lHandDepthImage, lastFrameRelativeTime);
+		r.memorize(rHandDepthImage, lastFrameRelativeTime);
 
 		frameCollection.stackFrame(f);
 		lhandCollection.stackFrame(l);
@@ -684,8 +1045,9 @@ void Kinect::draw()
     // Draw Color
     drawColor();
 
-	drawExtractedROI();
-	
+	//drawExtractedROI();
+	drawExtractedDepthROI();
+
 	// Draw Body
 	//drawBody();
 
@@ -723,6 +1085,40 @@ void Kinect::drawExtractedROI()
 				*result++ = *value++;
 				*result++ = 0;
 			}
+		}*/
+
+		cv::addWeighted(dstRect, 0.0, srcImage, 1.0, 0, dstRect);
+	}
+}
+
+void Kinect::drawExtractedDepthROI()
+{
+	if (!atLeastOneTracked) return;
+
+	int dstWidth = 256;
+
+	for (int i = 0; i < 2; ++i)
+	{
+		Mat srcImage = (i == 0 ? lHandDepthImage : rHandDepthImage);
+		if (srcImage.rows == 0) return;
+
+		cv::resize(srcImage, srcImage, cv::Size(dstWidth, dstWidth));
+		srcImage.convertTo(srcImage, CV_8UC4);
+		cv::Mat dstRect = colorMat(cv::Rect(colorWidth - dstWidth, dstWidth * i, dstWidth, dstWidth));
+
+		// Mat Array 접근 수정
+		/*
+		for (int r = 0; r < IMAGE_HEIGHT; r++)
+		{
+		uchar* value = srcImage.ptr<uchar>(r);
+		uchar* result = dstRect.ptr<uchar>(r);
+		for (int c = 0; c < IMAGE_WIDTH; c++)
+		{
+		*result++ = *value;
+		*result++ = *value;
+		*result++ = *value++;
+		*result++ = 0;
+		}
 		}*/
 
 		cv::addWeighted(dstRect, 0.0, srcImage, 1.0, 0, dstRect);

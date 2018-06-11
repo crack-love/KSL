@@ -80,7 +80,7 @@ string FrameCollection::toString()
 	for (int j = 0; j < FRAME_STANDARD_SIZE; ++j)
 	{
 		out << collection[j].toString(0) << " ";
-	}
+	}		
 	return out.str();
 }
 

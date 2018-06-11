@@ -34,7 +34,7 @@ void ImageFrameCollection::setStandard(TIMESPAN startTime)
 	int startIdx = 0;
 	int endIdx = 0;
 
-	// int cnt = 0;
+	int cnt = 0;
 	for (int i = 1; i < collection.size(); ++i)
 	{
 		if (collection[i].getTime() > timeLine)
@@ -47,7 +47,7 @@ void ImageFrameCollection::setStandard(TIMESPAN startTime)
 			temp = collection[startIdx];
 			temp.LerpMe((float)percent, collection[endIdx]);
 			result.push_back(temp);
-			// cnt++;
+			cnt++;
 
 			timeLine += dt;
 			if (timeLine > collection[endIdx].getTime()) // endidx가 timeLime 시간보다 적을 경우 다음 idx로 넘어감
@@ -59,6 +59,7 @@ void ImageFrameCollection::setStandard(TIMESPAN startTime)
 			}
 		}
 	}
+	cout << cnt << endl;
 
 	//cout << cnt << endl;
 	collection = result;

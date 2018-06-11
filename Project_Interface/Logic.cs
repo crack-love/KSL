@@ -68,7 +68,7 @@ namespace Project_Interface2
         // ------------------------------------------------------------------
 
         private void checkProcessDead(int i)
-        {   // 프로세스가 동작하는지 확인
+        {
             if (process[i] == null) return;
 
             // catch process
@@ -79,13 +79,13 @@ namespace Project_Interface2
             catch (ArgumentException)
             {
                 // process died in wild
-                processEnableChanged(i, false);  // 외부의 processEnableChanged를 호출
+                processEnableChanged(i, false);
                 process[i] = null;
             }
         }
 
         private void processStdInput(int i, string text)
-        {   // process에게 표준입력으로 text를 입력함
+        {
             if (!isProcessRunning(i)) return;
 
             // 개행문자 제거
@@ -95,7 +95,7 @@ namespace Project_Interface2
         }
 
         private void processExecute(int i, string path, string arg)
-        {   // path에 지정된 프로그램을 실행함.
+        {
             if (isProcessRunning(i)) return;
 
             ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -103,14 +103,14 @@ namespace Project_Interface2
             startInfo.ErrorDialog = true;
             startInfo.FileName = path;
             startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardInput = true;   // 표준입력을 받을 수 있도록 함
-            startInfo.RedirectStandardOutput = true;  // 표준출력을 다른 곳에 출력할 수 있도록 함
+            startInfo.RedirectStandardInput = true;
+            startInfo.RedirectStandardOutput = true;
             startInfo.RedirectStandardError = true;
-            startInfo.WorkingDirectory = path.Substring(0, path.LastIndexOf(@"\"));  // 프로세스의 작업 디렉토리 설정
-            startInfo.Arguments = arg;  // 실행 인자를 넘겨줌
+            startInfo.WorkingDirectory = path.Substring(0, path.LastIndexOf(@"\"));
+            startInfo.Arguments = arg;
             
-            process[i] = Process.Start(startInfo);  // 프로세스 실행
-            process[i].OutputDataReceived += outputDataReceived;  // 표준출력 값을 outputDataReceived를 통해 받음
+            process[i] = Process.Start(startInfo);
+            process[i].OutputDataReceived += outputDataReceived;
             process[i].ErrorDataReceived += outputDataReceived;
             processMapIndex[process[i]] = i;
             process[i].BeginOutputReadLine();
@@ -124,7 +124,7 @@ namespace Project_Interface2
         }
 
         private void closeAllProcess()
-        {   // 모든 프로세스 종료
+        {
             for (int i = 0; i < PROCESS_SIZE; ++i)
             {
                 if (isProcessRunning(i))
@@ -153,21 +153,19 @@ namespace Project_Interface2
                 if (data.StartsWith("[Result]"))
                 {
                     idx = -1;
-                    data = data.Substring("[Result]".Length);  // [Result]를 잘라내어 결과값만 저장
+                    data = data.Substring("[Result]".Length);
                 }
 
                 // 예측 요청 메시지일 경우 (Spoint)
                 else if (data.StartsWith("[Predict]"))
                 {
                     // 파이썬에 넘김
-
                     /* 과거코드
                     data = data.Substring("[Predict0]".Length);
                     processStdInput(1, data);
                     */
-
                     processStdInput(1, data);
-                    return; 
+                    return;
                 }
 
                 // UI Text 수정하는 이벤트 호출

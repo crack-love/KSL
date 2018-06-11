@@ -6,12 +6,8 @@
 *.iobj
 *.ipdb
 *.exe
-
 *.h5
-#data/ConvLSTM_train/
-#data/ConvLSTM_test/
-#data/temp/
-
+data/
 *.zip
 
 # User-specific files

@@ -1,7 +1,6 @@
 import numpy as np
 import os, sys
 import functools
-
 import matplotlib.pyplot as plt # plt.imshow
 import scripts.interfaceUtils as util #input(debug)
 from keras.preprocessing import image # image.load_img
@@ -95,7 +94,7 @@ def _loadImageFiles(dirpath, fileList, isShow):
     imgList = []
 
     for file in fileList:      
-        img = image.load_img(dirpath + "/" + file)
+        img = image.load_img(dirpath + "/" + file, grayscale=True)
         array = image.img_to_array(img)
         imgList.append(array)
     
@@ -122,6 +121,9 @@ def _ROI_loadAllSamplePaths(rootfolder):
     result = []
 
     for labelFolder in  os.listdir(rootfolder):
+        if labelFolder == 'temp':
+            continue
+            
         path1 = os.path.join(rootfolder, labelFolder)
 
         for sampleFolder in os.listdir(path1):
@@ -138,7 +140,7 @@ def ROI_loadDataListAll(rootPath, isShow, isShuffle):
 
     spointList, roiSampleList, labelList = \
         _ROI_loadDataList(samplePathList, isShow)
-    
+
     if isShuffle:
         spointList, roiSampleList, labelList = \
             shuffleDataset(spointList, roiSampleList, labelList)
@@ -157,9 +159,11 @@ def _ROI_loadDataList(samplePathList, isShow):
     for path in samplePathList:
         spoint, images, label = \
             ROI_loadData(path, isShow)
-        spointSamples.append(spoint)
-        imageSamples.append(images)
-        labelSamples.append(label)
+
+        if len(images) is not 0:
+            spointSamples.append(spoint)
+            imageSamples.append(images)
+            labelSamples.append(label)
     
     spointSamples = np.array(spointSamples)
     imageSamples = np.array(imageSamples)
@@ -272,4 +276,3 @@ def shuffleDataset(d1, d2, d3):
     d2_shuffled = [d2[i] for i in indexes]
     d3_shuffled = [d3[i] for i in indexes]
     return np.array(d1_shuffled), np.array(d2_shuffled), np.array(d3_shuffled)
-

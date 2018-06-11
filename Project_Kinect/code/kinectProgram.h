@@ -75,8 +75,7 @@ private:
 	// Depth Buffer
 	int depthWidth = 512, depthHeight = 424; // kinect v2의 depth 데이터 크기
 	cv::Mat depthMat; // CV_U8C4
-	BYTE depthBuffer[512 * 424 * 4];
-  
+	unsigned short depthBuffer[512 * 424 * 4];
 	// Body Buffer
 	array<IBody*, BODY_COUNT> bodies = { nullptr };
 	std::array<cv::Vec3b, BODY_COUNT> colors;
@@ -129,6 +128,10 @@ private:
 	// Hand ROI
 	cv::Mat lHandImage;
 	cv::Mat rHandImage;
+
+	// Hand Depth ROI
+	cv::Mat lHandDepthImage;
+	cv::Mat rHandDepthImage;
 
 public:
 	// Constructor
@@ -190,6 +193,8 @@ private:
 
 	void drawExtractedROI();
 
+	void drawExtractedDepthROI();
+
 	inline void drawBody();
 
 	void drawHDFace();
@@ -222,6 +227,10 @@ private:
 
 	// for extract hand
 	void extractHand();
+
+	// for extract ROI hand
+	void extractDepthHand();
+	void extractDepthHandWithRemovedBackground();
 
 	bool isHandTracking();
 

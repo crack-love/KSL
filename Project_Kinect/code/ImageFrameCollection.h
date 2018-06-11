@@ -29,6 +29,7 @@ public:
 	void setStandard(TIMESPAN startTime);  // «•¡ÿ»≠ (FrameSize, Lerp)
 
 	// save image frames
+
 	void save(string dirpath, int);
 
 	int getCollectionSize();
