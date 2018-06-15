@@ -12,6 +12,8 @@
 #include <direct.h>
 #include <wrl/client.h>
 #include <thread> // this_thread
+#include <deque>
+
 using namespace std;
 using namespace Microsoft::WRL;
 using namespace cv;
@@ -79,6 +81,11 @@ private:
 	// Body Buffer
 	array<IBody*, BODY_COUNT> bodies = { nullptr };
 	std::array<cv::Vec3b, BODY_COUNT> colors;
+
+	//unsigned short beforeLeftDepth;
+	//unsigned short beforeRightDepth;
+	deque<unsigned short> leftDepth;
+	deque<unsigned short> rightDepth;
 
 	// HDFace Buffer
 	vector<CameraSpacePoint> vertexes;

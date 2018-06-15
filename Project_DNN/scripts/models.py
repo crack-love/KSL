@@ -135,6 +135,63 @@ def Layer_B2():
     
     return b2_input, b2_output
 
+def Layer_B2_ver_concat():    
+    '''
+    branch 2 (roi cnn+lstm branch)
+    '''
+    b2_dropout = 0.00
+
+    b2_input = Input(shape=(35, 80, 160, 1), name='B2_Input')
+    b2 = TimeDistributed(Conv2D(filters=32,
+                                kernel_size=5,
+                                strides=2,
+                                padding='same',
+                                data_format='channels_last'),
+                                name='B2C1')(b2_input)
+    b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
+    #b2 = TimeDistributed(MaxPool2D(), name='B2C1_MP')(b2)
+    b2 = TimeDistributed(Conv2D(filters=32,
+                                kernel_size=5,
+                                strides=2,
+                                padding='same'),
+                                name='B2C2')(b2)
+    b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
+    #b2 = TimeDistributed(MaxPool2D(), name='B2C2_MP')(b2)
+    b2 = TimeDistributed(Conv2D(filters=64,
+                                kernel_size=3,
+                                strides=1,
+                                padding='same',
+                                activation='relu'),
+                                name='B2C3')(b2)
+    b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
+    #b2 = TimeDistributed(MaxPool2D(), name='B2C2_MP')(b2)
+    b2 = TimeDistributed(Conv2D(filters=64,
+                                kernel_size=3,
+                                strides=1,
+                                padding='same',
+                                activation='relu'),
+                                name='B2C4')(b2)
+    b2 = _add_BN_ReLU_SpDO_TD(b2, b2_dropout)
+    b2 = TimeDistributed(Flatten(), name="B2F1")(b2)
+    b2 = TimeDistributed(Dense(256), name="B2D1")(b2)
+    b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
+    b2 = TimeDistributed(Dense(256), name="B2D2")(b2)
+    b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
+    b2 = TimeDistributed(Dense(256), name="B2D3")(b2)
+    b2 = _add_BN_ReLU_DO_TD(b2, b2_dropout)
+    b2 = LSTM(512, name='B2R3')(b2)    
+    b2 = BatchNormalization()(b2)
+    b2 = Dense(256, name='B2D4')(b2)
+    b2 = _add_BN_ReLU_DO(b2, b2_dropout)
+    b2 = Dense(256, name='B2D5')(b2)
+    b2 = _add_BN_ReLU_DO(b2, b2_dropout)
+    b2 = Dense(256, name='B2D6')(b2)
+    b2 = _add_BN_ReLU_DO(b2, b2_dropout)
+    
+    b2_output = b2
+    
+    return b2_input, b2_output
+
 def Model_B1():
     i, o = Layer_B1()
     model = Model(i, o)
@@ -142,6 +199,7 @@ def Model_B1():
     return model
 
 def Model_B2():
+    #i, o = Layer_B2()
     i, o = Layer_B2()
     model = Model(i, o)
     model.name = 'B2'
@@ -159,7 +217,8 @@ def Model_M1():
     #relu_alpha = 0.1
 
     b1i, b1o = Layer_B1()
-    b2i, b2o = Layer_B2()
+    #b2i, b2o = Layer_B2()
+    b2i, b2o = Layer_B2_ver_concat()
 
     x = Concatenate(name='M1M1')([b1o, b2o])
     x = BatchNormalization()(x)

@@ -422,6 +422,12 @@ void Kinect::extractDepthHandWithRemovedBackground()
 	float hWidth = width / 2;
 	float hHeight = height / 2;
 
+	unsigned short sum = 0;
+	int cnt = 0;
+	unsigned short handDepth;
+	unsigned short minDepth;
+	unsigned short maxDepth;
+
 	/*
 	unsigned short sum = 0;
 	unsigned short handCnt = 0;
@@ -493,8 +499,8 @@ void Kinect::extractDepthHandWithRemovedBackground()
 	}
 	*/
 	
-	unsigned short sum = 0;
-	int cnt = 0;
+
+	/*
 	for (int i = 0; i < 2; ++i)
 	{
 		CameraSpacePoint camHandPos = (i == 0 ? lHandPos : rHandPos);
@@ -506,22 +512,35 @@ void Kinect::extractDepthHandWithRemovedBackground()
 		// 관심영역 설정
 		Rect roi(handPos.X - hWidth, handPos.Y - hHeight, width, height);
 
+		// 관심영역이 depthMat.cols, depthMat.rows 안에 있을 경우
 		if (0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= depthMat.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= depthMat.rows)
 		{
-			unsigned short handDepth = depthMat.at<Vec<unsigned short, 4>>(Point(handPos.X, handPos.Y)).val[0];
-			sum += handDepth;
-			cnt++;
+			Rect aroundHand(handPos.X - 10, handPos.Y - 10, 10, 10);
+			cv::Mat aroundHandMat = depthMat(aroundHand);
+			for (int i = 0; i < aroundHandMat.rows; ++i)
+			{
+				Vec<unsigned short, 4>* row = aroundHandMat.ptr<Vec<unsigned short, 4>>(i);
+				for (int j = 0; j < aroundHandMat.cols; ++j) {
+					sum += row[j].val[0];
+					cnt++;
+				}
+			}
+			//unsigned short handDepth = depthMat.at<Vec<unsigned short, 4>>(Point(handPos.X, handPos.Y)).val[0];
+			//sum += handDepth;
+			//cnt++;
 		}
 	}
+	*/
+	
 
-	unsigned short minDepth;
-	unsigned short maxDepth;
+	/*
 	if (cnt > 0)
 	{
 		sum /= cnt;
 		minDepth = sum - 100;
 		maxDepth = sum + 100;
 	}
+	*/
 
 	for (int i = 0; i < 2; ++i)
 	{
@@ -537,6 +556,59 @@ void Kinect::extractDepthHandWithRemovedBackground()
 
 		if (0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= depthMat.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= depthMat.rows)
 		{
+			handDepth = depthMat.at<Vec<unsigned short, 4>>(Point(handPos.X, handPos.Y)).val[0];
+			if (handDepth <= 0)
+				continue;
+			
+			/*
+			deque<unsigned short>& handDeque = (i == 0 ? leftDepth : rightDepth);
+
+			handDeque.push_back(handDepth);
+			if (handDeque.size() > 5)
+				handDeque.pop_front();
+
+			sum = 0;
+			for (std::deque<unsigned short>::iterator it = handDeque.begin(); it != handDeque.end(); ++it)
+				sum += *it;
+			unsigned short mean = sum / (unsigned short)handDeque.size();
+			handDepth = mean;
+			*
+			/
+			/*
+			if (abs(handDepth - mean) > 500)
+			{
+				continue;
+			}
+			*/
+
+			Rect aroundHand(handPos.X - 20, handPos.Y - 20, 40, 40);
+			cv::Mat aroundHandMat = depthMat(aroundHand);
+			handDepth = 8000;
+			for (int i = 0; i < aroundHandMat.rows; ++i)
+			{
+				Vec<unsigned short, 4>* row = aroundHandMat.ptr<Vec<unsigned short, 4>>(i);
+				for (int j = 0; j < aroundHandMat.cols; ++j) {
+					if (handDepth > row[j].val[0] && row[j].val[0] != 0)
+						handDepth = row[j].val[0];
+				}
+			}
+
+			//cout << handDepth << endl;
+			/*
+			unsigned short beforeDepth = (i == 0 ? beforeLeftDepth : beforeRightDepth);
+			//cout << beforeDepth << endl;
+			if (beforeDepth == 0)
+				(i == 0 ? beforeLeftDepth : beforeRightDepth) = handDepth;
+			else if (abs(handDepth - beforeDepth) >= 1000)
+				continue;
+			*/
+
+			minDepth = handDepth - 350;
+			if (minDepth < 0)
+				minDepth = 0;
+			maxDepth = handDepth + 350;
+			//cout << handDepth << endl;
+
 			cv::Mat extractedMat;
 			depthMat(roi).copyTo(extractedMat);
 			// unsigned short handDepth = depthMat.at<unsigned short>(Point(handPos.X, handPos.Y));
@@ -884,6 +956,10 @@ void Kinect::updateFrame()
 		// 기록 시작
 		if (leftHandActivated || rightHandActivated)
 		{
+			//beforeLeftDepth = 0;
+			//beforeRightDepth = 0;
+			leftDepth.clear();
+			rightDepth.clear();
 			recordStartTime = lastFrameRelativeTime;
 			frameStacking = true;
 		}

@@ -105,6 +105,58 @@ def _loadImageFiles(dirpath, fileList, isShow):
 
     return imgNumpyArray
 
+# (frame_size, 128, 128, 3)
+def _loadImageFilesByLeftRight(dirpath, fileList, isShow):  # 왼쪽, 오른쪽 이미지를 번갈아 가면서 imgList에 추가
+    imgList = []
+
+    length = len(fileList)
+    offset = int(length / 2)
+
+    for i in range(offset):      
+        left_file = fileList[i]
+        img = image.load_img(dirpath + "/" + left_file, grayscale=True)
+        array = image.img_to_array(img)
+        imgList.append(array)
+
+        right_file = fileList[i + offset]
+        img = image.load_img(dirpath + "/" + right_file, grayscale=True)
+        array = image.img_to_array(img)
+        imgList.append(array)
+    
+    imgNumpyArray = np.array(imgList)
+    #if isShow:
+        #print("imgList Length: " + str(len(imgList)))
+        #print("imaNumpyArray Shape: " + str(imgNumpyArray.shape))
+
+    return imgNumpyArray
+
+# (frame_size, 128, 128, 3)
+def _loadImageFilesWithConcat(dirpath, fileList, isShow):  # 왼쪽, 오른쪽 이미지를 번갈아 가면서 imgList에 추가
+    imgList = []
+
+    length = len(fileList)
+    offset = int(length / 2)
+
+    for i in range(offset):      
+        left_file = fileList[i]
+        left_img = image.load_img(dirpath + "/" + left_file, grayscale=True)
+        left_array = image.img_to_array(left_img)
+
+        right_file = fileList[i + offset]
+        right_img = image.load_img(dirpath + "/" + right_file, grayscale=True)
+        right_array = image.img_to_array(right_img)
+
+        merge_array = np.concatenate((left_array, right_array), axis=1)
+        imgList.append(merge_array)
+    
+    imgNumpyArray = np.array(imgList)
+    #if isShow:
+        #print("imgList Length: " + str(len(imgList)))
+        #print("imaNumpyArray Shape: " + str(imgNumpyArray.shape))
+
+    return imgNumpyArray
+
+
 def _comp(a, b):
     return int(a[:a.find('.')]) - int(b[:b.find('.')])
 
@@ -132,11 +184,12 @@ def _ROI_loadAllSamplePaths(rootfolder):
 
     return result
 
+# rootPath폴더 아래 데이터를 모두 읽어 옴
 def ROI_loadDataListAll(rootPath, isShow, isShuffle):
     '''
     rootpath = data/ConvLSTM/
     '''
-    samplePathList = _ROI_loadAllSamplePaths(rootPath)
+    samplePathList = _ROI_loadAllSamplePaths(rootPath)  # rootPath폴더 아래 라벨 폴더 아래 샘플 폴더를 모두 읽어옴
 
     spointList, roiSampleList, labelList = \
         _ROI_loadDataList(samplePathList, isShow)
@@ -157,8 +210,7 @@ def _ROI_loadDataList(samplePathList, isShow):
     labelSamples = []
     
     for path in samplePathList:
-        spoint, images, label = \
-            ROI_loadData(path, isShow)
+        spoint, images, label = ROI_loadData(path, isShow)
 
         if len(images) is not 0:
             spointSamples.append(spoint)
@@ -206,8 +258,9 @@ def ROI_loadData(dirpath, isShow):
     imageFileList.sort(key=functools.cmp_to_key(_comp))
 
     # 이미지 로드
-    imageList = _loadImageFiles(dirpath, imageFileList, isShow)
-    
+    # imageList = _loadImageFiles(dirpath, imageFileList, isShow)           # 왼쪽 이미지 쭉, 오른쪽 이미지 쭉
+    # imageList = _loadImageFilesByLeftRight(dirpath, imageFileList, isShow)  # 왼쪽 이미지 오른쪽 이미지 1번씩 반복
+    imageList = _loadImageFilesWithConcat(dirpath, imageFileList, isShow)
     # Spint 로드
     spointData, label = _loadDataFromFile(dirpath + "/Spoints.txt", isShow)
 
