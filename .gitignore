@@ -274,5 +274,4 @@ __pycache__/
 *.jpg
 
 # weights
-*.keras
 *.h5
