@@ -151,6 +151,8 @@ NVIDIA의 CUDA를 이용한 cuDNN을 사용하기 위해서는 GPU가 compute ca
     한글 출력을 위해 트루타입 한글 폰트 설치가 필요하다. (나눔고딕굵게, NanumGothicBold)
     
     [네이버 공식 설치 프로그램](https://drive.google.com/open?id=1-Jz2pCw_j9p1Gdh76_Eg-Ke7Xr-V_GEv)
+    
+    설치 후에도 Plot 한글 폰트 출력이 안 된다면 `C:\Users\(사용자이름)\.matplotlib` 폴더의 파일을 모두 삭제한다. 
 
 1. Graphbiz 설치
 
