@@ -7,6 +7,7 @@ from keras.utils import plot_model # for model description png
 from keras.losses import *
 from keras.activations import relu
 from keras.applications.xception import Xception, preprocess_input
+from keras.applications.inception_v3 import InceptionV3
 
 import interfaceUtils as utils
 import defines as define
@@ -83,37 +84,86 @@ def Model_B2_FT(inputShape):
     '''
     branch 2 (Fine tune mode)
     '''
+    '''
     FREEZE_LAYERS = 5
     
+    net = InceptionV3(
+        include_top=False,
+        weights='imagenet',
+        input_tensor=None,
+        input_shape=inputShape,
+
+    )
+    '''
+    '''
     net = Xception(
         include_top=False,
         weights='imagenet',
         input_tensor=None,
         input_shape=inputShape,
     )
-
-    xi = Input(shape=(70,)+inputShape) #1
-    x = TimeDistributed(net)(xi) #2
-    #x = Reshape(target_shape=(70, 2048))(x)
-    x = TimeDistributed(GlobalAveragePooling2D())(x) #3
+    '''
+    '''
+    plot_model(net, 'lastFTModel.png')
+    print('FTModel ploted')
+    
+    '''
+    xi = Input(shape=(35,)+inputShape) #1
+    #x = TimeDistributed(net)(xi) #2
+    
+    x = TimeDistributed(Conv2D(
+            filters=16,
+            kernel_size=(3, 3),
+            strides=(1, 1), 
+            data_format="channels_last",
+            padding = 'same'))(xi)
+    x = TimeDistributed(MaxPool2D())(x)
     x = TimeDistributed(BatchNormalization())(x) #4
-    x = TimeDistributed(Activation('relu'))(x) #5 #컨브망을 추가할까?
-    x = LSTM(2048, return_sequences=True)(x) # 유닛크기늘려보자 3중R망은어떨가?
+    x = TimeDistributed(Activation('relu'))(x)
+    x = TimeDistributed(Conv2D(
+            filters=16,
+            kernel_size=(3, 3),
+            strides=(1, 1), 
+            data_format="channels_last",
+            padding = 'same'))(x)
+    x = TimeDistributed(MaxPool2D())(x)
+    x = TimeDistributed(BatchNormalization())(x) #4
+    x = TimeDistributed(Activation('relu'))(x)
+    x = TimeDistributed(Conv2D(
+            filters=16,
+            kernel_size=(3, 3),
+            strides=(1, 1), 
+            data_format="channels_last",
+            padding = 'same'))(x)
+    x = TimeDistributed(MaxPool2D())(x)
+    x = TimeDistributed(BatchNormalization())(x) #4
+    x = TimeDistributed(Activation('relu'))(x)
+    x = TimeDistributed(BatchNormalization())(x) #4
+    x = TimeDistributed(Conv2D(
+            filters=1,
+            kernel_size=(1, 1),
+            strides=(1, 1), 
+            data_format="channels_last",
+            padding = 'same'))(x)
+    x = TimeDistributed(Flatten())(x) #4
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x) #5
+    x = LSTM(128, return_sequences=True)(x) # 유닛크기늘려보자 3중R망은어떨가?
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = LSTM(2048, return_sequences=False)(x)
+    x = LSTM(128, return_sequences=False)(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Dense(2048)(x)
+    x = Dense(128)(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Dense(1024)(x)
+    x = Dense(128)(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     xo = Dense(define.LABEL_SIZE, activation='softmax', name='softmax')(x)
     model = Model(inputs=xi, outputs=xo)
     model.name = 'Model_B2_FT'
-
+    '''
     i = 0
     print(len(model.layers))
     for layer in model.layers:
@@ -123,13 +173,13 @@ def Model_B2_FT(inputShape):
         else:
             layer.trainable = True
         print(str(i) + ': ' + str(layer) + ' ' + str(layer.trainable))
-
+    '''
     model.compile(
         optimizer=Adam(lr=1e-4),
         loss='categorical_crossentropy',
         metrics=['accuracy']
         )
-    
+    model.summary()
     return model
 
 def Layer_B2():    
@@ -208,7 +258,7 @@ def Model_M1():
       lr=1e-4로 최소 epoch 60번은 돌려야 2,3을 구분할 수 있더라
     '''
     m1_dropout = 0.0
-    m1_learningRate = 1e-4
+    m1_learningRate = 1e-3
     #decay_rate = m1_learningRate / 20 # lr/epoches
     #relu_alpha = 0.1
 

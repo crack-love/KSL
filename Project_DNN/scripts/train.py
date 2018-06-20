@@ -22,6 +22,28 @@ def calculateAccuracy(dataList, labelList, size, model, verbose, batch_size):
 
     return accuracy
 
+def calcurateAccWithLable(predicted, labels):
+    size = len(labels)
+    predicted = np.array(predicted)
+    print(predicted)
+    print(predicted.shape)
+    print(labels.shape)
+    labels = np.array(labels)
+    
+    predicted_oneHot = np.argmax(predicted, 1)
+    predicteShouldBeList = np.argmax(labels, 1)
+
+    print('Percent:')
+    _printFloatViewable(predicted)
+    print('Source:')
+    print(predicteShouldBeList)
+    print('Predicted:')
+    print(predicted_oneHot)
+
+    accuracy = np.sum(np.equal(predicted_oneHot, predicteShouldBeList)) / size
+
+    return accuracy
+
 def calcurateAcc(predicted, generator):
     size = len(predicted)
     labels = []

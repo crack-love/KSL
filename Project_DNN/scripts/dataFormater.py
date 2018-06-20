@@ -104,6 +104,36 @@ def _loadImageFiles(dirpath, fileList, isShow, imageSize):
 
     return imgNumpyArray
 
+def _loadImageFilesWithConcat(dirpath, fileList, isShow, imgSize):  # 왼쪽, 오른쪽 이미지를 번갈아 가면서 imgList에 추가
+    imgList = []
+
+    length = len(fileList)
+    offset = int(length / 2)
+
+    for i in range(offset):      
+        left_file = fileList[i]
+        left_img = image.load_img(dirpath + '/' + left_file, grayscale=True, target_size=imgSize)
+        left_array = image.img_to_array(left_img)
+
+        right_file = fileList[i + offset]
+        right_img = image.load_img(dirpath + '/' + right_file, grayscale=True, target_size=imgSize)
+        right_array = image.img_to_array(right_img)
+
+        merge_array = np.concatenate((left_array, right_array), axis=1)
+        imgList.append(merge_array)
+    
+    imgNumpyArray = np.array(imgList)
+    #if isShow:
+        #print("imgList Length: " + str(len(imgList)))
+        #print("imaNumpyArray Shape: " + str(imgNumpyArray.shape))
+
+    return imgNumpyArray
+'''
+import ntpath
+def path_leaf(path):
+    head, tail = ntpath.split(path)
+    return tail or ntpath.basename(head)
+'''
 def _comp(a, b):
     return int(a[:a.find('.')]) - int(b[:b.find('.')])
 
@@ -177,7 +207,7 @@ def _ROI_loadDataList(samplePathList, isShow, imgSize):
 
     return spointSamples, imageSamples, labelSamples
 
-def ROI_loadData(dirpath, isShow, imageSize):
+def ROI_loadData(sampleDir, isShow, imageSize):
     """
     타임스텝 단위의 모든 데이터를 읽는다.
       디렉토리 안에 있는 left, right hand 이미지, SPoint.txt 로드
@@ -198,17 +228,17 @@ def ROI_loadData(dirpath, isShow, imageSize):
     imageList = [] # left, right sum
 
     # 폴더내 이미지 파일명 소트, Spoint.txt 리스트에서 제거
-    for f in os.listdir(dirpath):
+    for f in os.listdir(sampleDir):
         if f.find('Spoints.txt') == -1:
             imageFileList.append(f)
 
     imageFileList.sort(key=functools.cmp_to_key(_comp))
 
     # 이미지 로드
-    imageList = _loadImageFiles(dirpath, imageFileList, isShow, imageSize)
-    
+    #imageList = _loadImageFiles(dirpath, imageFileList, isShow, imageSize)
+    imageList = _loadImageFilesWithConcat(sampleDir, imageFileList, isShow, imageSize)
     # Spint 로드
-    spointData, label = _loadDataFromFile(dirpath + "/Spoints.txt", isShow)
+    spointData, label = _loadDataFromFile(sampleDir + "/Spoints.txt", isShow)
 
     # 이미지 확인법
     #plt.imshow(imageList[0][0] / 255) #settingwindow
@@ -287,9 +317,11 @@ def getSamplePathList(dir):
             sampleFolders.append(path)
     return sampleFolders
 
+import random
 # spoint, img, label generator
 def generator_multiple(imgGen, directory, imageSize, batchSize):
     pathList = getSamplePathList(directory)
+    random.shuffle(pathList)
 
     batchX1 = []
     batchX2 = []
@@ -328,3 +360,4 @@ def generator_multiple(imgGen, directory, imageSize, batchSize):
             batchX2 = []
             batchY = []
             stackedBatchSize = 0
+            random.shuffle(pathList)
